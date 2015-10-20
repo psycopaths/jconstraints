@@ -1,0 +1,135 @@
+/*
+ * Copyright (C) 2015, United States Government, as represented by the 
+ * Administrator of the National Aeronautics and Space Administration.
+ * All rights reserved.
+ *
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may obtain a 
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed 
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * specific language governing permissions and limitations under the License.
+ */
+package gov.nasa.jpf.constraints.solvers.nativez3;
+
+import gov.nasa.jpf.constraints.api.ConstraintSolver;
+import gov.nasa.jpf.constraints.api.Expression;
+import gov.nasa.jpf.constraints.api.Valuation;
+
+import java.util.Collections;
+import java.util.Map;
+
+import com.microsoft.z3.Context;
+import com.microsoft.z3.Global;
+import com.microsoft.z3.Params;
+import com.microsoft.z3.Solver;
+import com.microsoft.z3.Z3Exception;
+import java.util.HashMap;
+import java.util.Map.Entry;
+
+public class NativeZ3Solver extends ConstraintSolver {
+
+    private Context ctx;
+
+    private NativeZ3SolverContext defaultContext;
+
+    private final int timeout;
+    
+    private final Map<String, String> options;
+
+    static {
+        // This has to be set globally
+        // TODO: this should be moved to options as well
+        Global.setParameter("smt.bv.enable_int2bv", "true");
+    }
+
+    public NativeZ3Solver() {
+        this(-1, new HashMap<String, String>());
+    }
+
+    public NativeZ3Solver(int to, Map<String, String> properties) {
+        this.timeout = to;
+        this.options = properties;
+
+        Map<String, String> cfg = Collections.singletonMap("model", "true");
+        for (Entry<String, String> o : options.entrySet()) {
+            Global.setParameter(o.getKey(),o.getValue());
+        }
+        
+        try {
+            this.ctx = new Context(cfg);
+            defaultContext = createContext();
+        } catch (Z3Exception ex) {
+            if (ctx != null) {
+                try {
+                    ctx.dispose();
+                } catch (Throwable t) {
+                }
+            }
+            throw new RuntimeException(ex);
+        }
+    }
+
+    Context getContext() {
+        return ctx;
+    }
+
+    public void dispose() {
+        defaultContext.dispose();
+        defaultContext = null;
+        ctx.dispose();
+        ctx = null;
+    }
+
+    protected void finalize() throws Throwable {
+        super.finalize();
+        if (ctx != null) {
+            dispose();
+        }
+    }
+
+    @Override
+    public Result solve(Expression<Boolean> f, Valuation result) {
+        try {
+            defaultContext.push();
+            defaultContext.add(f);
+            return defaultContext.solve(result);
+        } finally {
+            defaultContext.pop();
+        }
+    }
+
+    @Override
+    public NativeZ3SolverContext createContext() {
+        Solver solver = null;
+
+        try {
+            solver = ctx.mkSolver();
+            NativeZ3ExpressionGenerator root;
+
+            if (timeout > 0) {
+            Params p = ctx.mkParams();
+                //p.add("timeout",timeout);
+                //p.add(":timeout", timeout); 
+                p.add("soft_timeout", timeout);
+                solver.setParameters(p);     
+            }
+
+            root = new NativeZ3ExpressionGenerator(ctx, solver);
+
+            return new NativeZ3SolverContext(solver, root);
+        } catch (Z3Exception ex) {
+            if (solver != null) {
+                try {
+                    solver.dispose();
+                } catch (Throwable t) {
+                }
+            }
+            throw new RuntimeException(ex);
+        }
+    }
+
+}
