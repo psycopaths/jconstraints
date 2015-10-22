@@ -8,12 +8,10 @@ constraint solver.
 Dependencies
 ==============================================
 
-* [Z3 4.3+][2]
+* [Z3 4.3+][4]
 
-Z3 is not distributed along with *jpf-constraints-z3*, 
-but is available free of charge
-for non-commercial purposes under the terms of the 
-[Microsoft Research License Agreement][4]. 
+Z3 is not distributed along with *jpf-constraints-z3*, but is
+available at [The Z3 Theorem Prover][4]'s website.
 
 
 Building and Installing
@@ -95,7 +93,6 @@ Example:
 
 
 [0]: https://bitbucket.org/psycopaths/jconstraints
-[2]: http://z3.codeplex.com/
-[4]: http://z3.codeplex.com/license
+[4]: https://github.com/Z3Prover/z3
 [5]: http://research.microsoft.com/en-us/um/people/leonardo/blog/2012/12/10/z3-for-java.html
 [9]: http://z3.codeplex.com/SourceControl/latest#
