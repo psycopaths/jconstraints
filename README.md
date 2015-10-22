@@ -28,25 +28,25 @@ Moura's [blog][5].
 
 First, we have to clone Z3:
 
-	```bash
- 	git clone https://github.com/Z3Prover/z3.git
- 	```
+```bash
+git clone https://github.com/Z3Prover/z3.git
+```
 
 **Obtaining Z3 without Git:** If you do not have Git, you can also
 download a source archive from [Z3's website][9].
 
 Next, we generate a Z3 Makefile with the `--java` option.
 
-	```bash
- 	python scripts/mk_make.py --java
- 	````
+```bash
+python scripts/mk_make.py --java
+```
 
 Now, we build Z3
 
-	```bash
-	cd build
- 	make all
- 	```
+```bash
+cd build
+make all
+```
 
 Make sure to install `libz3.so` and `libz3java.so` (extension `.dylib`
 in OSX) to a global library folder or to one that is contained in your
@@ -55,9 +55,9 @@ in OSX) to a global library folder or to one that is contained in your
 Install the `com.microsoft.z3.jar` file from the `build` directory of
 your Z3 working copy into the local Maven directory:
 
-	```bash
- 	mvn install:install-file -Dfile=com.microsoft.z3.jar -DgroupId=com.microsoft -DartifactId=z3 -Dversion=0.9 -Dpackaging=jar
- 	```
+```bash
+mvn install:install-file -Dfile=com.microsoft.z3.jar -DgroupId=com.microsoft -DartifactId=z3 -Dversion=0.9 -Dpackaging=jar
+```
 
 
 Building and Installing jConstraints-z3
@@ -80,18 +80,13 @@ Configuration
 jconstraints-z3 supports setting some of the options in z3
 via constructor parameters or configuration options:
 
-	```
-	z3.timeout=[timeout in millis]
- 	z3.options=[option1]=[value1];[option2]=[value2];...
- 	````
+    z3.timeout=[timeout in millis]
+    z3.options=[option1]=[value1];[option2]=[value2];...
 
 Example:
 
-	```
-	z3.timeout=2
-	z3.options=smt.mbqi=true;smt.macro-finder=true
-	```
-
+    z3.timeout=2
+    z3.options=smt.mbqi=true;smt.macro-finder=true
 
 [0]: https://bitbucket.org/psycopaths/jconstraints
 [4]: https://github.com/Z3Prover/z3
