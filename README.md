@@ -10,7 +10,7 @@ Dependencies
 
 * [Z3 4.3+][4]
 
-Z3 is not distributed along with *jpf-constraints-z3*, but is
+Z3 is not distributed along with *jConstraints-z3*, but is
 available at [The Z3 Theorem Prover][4]'s website.
 
 
