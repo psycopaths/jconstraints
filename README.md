@@ -19,9 +19,10 @@ Building and Installing
 
 Building and Installing Z3
 ----------------------------------------------
-**Note**: Installing Z3 requires `git` and `python`
-and `maven` to be installed and to reside in your `PATH`
-environment variable.
+
+**Note**: Installing Z3 requires `git`, `python`, `maven`, and a C++
+compiler to be installed and to reside in your `PATH` environment
+variable.
 
 The following instructions are taken from Leonardo de 
 Moura's [blog][5].
