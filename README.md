@@ -67,7 +67,7 @@ Building and Installing jConstraints-z3
 * In the *jConstraints-z3* folder, run `mvn install`
 * If the compilation was successful, the *jConstraints-z3*
   library can be found in the JAR file
-  `target/jconstraints-[VERSION].jar`
+  `target/jconstraints-z3-[VERSION].jar`
 * jConstraints loads extensions automatically from the
   `~/.jconstraints/extensions` folder in the user's home
   directory. Create this directory and copy
