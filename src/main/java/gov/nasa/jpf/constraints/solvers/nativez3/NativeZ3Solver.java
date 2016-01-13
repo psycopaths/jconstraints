@@ -114,7 +114,7 @@ public class NativeZ3Solver extends ConstraintSolver {
             Params p = ctx.mkParams();
                 //p.add("timeout",timeout);
                 //p.add(":timeout", timeout); 
-                p.add("soft_timeout", timeout);
+                p.add("timeout", timeout);
                 solver.setParameters(p);     
             }
 
