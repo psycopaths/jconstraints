@@ -51,7 +51,7 @@ make all
 
 Make sure to install `libz3.so` and `libz3java.so` (extension `.dylib`
 in OSX) to a global library folder or to one that is contained in your
-`java.library.path` property (the `LD_LIBRARY_PATH` in Bash).
+`java.library.path` property (the `LD_LIBRARY_PATH` for Linux and `DYLD_LIBRARY_PATH` for OS X).
 
 Install the `com.microsoft.z3.jar` file from the `build` directory of
 your Z3 working copy into the local Maven directory:
