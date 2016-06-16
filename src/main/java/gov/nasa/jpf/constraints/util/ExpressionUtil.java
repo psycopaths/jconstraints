@@ -115,7 +115,7 @@ public class ExpressionUtil {
       return def;
     
     Expression<Boolean> curr = it.next();
-    
+
     while(it.hasNext()) {
       Expression<Boolean> next = it.next();
       curr = new PropositionalCompound(curr, op, next);
