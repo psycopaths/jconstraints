@@ -93,10 +93,19 @@ public class PropositionalCompound extends AbstractBoolExpression {
 
   @Override
   public void print(Appendable a, int flags) throws IOException {
+    if(left == null){
+      System.out.println(operator.toString());
+      right.print(System.out);
+      System.out.flush();
+    }
     a.append('(');
     left.print(a, flags);
     a.append(' ').append(operator.toString()).append(' ');
-    right.print(a, flags);
+    if(right == null){
+      a.append("null");
+    }else{
+      right.print(a, flags);
+    }
     a.append(')');
   }
 
@@ -147,8 +156,4 @@ public class PropositionalCompound extends AbstractBoolExpression {
       return false;
     return true;
   }
-
-  
-  
-    
 }
