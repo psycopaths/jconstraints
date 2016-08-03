@@ -2,16 +2,16 @@ jConstraints-z3: Installation Guide and Manual
 ==============================================
 
 *jConstraints-z3* is a plugin for 
-[jConstraints][0], adding Z3 as a 
+[jConstraints][0], adding support for Z3 as a 
 constraint solver.
 
 Dependencies
 ==============================================
 
-* [Z3 4.3+][4]
+* [Z3 4.4.1][4]
 
 Z3 is not distributed along with *jConstraints-z3*, but is
-available at [The Z3 Theorem Prover][4]'s website.
+available at [The Z3 Theorem Prover][4]'s GitHub repository.
 
 
 Building and Installing
@@ -24,19 +24,20 @@ Building and Installing Z3
 compiler to be installed and to reside in your `PATH` environment
 variable.
 
-The following instructions are taken from Leonardo de 
-Moura's [blog][5].
+The following instructions are taken from the `README` from [The Z3 Theorem Prover][4]'s GitHub repository.
 
-First, we have to clone Z3:
+First, clone Z3:
 
 ```bash
 git clone https://github.com/Z3Prover/z3.git
 ```
 
-**Obtaining Z3 without Git:** If you do not have Git, you can also
-download a source archive from [Z3's website][9].
+Make sure that you use the `4.4.1` release:
+```bash
+git checkout z3-4.4.1
+```
 
-Next, we generate a Z3 Makefile with the `--java` option.
+Next, we generate a Z3 Makefile with the `--java` option to get the Z3 Java bindings.
 
 ```bash
 python scripts/mk_make.py --java
@@ -57,7 +58,7 @@ Install the `com.microsoft.z3.jar` file from the `build` directory of
 your Z3 working copy into the local Maven directory:
 
 ```bash
-mvn install:install-file -Dfile=com.microsoft.z3.jar -DgroupId=com.microsoft -DartifactId=z3 -Dversion=0.9 -Dpackaging=jar
+mvn install:install-file -Dfile=com.microsoft.z3.jar -DgroupId=com.microsoft -DartifactId=z3 -Dversion=4.4.1 -Dpackaging=jar
 ```
 
 
@@ -90,6 +91,4 @@ Example:
     z3.options=smt.mbqi=true;smt.macro-finder=true
 
 [0]: https://bitbucket.org/psycopaths/jconstraints
-[4]: https://github.com/Z3Prover/z3
-[5]: http://research.microsoft.com/en-us/um/people/leonardo/blog/2012/12/10/z3-for-java.html
-[9]: https://github.com/Z3Prover/z3/releases
+[4]: https://github.com/Z3Prover/z3/tree/z3-4.4.1
