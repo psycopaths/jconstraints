@@ -31,8 +31,20 @@ public enum BitvectorOperator {
   private BitvectorOperator(String str) {
     this.str = str;
   }
-  
+
   public String toString() {
     return str;
+  }
+
+  public static BitvectorOperator fromString(String str){
+    switch(str){
+      case "&": return AND;
+      case "|": return OR;
+      case "^": return XOR;
+      case "<<": return SHIFTL;
+      case ">>": return SHIFTR;
+      case ">>>": return SHIFTUR;
+      default: return null;
+    }
   }
 }

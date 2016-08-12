@@ -38,5 +38,16 @@ public enum LogicalOperator {
     return str;
   }
 
+  public static LogicalOperator fromString(String str){
+    switch(str){
+      case "&&": return AND;
+      case "||": return OR;
+      case "->": return IMPLY;
+      case "<->": return EQUIV;
+      case "^": return XOR;
+      default: return null;
+    }
+  }
+
   public abstract boolean eval(boolean lv, boolean rv);
 }
