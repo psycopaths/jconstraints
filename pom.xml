@@ -32,7 +32,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compiler-plugin.version>3.1</compiler-plugin.version>
-        <z3.version>0.9</z3.version>
+        <z3.version>4.4.1</z3.version>
         <testng.version>6.8</testng.version>
         <jconstraints.version>0.9.1-SNAPSHOT</jconstraints.version>		
     </properties>
