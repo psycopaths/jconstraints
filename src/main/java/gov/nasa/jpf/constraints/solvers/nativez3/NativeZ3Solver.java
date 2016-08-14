@@ -32,10 +32,15 @@ import com.microsoft.z3.Params;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Tactic;
 import com.microsoft.z3.Z3Exception;
+import gov.nasa.jpf.constraints.util.ExpressionUtil;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class NativeZ3Solver extends ConstraintSolver implements QuantifierEliminator{
+public class NativeZ3Solver extends ConstraintSolver
+        implements QuantifierEliminator{
 
   private Context ctx;
 
@@ -152,12 +157,25 @@ public class NativeZ3Solver extends ConstraintSolver implements QuantifierElimin
     ApplyResult res = tactic.apply(goal);
     Goal[] subgoals = res.getSubgoals();
     System.out.println("gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3Solver.eliminateQuantifiers()");
+    Expression result = null;
+    NativeZ3TojConstraintConverter converter = new NativeZ3TojConstraintConverter();
     for(Goal g: subgoals){
       BoolExpr[] formulas = g.getFormulas();
       for(BoolExpr f: formulas){
         System.out.println(f.toString());
+        System.out.println("gov.nasa.jpf.constraints.solver.ExpressionConversionTest.testExpressionConversion() - asdfasfagdsgasdgas");
+        Expression<Boolean> jConstraintExpr = converter.parse(f);
+        result = result== null? jConstraintExpr :
+                ExpressionUtil.and(result, jConstraintExpr);
+        try {
+          result.print(System.out);
+          System.out.println("parsed printed");
+        } catch (IOException ex) {
+          ex.printStackTrace();
+        }
       }
     }
-    return null;
+    
+    return result;
   }
 }

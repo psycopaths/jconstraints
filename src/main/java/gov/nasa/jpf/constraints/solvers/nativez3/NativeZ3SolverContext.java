@@ -146,7 +146,6 @@ public class NativeZ3SolverContext extends SolverContext {
 			    		}
 			    		
 					    Variable<?> v = freeVars.get(text);
-					    
 					    if (v == null) {
 					    	continue;
 					    }
@@ -154,9 +153,9 @@ public class NativeZ3SolverContext extends SolverContext {
 
 			
 					    AST res = model.getConstInterp(decl);
-					    try {				        
+					    try {
 					    	String value = res.toString().trim();
-					    	if(TypeUtil.isRealSort(v) && value.contains("/")) {
+                                                if(TypeUtil.isRealSort(v) && value.contains("/")) {
 					    	  String[] split = value.split("/");
 					    	  BigDecimal nom = new BigDecimal(split[0].trim());
 					    	  BigDecimal den = new BigDecimal(split[1].trim());
