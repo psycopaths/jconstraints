@@ -87,6 +87,16 @@ public class BitvectorNegation<E>
     negated.print(a, flags);
   }
 
+  @Override
+  public void printMalformedExpression(Appendable a, int flags) 
+          throws IOException{
+    a.append('~');
+    if(negated != null){
+      negated.print(a, flags);
+    } else {
+      a.append("null");
+    }
+  }
   /* (non-Javadoc)
    * @see java.lang.Object#hashCode()
    */

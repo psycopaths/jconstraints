@@ -103,7 +103,22 @@ public class CastExpression<F,E> extends AbstractExpression<E> {
     casted.print(a, flags);
   }
 
-
+  @Override
+  public void printMalformedExpression(Appendable a, int flags) 
+          throws IOException {
+    a.append('(');
+    if(toType == null){
+      a.append("null");
+    }else{
+      a.append(toType.getName());
+    }
+    a.append(')');
+    if(casted == null){
+      a.append("null");
+    } else {
+      casted.print(a, flags);
+    }
+  }
   @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);

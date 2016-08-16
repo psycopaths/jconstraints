@@ -62,7 +62,12 @@ public class EqualityExpression extends AbstractBoolExpression {
   @Override
   public void print(Appendable a, int flags) throws IOException {
     // TODO Auto-generated method stub
-    
+  }
+
+  @Override
+  public void printMalformedExpression(Appendable a, int flags) 
+          throws IOException {
+    // TODO Auto-generated method stub
   }
 
 }

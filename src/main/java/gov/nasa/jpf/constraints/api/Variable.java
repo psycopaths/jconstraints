@@ -130,6 +130,29 @@ public class Variable<E> extends Expression<E> {
   }
 
   @Override
+  public void printMalformedExpression(Appendable a, int flags)
+          throws IOException{
+    boolean qid = quoteIdentifiers(flags);
+    if(qid)
+      a.append('\'');
+    if(name == null){
+      a.append("null");
+    }else {
+      a.append(name);
+    }
+    if(qid)
+      a.append('\'');
+    if(includeVariableType(flags)) {
+      a.append(':');
+      if(type == null){
+        a.append("null");
+      } else {
+        a.append(type.getName());
+      }
+    }
+  }
+
+  @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
   }

@@ -138,6 +138,24 @@ public class NumericCompound<E> extends AbstractExpression<E> {
   }
 
   @Override
+  public void printMalformedExpression(Appendable a, int flags) 
+          throws IOException {
+    a.append('(');
+    if(left == null){
+      a.append("null");
+    }else{
+      left.printMalformedExpression(a, flags);
+    }
+    a.append(' ').append(operator.toString()).append(' ');
+    if(right == null){
+      a.append("null");
+    }else{
+      right.printMalformedExpression(a, flags);
+    }
+    a.append(')');
+  }
+
+  @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
   }

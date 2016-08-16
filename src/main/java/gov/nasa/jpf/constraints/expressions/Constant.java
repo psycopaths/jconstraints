@@ -118,7 +118,15 @@ public class Constant<E> extends AbstractExpression<E> {
     a.append(String.valueOf(value));
   }
 
-
+  @Override
+  public void printMalformedExpression(Appendable a, int flags) 
+          throws IOException {
+    if(value == null){
+      a.append("null");
+    } else {
+      a.append(String.valueOf(value));
+    }
+  }
   @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
@@ -131,5 +139,4 @@ public class Constant<E> extends AbstractExpression<E> {
   public Constant(Class<E> clazz, E value) {
     this(ObjectConstraints.getPrimitiveType(clazz), value);
   }
-  
 }

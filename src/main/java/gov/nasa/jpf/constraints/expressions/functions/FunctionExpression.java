@@ -106,6 +106,33 @@ public class FunctionExpression<T> extends AbstractExpression<T> {
     a.append(')');
   }
 
+  @Override
+  public void printMalformedExpression(Appendable a, int flags) throws IOException {
+    boolean qid = Expression.quoteIdentifiers(flags);
+    if(qid)
+      a.append('\'');
+    if(function == null){
+      a.append("null");
+    } else {
+      a.append(function.getName());
+    }
+    if(qid)
+      a.append('\'');
+    a.append('(');
+    boolean first = true;
+    for(Expression<?> arg : args) {
+      if(first)
+        first = false;
+      else
+        a.append(',');
+      if(arg != null){
+        a.append("null");
+      } else {
+        arg.print(a, flags);
+      }
+    }
+    a.append(')');
+  }
 
   /* (non-Javadoc)
    * @see java.lang.Object#hashCode()
@@ -149,8 +176,4 @@ public class FunctionExpression<T> extends AbstractExpression<T> {
     public Expression<?>[] getArgs() {
         return args;
     }
-  
-  
-
-
 }
