@@ -159,7 +159,7 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
   public Type<?> getOperandType() {
     return left.getType();
   }
-  
+
   private static <L,R> int compare(Expression<L> left, Expression<R> right, Valuation val) {
     L lv = left.evaluate(val);
     R rv = right.evaluate(val);

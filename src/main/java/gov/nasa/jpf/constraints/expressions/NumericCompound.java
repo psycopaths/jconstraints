@@ -45,7 +45,7 @@ public class NumericCompound<E> extends AbstractExpression<E> {
   public static <E> NumericCompound<E> create(Expression<E> left, NumericOperator operator, Expression<?> right) {
     Type<E> type = left.getType();
     Expression<E> r = right.requireAs(type);
-    return new NumericCompound<E>(left, operator, r);
+    return new NumericCompound<>(left, operator, r);
   }
   
   private final NumericOperator operator;
@@ -89,9 +89,6 @@ public class NumericCompound<E> extends AbstractExpression<E> {
     right.collectFreeVariables(variables);
   }
 
-
-
-  
   /**
    * @return the comparator
    */

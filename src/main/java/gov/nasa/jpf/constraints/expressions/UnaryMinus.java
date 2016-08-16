@@ -121,7 +121,4 @@ public class UnaryMinus<E> extends AbstractExpression<E> {
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
   }
-
-
-    
 }

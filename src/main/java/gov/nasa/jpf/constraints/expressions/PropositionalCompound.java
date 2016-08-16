@@ -123,7 +123,6 @@ public class PropositionalCompound extends AbstractBoolExpression {
     return visitor.visit(this, data);
   }
 
-
   /* (non-Javadoc)
    * @see java.lang.Object#hashCode()
    */
@@ -136,7 +135,6 @@ public class PropositionalCompound extends AbstractBoolExpression {
     result = prime * result + ((right == null) ? 0 : right.hashCode());
     return result;
   }
-
 
   /* (non-Javadoc)
    * @see java.lang.Object#equals(java.lang.Object)
