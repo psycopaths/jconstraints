@@ -22,17 +22,17 @@ import java.util.logging.Logger;
 
 @Deprecated
 public class NativeZ3SolverProviderLegacy extends NativeZ3SolverProvider {
-	
-	private static final Logger logger = Logger.getLogger("constraints");
-	
-	@Override
-	public String[] getNames() {
-		return new String[]{"NativeZ3"};
-	}
 
-	@Override
-	public ConstraintSolver createSolver(Properties config) {
-		logger.warning("Using deprecated solver name 'NativeZ3' might fail in future releases");
-		return super.createSolver(config);
-	}
+  private static final Logger logger = Logger.getLogger("constraints");
+
+  @Override
+  public String[] getNames() {
+    return new String[]{"NativeZ3"};
+  }
+
+  @Override
+  public ConstraintSolver createSolver(Properties config) {
+    logger.warning("Using deprecated solver name 'NativeZ3' might fail in future releases");
+    return super.createSolver(config);
+  }
 }

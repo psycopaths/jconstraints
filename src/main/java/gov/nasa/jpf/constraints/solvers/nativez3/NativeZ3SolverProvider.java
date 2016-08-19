@@ -24,39 +24,39 @@ import java.util.Properties;
 
 public class NativeZ3SolverProvider implements ConstraintSolverProvider {
 
-	@Override
-	public String[] getNames() {
-		return new String[]{"z3", "Z3"};
-	}
+  @Override
+  public String[] getNames() {
+    return new String[]{"z3", "Z3"};
+  }
 
-	@Override
-	public ConstraintSolver createSolver(Properties config) {
-            Map<String,String> options = new HashMap<>();
-            int timeout = -1;
-            
-            if (config.containsKey("z3.options")) {
-                String conf = config.getProperty("z3.options").trim();
-                String[] opts = conf.split(";");
-                for (String o : opts) {
-                    o = o.trim();
-                    if (o.length() < 1) {
-                        continue;
-                    }
-                    
-                    String[] kv = o.split("=");
-                    if(kv.length != 2) {
-                        System.err.println("Warning: " + o + " is not a valid option to z3.");
-                        continue;
-                    }
-                    options.put(kv[0].trim(), kv[1].trim());
-                }
-            }
+  @Override
+  public ConstraintSolver createSolver(Properties config) {
+    Map<String, String> options = new HashMap<>();
+    int timeout = -1;
 
-            if (config.containsKey("z3.timeout")) {
-                timeout = Integer.parseInt(config.getProperty("z3.timeout"));
-            }
-            
-            return new NativeZ3Solver(timeout, options);
-	}
+    if (config.containsKey("z3.options")) {
+      String conf = config.getProperty("z3.options").trim();
+      String[] opts = conf.split(";");
+      for (String o : opts) {
+        o = o.trim();
+        if (o.length() < 1) {
+          continue;
+        }
+
+        String[] kv = o.split("=");
+        if (kv.length != 2) {
+          System.err.println("Warning: " + o + " is not a valid option to z3.");
+          continue;
+        }
+        options.put(kv[0].trim(), kv[1].trim());
+      }
+    }
+
+    if (config.containsKey("z3.timeout")) {
+      timeout = Integer.parseInt(config.getProperty("z3.timeout"));
+    }
+
+    return new NativeZ3Solver(timeout, options);
+  }
 
 }
