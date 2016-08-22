@@ -13,26 +13,25 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
  * specific language governing permissions and limitations under the License.
  */
-package gov.nasa.jpf.constraints.solvers.nativez3;
+package gov.nasa.jpf.constraints.solver;
 
-import gov.nasa.jpf.constraints.api.ConstraintSolver;
+import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3TojConstraintConverter;
+import org.junit.Before;
+import org.testng.annotations.Test;
 
-import java.util.Properties;
-import java.util.logging.Logger;
-
-@Deprecated
-public class NativeZ3SolverProviderLegacy extends NativeZ3SolverProvider {
-
-  private static final Logger logger = Logger.getLogger("constraints");
-
-  @Override
-  public String[] getNames() {
-    return new String[]{"NativeZ3"};
+public class ExpressionConversionTest {
+  
+  public ExpressionConversionTest() {
+  }
+  
+  @Before
+  public void setUp() {
   }
 
-  @Override
-  public ConstraintSolver createSolver(Properties config) {
-    logger.warning("Using deprecated solver name 'NativeZ3' might fail in future releases");
-    return super.createSolver(config);
+  @Test
+  public void testExpressionConversion(){
+    String z3ExprString = "(exists ('a':integer, 'b':integer):"
+            +" ((('x' == ('a' + 'b')) && ('a' > 0)) && ('b' > 0)))";
+    NativeZ3TojConstraintConverter converter = new NativeZ3TojConstraintConverter();
   }
 }
