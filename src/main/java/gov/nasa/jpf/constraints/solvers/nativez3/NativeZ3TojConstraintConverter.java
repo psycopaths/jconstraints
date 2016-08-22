@@ -163,11 +163,9 @@ public class NativeZ3TojConstraintConverter {
       }
     }
     if (returnExpression == null) {
-      logger.sever("gov.nasa.jpf.constraints.solvers.nativez3." 
-              + "NativeZ3TojConstraintConverter.parse()");
-      logger.sever(z3Expr.getClass());
-      throw new UnsupportedOperationException(
-              "Cannot convert the z3Expression to jConstraint.");
+      String msg = "Cannot convert the z3Expression to jConstraint";
+      logger.severe(msg);
+      throw new UnsupportedOperationException(msg);
     }
     return returnExpression;
   }
