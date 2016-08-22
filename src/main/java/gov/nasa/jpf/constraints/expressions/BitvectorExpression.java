@@ -134,6 +134,24 @@ public class BitvectorExpression<E>
     a.append(')');
   }
 
+  @Override
+  public void printMalformedExpression(Appendable a, int flags) 
+          throws IOException {
+    a.append('(');
+    if(left == null){
+      a.append("null");
+    }else{
+      left.printMalformedExpression(a, flags);
+    }
+    a.append(' ').append(op.toString()).append(' ');
+    if(right == null){
+      a.append("null");
+    }else{
+      right.printMalformedExpression(a, flags);
+    }
+    a.append(')');
+  }
+
   /* (non-Javadoc)
    * @see java.lang.Object#hashCode()
    */

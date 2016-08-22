@@ -42,4 +42,16 @@ public enum NumericComparator {
    public String toString() {
      return str;
    }  
+
+   public static NumericComparator fromString(String str){
+     switch(str){
+       case "==": return EQ;
+       case "!=": return NE;
+       case "<": return LT;
+       case "<=": return LE;
+       case ">": return GT;
+       case ">=": return GE;
+       default: return null;
+     }
+   }
 }

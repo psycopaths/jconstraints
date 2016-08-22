@@ -13,24 +13,30 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
  * specific language governing permissions and limitations under the License.
  */
-
 package gov.nasa.jpf.constraints.expressions;
 
 public enum Quantifier {
-	FORALL("forall") { public Quantifier negate() { return EXISTS; } },
-	EXISTS("exists") { public Quantifier negate() { return FORALL; } };
-	
-	private final String str;
-	
-	
-	private Quantifier(String str) {
-		this.str = str;
-	}
-	
-	public abstract Quantifier negate();
-	
-	@Override
-	public String toString() {
-		return str;
-	}
+  FORALL("forall") {
+    public Quantifier negate() {
+      return EXISTS;
+    }
+  },
+  EXISTS("exists") {
+    public Quantifier negate() {
+      return FORALL;
+    }
+  };
+
+  private final String str;
+
+  private Quantifier(String str) {
+    this.str = str;
+  }
+
+  public abstract Quantifier negate();
+
+  @Override
+  public String toString() {
+    return str;
+  }
 }

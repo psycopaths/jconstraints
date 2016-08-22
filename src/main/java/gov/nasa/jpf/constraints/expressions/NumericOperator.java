@@ -37,4 +37,15 @@ public enum NumericOperator {
   public String toString() {
     return str;
   }
+  
+  public static NumericOperator fromString(String str){
+    switch(str){
+      case "/": return DIV;
+      case "*": return MUL;
+      case "-": return MINUS;
+      case "+": return PLUS;
+      case "%": return REM;
+      default: return null;
+    }
+  }
 }

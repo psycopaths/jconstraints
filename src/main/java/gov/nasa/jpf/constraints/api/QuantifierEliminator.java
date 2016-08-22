@@ -13,38 +13,8 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
  * specific language governing permissions and limitations under the License.
  */
+package gov.nasa.jpf.constraints.api;
 
-package gov.nasa.jpf.constraints.expressions;
-
-public enum BitvectorOperator {
-
-  AND("&"),
-  OR("|"),
-  XOR("^"),
-  SHIFTL("<<"),
-  SHIFTR(">>"),
-  SHIFTUR(">>>");
-
-  
-  private final String str;
-  
-  private BitvectorOperator(String str) {
-    this.str = str;
-  }
-
-  public String toString() {
-    return str;
-  }
-
-  public static BitvectorOperator fromString(String str){
-    switch(str){
-      case "&": return AND;
-      case "|": return OR;
-      case "^": return XOR;
-      case "<<": return SHIFTL;
-      case ">>": return SHIFTR;
-      case ">>>": return SHIFTUR;
-      default: return null;
-    }
-  }
+public interface QuantifierEliminator {
+  public Expression eliminateQuantifiers(Expression<Boolean> expr);
 }

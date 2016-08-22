@@ -98,9 +98,14 @@ public abstract class Expression<E> extends AbstractPrintable {
     return exp;
   }
   
-  
   public abstract void print(Appendable a, int flags) throws IOException;
-  
+
+  /**A malformed Expression might contain a null value.
+  This method should only be used in debug environment
+   * @throws java.io.IOExceptions*/
+  public abstract void printMalformedExpression(Appendable a, int flags)
+          throws IOException;
+
   public String toString(int flags) {
     StringBuilder sb = new StringBuilder();
     try {
@@ -117,6 +122,10 @@ public abstract class Expression<E> extends AbstractPrintable {
     print(a, DEFAULT_FLAGS);
   }
   
+  public final void printMalformedExpression(Appendable a) throws IOException {
+    printMalformedExpression(a, DEFAULT_FLAGS);
+  }
+
   
   // LEGACY API
   

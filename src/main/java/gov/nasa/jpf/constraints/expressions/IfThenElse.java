@@ -99,6 +99,29 @@ public class IfThenElse<E> extends AbstractExpression<E> {
     }
 
     @Override
+    public void printMalformedExpression(Appendable a, int flags) throws IOException{
+      a.append("if (");
+      if(ifCond == null){
+        a.append("null");
+      } else {
+        ifCond.printMalformedExpression(a, flags);
+      }
+      a.append(") then (");
+      if(thenExpr == null){
+        a.append("null");
+      } else{
+        thenExpr.print(a, flags);
+      }
+      a.append(") else (");
+      if(elseExpr == null){
+        a.append("null");
+      }else {
+        elseExpr.print(a, flags);
+      }
+      a.append(")");
+    }
+
+    @Override
     public int hashCode() {
         int hash = 3;
         hash = 53 * hash + Objects.hashCode(this.ifCond);
@@ -139,7 +162,4 @@ public class IfThenElse<E> extends AbstractExpression<E> {
     public Expression<E> getElse() {
         return elseExpr;
     }
-    
-    
-    
 }

@@ -134,6 +134,24 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
   }
 
   @Override
+    public void printMalformedExpression(Appendable a, int flags) 
+          throws IOException {
+    a.append('(');
+    if(left == null){
+      a.append("null");
+    }else{
+      left.printMalformedExpression(a, flags);
+    }
+    a.append(' ').append(operator.toString()).append(' ');
+    if(right == null){
+      a.append("null");
+    }else{
+      right.printMalformedExpression(a, flags);
+    }
+    a.append(')');
+  }
+
+  @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
   }
@@ -141,7 +159,7 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
   public Type<?> getOperandType() {
     return left.getType();
   }
-  
+
   private static <L,R> int compare(Expression<L> left, Expression<R> right, Valuation val) {
     L lv = left.evaluate(val);
     R rv = right.evaluate(val);

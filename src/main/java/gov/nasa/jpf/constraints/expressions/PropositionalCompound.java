@@ -100,12 +100,28 @@ public class PropositionalCompound extends AbstractBoolExpression {
     a.append(')');
   }
 
+  @Override
+  public void printMalformedExpression(Appendable a, int flags) 
+          throws IOException {
+    a.append('(');
+    if(left == null){
+      a.append("null");
+    }else{
+      left.printMalformedExpression(a, flags);
+    }
+    a.append(' ').append(operator.toString()).append(' ');
+    if(right == null){
+      a.append("null");
+    }else{
+      right.printMalformedExpression(a, flags);
+    }
+    a.append(')');
+  }
 
   @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
   }
-
 
   /* (non-Javadoc)
    * @see java.lang.Object#hashCode()
@@ -119,7 +135,6 @@ public class PropositionalCompound extends AbstractBoolExpression {
     result = prime * result + ((right == null) ? 0 : right.hashCode());
     return result;
   }
-
 
   /* (non-Javadoc)
    * @see java.lang.Object#equals(java.lang.Object)
@@ -147,8 +162,4 @@ public class PropositionalCompound extends AbstractBoolExpression {
       return false;
     return true;
   }
-
-  
-  
-    
 }
