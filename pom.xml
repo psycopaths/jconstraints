@@ -23,7 +23,7 @@
 	-->
 	<groupId>gov.nasa</groupId>
 	<artifactId>jconstraints</artifactId>
-	<version>0.9.1-SNAPSHOT</version>
+	<version>0.9.1</version>
 	<packaging>jar</packaging>
 	<name>jConstraints</name>
 	<url>https://github.com/psycopaths/jconstraints</url>
@@ -43,7 +43,8 @@
 
 	<scm>
         <developerConnection>scm:git:https://github.com/psycopaths/jconstraints.git</developerConnection>
-    </scm>
+      <tag>jconstraints-0.9.1</tag>
+  </scm>
 
 
 	<!--	
