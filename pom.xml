@@ -19,7 +19,7 @@
 
     <groupId>gov.nasa</groupId>
     <artifactId>jconstraints-z3</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>jConstraints-z3</name>
     <url>https://github.com/psycopaths/jconstraints-z3</url>
@@ -39,7 +39,7 @@
   
 	<scm>
         <developerConnection>scm:git:https://github.com/psycopaths/jconstraints-z3.git</developerConnection>
-      <tag>jconstraints-z3-0.9.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
 	<!--	
