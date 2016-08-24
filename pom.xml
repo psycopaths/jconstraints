@@ -41,24 +41,17 @@
 		<system>GitHub Issues</system>
 	</issueManagement>
 
-	<developers>
-		<developer>
-			<id>falkhowar</id>
-			<name>Falk Howar</name>
-			<email>falk.howar@gmail.com</email>
-		</developer>
-		<developer>
-			<id>misberner</id>
-			<name>Malte Isberner</name>
-			<email>malte.isberner@gmail.com</email>
-		</developer>
-	</developers>
+	<scm>
+        <developerConnection>scm:git:https://github.com/psycopaths/jconstraints.git</developerConnection>
+    </scm>
+
 
 	<!--	
 	================================= PROPERTIES ================================
 	-->
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 		<compiler-plugin.version>3.1</compiler-plugin.version>
 		<guava.version>14.0.1</guava.version>
 		<antlr.version>3.5.2</antlr.version>
@@ -83,6 +76,11 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven-release-plugin.version}</version>
+            </plugin>
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr3-maven-plugin</artifactId>
