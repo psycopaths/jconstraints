@@ -20,7 +20,7 @@
 
     <groupId>gov.nasa</groupId>
     <artifactId>jconstraints-z3</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>jConstraints-z3</name>
     <url>https://github.com/psycopaths/jconstraints-z3</url>
@@ -51,7 +51,7 @@
 		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <z3.version>4.4.1</z3.version>
         <testng.version>6.8</testng.version>
-        <jconstraints.version>0.9.1-SNAPSHOT</jconstraints.version>		
+        <jconstraints.version>0.9.1</jconstraints.version>		
     </properties>
 
 	<!--	
