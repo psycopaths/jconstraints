@@ -114,7 +114,7 @@ public class NativeZ3SolverContext extends SolverContext {
 
         NativeZ3ExpressionGenerator gen = generatorStack.peek();
         if (gen.isTainted(model)) {
-          model.dispose();
+//          model.dispose();
           logger.info("Model is tainted, rechecking ...");
           model = gen.recheckUntainted();
           if (model == null) {
@@ -139,7 +139,7 @@ public class NativeZ3SolverContext extends SolverContext {
               sym = decl.getName();
               text = sym.toString().trim();
             } finally {
-              sym.dispose();
+//              sym.dispose();
             }
 
             Variable<?> v = freeVars.get(text);
@@ -162,12 +162,12 @@ public class NativeZ3SolverContext extends SolverContext {
                 val.setParsedValue(v, value);
               }
             } finally {
-              res.dispose();
+//              res.dispose();
             }
           }
         } finally {
           for (int i = 0; i < decls.length; i++) {
-            decls[i].dispose();
+//            decls[i].dispose();
           }
         }
 
@@ -176,7 +176,7 @@ public class NativeZ3SolverContext extends SolverContext {
         }
 
       } finally {
-        model.dispose();
+//        model.dispose();
       }
 
       logger.finer("Satisfiable, valuation " + val);
@@ -193,7 +193,7 @@ public class NativeZ3SolverContext extends SolverContext {
     freeVarsStack.clear();
 
     try {
-      solver.dispose();
+//      solver.dispose();
     } catch (Z3Exception ex) {
     } finally {
       solver = null;

@@ -55,7 +55,7 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.FuncDecl;
-import com.microsoft.z3.IDisposable;
+
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.Model;
 import com.microsoft.z3.RealExpr;
@@ -77,8 +77,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 
 	protected final Map<Variable<?>, Expr> variables;
 
-	protected final Set<IDisposable> protect;
-	protected final List<IDisposable> own = new ArrayList<IDisposable>();
+//	protected final Set<IDisposable> protect;
+//	protected final List<IDisposable> own = new ArrayList<IDisposable>();
 	
 	protected int count;
 	
@@ -88,10 +88,10 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			throws Z3Exception {
 		this.ctx = ctx;
 		this.solver = solver;
-		this.protect = new HashSet<IDisposable>();
+//		this.protect = new HashSet<IDisposable>();
 		this.tainted = (BoolExpr)ctx.mkFreshConst("__tainted", ctx.getBoolSort());
-		this.protect.add(tainted);
-		this.own.add(tainted);
+//		this.protect.add(tainted);
+//		this.own.add(tainted);
 		this.variables = new HashMap<Variable<?>, Expr>();
 		
 		this.count = 0;
@@ -103,7 +103,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 		this.solver = parent.solver;
 
 		this.variables = new HashMap<Variable<?>, Expr>(parent.variables);
-		this.protect = new HashSet<IDisposable>(parent.protect);
+//		this.protect = new HashSet<IDisposable>(parent.protect);
 		this.tainted = parent.tainted;
 		
 		this.count = parent.count;
@@ -839,8 +839,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 
 		Expr var = createBoolVar(v);
 		this.variables.put(v, var);
-		this.protect.add(var);
-		this.own.add(var);
+//		this.protect.add(var);
+//		this.own.add(var);
 
 		return var;
 	}
@@ -866,8 +866,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	  
 	  BitVecExpr var = createBVVar(v);
 	  this.variables.put(v, var);
-	  this.protect.add(var);
-	  this.own.add(var);
+//	  this.protect.add(var);
+//	  this.own.add(var);
 	  
 	  return var;
 	}
@@ -891,8 +891,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 
 		IntExpr var = createIntVar(v);
 		this.variables.put(v, var);
-		this.protect.add(var);
-		this.own.add(var);
+//		this.protect.add(var);
+//		this.own.add(var);
 
 		return var;
 	}
@@ -937,15 +937,15 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	}
 
 	protected RealExpr getOrCreateRealVar(Variable<?> v) {
-		Expr ret = this.variables.get(v);
+                Expr ret = this.variables.get(v);
 		if (ret != null) {
 			return (RealExpr) ret;
 		}
 
 		RealExpr var = createRealVar(v);
 		this.variables.put(v, var);
-		this.protect.add(var);
-		this.own.add(var);
+//		this.protect.add(var);
+//		this.own.add(var);
 
 		return var;
 	}
@@ -953,7 +953,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	protected RealExpr createRealVar(Variable<?> v) {
 		try {
 			RealExpr z3Var = ctx.mkRealConst(v.getName());
-
+                        
 			NumericType<?> type = (NumericType<?>)v.getType();
 			
 			BigDecimal min = type.getMin();
@@ -1025,43 +1025,43 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	}
 	
 	public void dispose() {
-	  synchronized(own) {
-  		for (IDisposable d : own) {
-  			try {
-  				d.dispose();
-  			} catch (Throwable t) {
-  			}
-  		}
-  		own.clear();
-	  }
+//	  synchronized(own) {
+//  		for (IDisposable d : own) {
+//  			try {
+//  				d.dispose();
+//  			} catch (Throwable t) {
+//  			}
+//  		}
+//  		own.clear();
+//	  }
 	}
 
 	protected void finalize() {
 		dispose();
 	}
 
-	protected void safeDispose(IDisposable... disposables) {
-		for (int i = 0; i < disposables.length; i++) {
-			IDisposable disp = disposables[i];
-			if (disp == null || protect.contains(disp))
-				continue;
-			try {
-				disp.dispose();
-			} catch (Throwable t) {
-			}
-		}
+	protected void safeDispose(Object ... disposables) {
+//		for (int i = 0; i < disposables.length; i++) {
+//			IDisposable disp = disposables[i];
+//			if (disp == null || protect.contains(disp))
+//				continue;
+//			try {
+//				disp.dispose();
+//			} catch (Throwable t) {
+//			}
+//		}
 	}
 
-	protected static void uncheckedDispose(IDisposable... disposables) {
-		for (int i = 0; i < disposables.length; i++) {
-			try {
-				IDisposable disp = disposables[i];
-				if (disp != null) {
-					disp.dispose();
-				}
-			} catch (Throwable t) {
-			}
-		}
+	protected static void uncheckedDispose(Object ... disposables) {
+//		for (int i = 0; i < disposables.length; i++) {
+//			try {
+//				IDisposable disp = disposables[i];
+//				if (disp != null) {
+//					disp.dispose();
+//				}
+//			} catch (Throwable t) {
+//			}
+//		}
 	}
 
 	NativeZ3ExpressionGenerator createChild() throws Z3Exception {
@@ -1076,7 +1076,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
       return (eval.getBoolValue() == Z3_lbool.Z3_L_TRUE);
     }
     finally {
-      safeDispose(eval);
+//      safeDispose(eval);
     }
   }
 

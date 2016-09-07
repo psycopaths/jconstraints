@@ -33,11 +33,8 @@ import com.microsoft.z3.Solver;
 import com.microsoft.z3.Tactic;
 import com.microsoft.z3.Z3Exception;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class NativeZ3Solver extends ConstraintSolver
         implements QuantifierEliminator {
@@ -75,7 +72,7 @@ public class NativeZ3Solver extends ConstraintSolver
     } catch (Z3Exception ex) {
       if (ctx != null) {
         try {
-          ctx.dispose();
+          //ctx.dispose();
         } catch (Throwable t) {
         }
       }
@@ -90,7 +87,7 @@ public class NativeZ3Solver extends ConstraintSolver
   public void dispose() {
     defaultContext.dispose();
     defaultContext = null;
-    ctx.dispose();
+    //ctx.dispose();
     ctx = null;
   }
 
@@ -134,7 +131,7 @@ public class NativeZ3Solver extends ConstraintSolver
     } catch (Z3Exception ex) {
       if (solver != null) {
         try {
-          solver.dispose();
+          //solver.dispose();
         } catch (Throwable t) {
         }
       }

@@ -50,11 +50,11 @@ public class TrigonometricTest {
     @Test
     public void testAtan2() {
         Properties conf = new Properties();
-        //conf.setProperty("z3.timeout", "1000");              
+        conf.setProperty("z3.timeout", "1");              
         SolverContext ctx = createContext(conf);
 
         SqrtProperties sqrt = new SqrtProperties(15);
-        Atan2Properties atan2 = new Atan2Properties(46, sqrt);
+        Atan2Properties atan2 = new Atan2Properties(15, sqrt);
         
         ctx.add(sqrt.getDefinition());
         ctx.add(atan2.getDefinition());
