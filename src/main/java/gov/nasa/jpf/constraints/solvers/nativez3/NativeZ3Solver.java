@@ -32,13 +32,17 @@ import com.microsoft.z3.Params;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Tactic;
 import com.microsoft.z3.Z3Exception;
+import gov.nasa.jpf.constraints.api.Simplifier;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 public class NativeZ3Solver extends ConstraintSolver
-        implements QuantifierEliminator {
+        implements QuantifierEliminator, Simplifier<Boolean> {
 
+  private static final Logger logger = Logger.getLogger("constraints");
+    
   private Context ctx;
 
   private NativeZ3SolverContext defaultContext;
@@ -153,6 +157,35 @@ public class NativeZ3Solver extends ConstraintSolver
 
     ApplyResult res = tactic.apply(goal);
     Goal[] subgoals = res.getSubgoals();
+    return convertSubgoals(subgoals);
+  }
+  
+  @Override
+  public Expression<Boolean> simplify(Expression<Boolean> expr) {
+    Solver solver = ctx.mkSolver();
+    NativeZ3ExpressionGenerator rootGenerator
+            = new NativeZ3ExpressionGenerator(ctx, solver);
+    
+    Tactic tactic = ctx.mkTactic("ctx-solver-simplify");
+    Goal goal = ctx.mkGoal(true, false, false);
+    
+    BoolExpr z3Expr = rootGenerator.generateAssertion(expr);
+    goal.add(z3Expr);
+    
+    ApplyResult res = tactic.apply(goal);    
+    if (res.getNumSubgoals() == 1 && 
+            (res.getSubgoals()[0].isDecidedSat() || 
+            res.getSubgoals()[0].isDecidedUnsat())) {
+        
+        logger.warning("Simplification failed.");
+        return expr;
+    }
+    
+    Goal[] subgoals = res.getSubgoals();
+    return convertSubgoals(subgoals);    
+  }
+  
+  private Expression<Boolean> convertSubgoals(Goal[] subgoals) {
     Expression result = null;
     NativeZ3TojConstraintConverter converter = new NativeZ3TojConstraintConverter();
     for (Goal g : subgoals) {
@@ -163,6 +196,7 @@ public class NativeZ3Solver extends ConstraintSolver
                 : ExpressionUtil.and(result, jConstraintExpr);
       }
     }
-    return result;
+    return result;      
   }
+  
 }
