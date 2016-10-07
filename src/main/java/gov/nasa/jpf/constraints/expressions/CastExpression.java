@@ -52,6 +52,10 @@ public class CastExpression<F,E> extends AbstractExpression<E> {
     this.toType = toType;
     this.castOp = castOp;
   }
+
+  public CastOperation<? super F, ? extends E> getCastOp() {
+    return castOp;
+  }
   
   
   @Override
