@@ -7,6 +7,8 @@ options {
 }
 
 tokens {
+	QUANTIFIER_VAR_LIST;
+	QUANTIFIER_VAR;
 	TYPED_VAR;
 	TYPED_VAR_LIST;
 	UNARY_MINUS;
@@ -27,13 +29,21 @@ package gov.nasa.jpf.constraints.parser;
 }
 
 start
-	: root_lexpression EOF!;
+	: (root_lexpression | root_declare_stmt ) EOF!
+	;
 
 start_aexpression
 	: root_aexpression EOF!;
 
 start_variable
 	: root_variable EOF!;
+
+root_declare_stmt
+	: declare_var_list -> ^(ROOT declare_var_list)
+	;
+declare_var_list
+	: DECLARE! typed_var_list
+	;
 	
 root_lexpression
 	: declare_stmt? lexpression -> ^(ROOT declare_stmt? lexpression)
@@ -50,6 +60,7 @@ root_variable
 declare_stmt
 	:	DECLARE! typed_var_list IN!
 	;
+
 	
 lexpression
     : lexpr_quantifier
@@ -57,7 +68,7 @@ lexpression
 
 	
 lexpr_quantifier
-	: (FORALL | EXISTS)^ LPAREN! typed_var_list RPAREN! COLON! lexpr_quantifier
+	: (FORALL | EXISTS)^ LPAREN! quantifier_var_list RPAREN! COLON! lexpr_quantifier
 	| lexpr_cmp
 	;
 	
@@ -84,6 +95,7 @@ lexpr_unary
 lexpr_atomic
 	: (TRUE|FALSE)^
 	| aexpression ((EQ|NE|LE|LT|GE|GT)^ aexpression)?
+	| aexpression ((EQ|NE)^ (TRUE|FALSE))
 	;
 	
 aexpression
@@ -140,7 +152,15 @@ identifier
 typed_var
     : identifier COLON ID -> ^(TYPED_VAR identifier ID)
     ;
-    	
+
+quantifier_var
+	:	identifier COLON ID -> ^(TYPED_VAR identifier ID)
+	| identifier -> ^(QUANTIFIER_VAR identifier)
+	;
+	
+quantifier_var_list
+	: quantifier_var (COMMA quantifier_var)* -> ^(QUANTIFIER_VAR_LIST quantifier_var+)
+	;
 
 typed_var_list
 	: typed_var (COMMA typed_var)* -> ^(TYPED_VAR_LIST typed_var+)

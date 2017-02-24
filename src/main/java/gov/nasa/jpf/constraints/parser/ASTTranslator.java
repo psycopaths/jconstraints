@@ -75,6 +75,10 @@ import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.expressions.Quantifier;
 import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.QUANTIFIER_VAR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.QUANTIFIER_VAR_LIST;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.TYPED_VAR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.TYPED_VAR_LIST;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.NumericType;
 import gov.nasa.jpf.constraints.types.Type;
@@ -110,6 +114,10 @@ public class ASTTranslator extends TreeVisitor {
         if(vars.put(var.getName(), var) != null)
           throw new IllegalStateException("Duplicate declaration of variable " + var.getName());
       }
+    }
+    
+    public Collection<? extends Variable<?>> getVariables(){
+      return vars.values();
     }
     
     public Context getParent() {
@@ -155,6 +163,10 @@ public class ASTTranslator extends TreeVisitor {
     current = currParent;
   }
   
+  public Collection<? extends Variable<?>> getVariableOfTopContext(){
+    return current.getVariables();
+  }
+  
   public Expression<Boolean> translateRootLogical(Tree n) {
     requireType(n, ROOT);
     int exprIdx = 0;
@@ -162,9 +174,15 @@ public class ASTTranslator extends TreeVisitor {
       List<? extends Variable<?>> varDecls = translateTypedVarList(n.getChild(0));
       current.declareVariables(varDecls);
       exprIdx++;
+      return translateBoolExpression(n.getChild(exprIdx));
     }
-    
-    return translateBoolExpression(n.getChild(exprIdx));
+    switch(n.getChild(0).getType()){
+      case TYPED_VAR_LIST: 
+        List<? extends Variable<?>> varDecls = translateTypedVarList(n.getChild(0));
+        current.declareVariables(varDecls);
+        return null;
+      default: return translateBoolExpression(n.getChild(0));
+    }
   }
 
   public Variable<?> translateRootVariable(Tree n) {
@@ -212,6 +230,7 @@ public class ASTTranslator extends TreeVisitor {
     case ID:
       return (Expression<Boolean>) translateVariable(n);
     }
+    System.out.println("invalid Token: " +  n.toStringTree());
     throw new UnexpectedTokenException(n, FORALL, EXISTS, LIMP, LEQ, LXOR, LOR, LAND, EQ, NE, LT, LE, GT, GE, LNOT, TRUE, FALSE);
   }
   
@@ -234,7 +253,7 @@ public class ASTTranslator extends TreeVisitor {
     default:
       throw new UnexpectedTokenException(n, FORALL, EXISTS);
     }
-    List<? extends Variable<?>> vars = translateTypedVarList(n.getChild(0));
+    List<? extends Variable<?>> vars = translateQuantifiedVarList(n.getChild(0));
     pushContext(vars);
     Expression<Boolean> body = translateBoolExpression(n.getChild(1));
     popContext();
@@ -340,6 +359,9 @@ public class ASTTranslator extends TreeVisitor {
     case BIGINT_LITERAL:
     case BIGDECIMAL_LITERAL:
       return translateLiteral(n);
+    case TRUE:
+    case FALSE:
+      return translateBoolExpression(n);
     default:
       throw new UnexpectedTokenException(n, BVOR, BVXOR, BVAND, BVSHL, BVSHR, BVSHUR, BVNEG, ADD, SUB, MUL, DIV, REM, UNARY_PLUS, UNARY_MINUS, TYPE_CAST);
     }
@@ -481,7 +503,7 @@ public class ASTTranslator extends TreeVisitor {
   }
   
   public List<? extends Variable<?>> translateTypedVarList(Tree n) {
-    requireType(n, ExpressionParser.TYPED_VAR_LIST);
+    requireType(n, TYPED_VAR_LIST);
     int count = n.getChildCount();
     
     List<Variable<?>> result = new ArrayList<Variable<?>>(count);
@@ -492,6 +514,39 @@ public class ASTTranslator extends TreeVisitor {
     }
     
     return result;
+  }
+  
+  public List<? extends Variable<?>> translateQuantifiedVarList(Tree n) {
+    requireType(n, QUANTIFIER_VAR_LIST);
+    int count = n.getChildCount();
+    
+    List<Variable<?>> result = new ArrayList<>(count);
+    
+    for (int i = 0; i< count; i++){
+      Variable var;
+      switch(n.getChild(i).getType()){
+        case QUANTIFIER_VAR: 
+          var = (Variable) translateQuantifierVariable(n.getChild(i));
+          break;
+        case TYPED_VAR: 
+          var = translateTypedVar(n.getChild(i));
+          break;
+        default:
+          throw new UnexpectedTokenException(n, QUANTIFIER_VAR,TYPED_VAR);
+      }
+      result.add(var);
+    }
+    return result;
+  }
+  
+    public Variable<?> translateQuantifierVariable(Tree n) {
+    requireType(n, ExpressionParser.QUANTIFIER_VAR);
+    String varName = translateIdentifier(n.getChild(0));
+    Variable<?> var = current.lookup(varName);
+    if(var == null){
+      throw new UndeclaredVariableException(n);
+    }
+    return var;
   }
   
   public Variable<?> translateTypedVar(Tree n) {
