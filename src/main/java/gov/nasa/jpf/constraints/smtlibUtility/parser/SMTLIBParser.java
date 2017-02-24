@@ -2,7 +2,6 @@ package gov.nasa.jpf.constraints.smtlibUtility.parser;
 
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.expressions.AbstractStringExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorOperator;
 import gov.nasa.jpf.constraints.expressions.BooleanExpression;
@@ -33,8 +32,6 @@ import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.smtlibUtility.SMTProblem;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.Type;
-import javafx.beans.binding.StringExpression;
-
 import org.smtlib.CharSequenceReader;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
@@ -55,16 +52,13 @@ import org.smtlib.impl.SMTExpr.FcnExpr;
 import org.smtlib.impl.SMTExpr.Let;
 import org.smtlib.impl.SMTExpr.Symbol;
 import org.smtlib.impl.Sort;
-import org.smtlib.sexpr.Sexpr.Expr;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +66,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+//import javafx.beans.binding.StringExpression;
 
 public class SMTLIBParser {
 
@@ -132,485 +128,491 @@ public class SMTLIBParser {
     }
 
     public Expression processAssert(final C_assert cmd) throws SMTLIBParserException {
-    	final Expression res = processExpression(cmd.expr());
-        problem.addAssertion(res);
-        return res;
-    }
+		final Expression res = processExpression(cmd.expr());
+		problem.addAssertion(res);
+		return res;
+	}
 
     public void processDeclareFun(final C_declare_fun cmd) throws SMTLIBParserException {
-        if (cmd.argSorts().size() != 0) {
-            throw new SMTLIBParserNotSupportedException(
-                    "Cannot convert the declared function, because argument size is not null. Might be implemented in" +
-                    " the future.");
-        }
-        if (!(cmd.resultSort() instanceof Sort.Application)) {
-            throw new SMTLIBParserException("Could only convert type of type Sort.Application");
-        }
-        final Sort.Application application = (Sort.Application) cmd.resultSort();
-        // System.out.println("application.toString(): " + application.toString());
-        final Type<?> type = TypeMap.getType(application.toString());
-        if (type == null) {
-            throw new SMTLIBParserExceptionInvalidMethodCall(
-                    "Could not resolve type declared in function: " + application.toString());
-        }
-        final Variable var = Variable.create(type, cmd.symbol().toString());
-        problem.addVariable(var);
-    }
+		if (cmd.argSorts().size() != 0) {
+			throw new SMTLIBParserNotSupportedException(
+					"Cannot convert the declared function, because argument size is not null. Might be implemented " +
+					"in" + " the future.");
+		}
+		if (!(cmd.resultSort() instanceof Sort.Application)) {
+			throw new SMTLIBParserException("Could only convert type of type Sort.Application");
+		}
+		final Sort.Application application = (Sort.Application) cmd.resultSort();
+
+		final Type<?> type = TypeMap.getType(application.toString());
+		if (type == null) {
+			throw new SMTLIBParserExceptionInvalidMethodCall(
+					"Could not resolve type declared in function: " + application.toString());
+		}
+		final Variable var = Variable.create(type, cmd.symbol().toString());
+		problem.addVariable(var);
+	}
 
     private <E> Expression<E> processArgument(final IExpr arg) throws SMTLIBParserException {
-        Expression<E> resolved = null;
-        if (arg instanceof ISymbol) {
-        	if(((ISymbol) arg).value().equals("re.nostr")) {
-        		resolved = createExpression(RegExOperator.NOSTR,new LinkedList<Expression>());
-        	}
-        	if(((ISymbol) arg).value().equals("re.allchar")) {
-        		resolved = createExpression(RegExOperator.ALLCHAR,new LinkedList<Expression>());
-        	}
-        	else {
-            	resolved = resolveSymbol((ISymbol) arg);
-        	}
-        } else if (arg instanceof INumeral) {
-            resolved = resolveNumeral((INumeral) arg);
-        } else if (arg instanceof IDecimal) {
-            resolved = resolveDecimal((IDecimal) arg);
-        } else if (arg instanceof FcnExpr) {
-            resolved = processFunctionExpression((FcnExpr) arg);
-        } else if (arg instanceof Let) {
-            resolved = processLetExpression((Let) arg);
-        } else if (arg instanceof IStringLiteral) {
-        	resolved = resolveStringLiteral((IStringLiteral) arg);
-        } else {
-            throw new SMTLIBParserNotSupportedException("The arguments type is not supported: " + arg.getClass());
-        }
-        return successfulArgumentProcessing(resolved, arg);
-    }
+		Expression<E> resolved = null;
+		if (arg instanceof ISymbol) {
+			if (((ISymbol) arg).value().equals("re.nostr")) {
+				resolved = createExpression(RegExOperator.NOSTR, new LinkedList<Expression>());
+			}
+			if (((ISymbol) arg).value().equals("re.allchar")) {
+				resolved = createExpression(RegExOperator.ALLCHAR, new LinkedList<Expression>());
+			} else {
+				resolved = resolveSymbol((ISymbol) arg);
+			}
+		} else if (arg instanceof INumeral) {
+			resolved = resolveNumeral((INumeral) arg);
+		} else if (arg instanceof IDecimal) {
+			resolved = resolveDecimal((IDecimal) arg);
+		} else if (arg instanceof FcnExpr) {
+			resolved = processFunctionExpression((FcnExpr) arg);
+		} else if (arg instanceof Let) {
+			resolved = processLetExpression((Let) arg);
+		} else if (arg instanceof IStringLiteral) {
+			resolved = resolveStringLiteral((IStringLiteral) arg);
+		} else {
+			throw new SMTLIBParserNotSupportedException("The arguments type is not supported: " + arg.getClass());
+		}
+		return successfulArgumentProcessing(resolved, arg);
+	}
 
-    private Expression processExpression(final IExpr expr) throws SMTLIBParserException {
-        Expression res = null;
-        if (expr instanceof FcnExpr) {
-            res = processFunctionExpression((FcnExpr) expr);
-        } else if (expr instanceof Let) {
-            res = processLetExpression((Let) expr);
-        } else if (expr instanceof Symbol) {
-        	res = resolveSymbol((ISymbol)expr);
-        } else {
-            throw new SMTLIBParserNotSupportedException("Cannot pare the subexpression of type: " + expr.getClass());
-        }
-        return res;
-    }
+	private Expression processExpression(final IExpr expr) throws SMTLIBParserException {
+		Expression res = null;
+		if (expr instanceof FcnExpr) {
+			res = processFunctionExpression((FcnExpr) expr);
+		} else if (expr instanceof Let) {
+			res = processLetExpression((Let) expr);
+		} else if (expr instanceof Symbol) {
+			res = resolveSymbol((ISymbol) expr);
+		} else {
+			throw new SMTLIBParserNotSupportedException("Cannot pare the subexpression of type: " + expr.getClass());
+		}
+		return res;
+	}
+
 
 	private Expression processLetExpression(final Let sExpr) throws SMTLIBParserException {
-        final List<Variable> parameters = new ArrayList();
-        final Map<Variable, Expression> parameterValues = new HashMap<>();
-        for (final IExpr.IBinding binding : sExpr.bindings()) {
-            final Expression parameterValue = processExpression(binding.expr());
-            final Variable parameter = Variable.create(parameterValue.getType(), binding.parameter().value());
-            parameters.add(parameter);
-            parameterValues.put(parameter, parameterValue);
-        }
-        letContext.addAll(parameters);
-        final Expression mainValue = processExpression(sExpr.expr());
-        letContext.removeAll(parameters);
-        return LetExpression.create(parameters, parameterValues, mainValue);
-    }
-
-    private Expression processFunctionExpression(final FcnExpr sExpr) throws SMTLIBParserException {
-        final String operatorStr = sExpr.head().headSymbol().value();
-
-        final Queue<Expression> convertedArguments = new LinkedList<>();
-        for (final IExpr arg : sExpr.args()) {
-            final Expression jExpr = processArgument(arg);
-            
-            convertedArguments.add(jExpr);
-        }
-        if(operatorStr.equals("re.loop")) {
-        	String tmp = sExpr.toString();
-        	Pattern p = Pattern.compile("[+-]?[0-9]+");
-        	Matcher m = p.matcher(tmp);
-        	SMT smt = new SMT();
-        	IExpr.IFactory efactory = smt.smtConfig.exprFactory;
-        	m.find();
-        	IExpr low = efactory.numeral(m.group());
-        	m.find();
-        	IExpr high = efactory.numeral(m.group());
-        	convertedArguments.add(processArgument(low));
-        	convertedArguments.add(processArgument(high));    	
-        }
-        Expression ret = null;
-        if (operatorStr.equals("not")) {
-            ret = createNegation(convertedArguments);
-        }
-        else {
-            final ExpressionOperator operator =
-                    ExpressionOperator.fromString(FunctionOperatorMap.getjConstraintOperatorName(
-                    operatorStr));
-            ret = createExpression(operator, convertedArguments);
-        }
-        return ret;
-    }
-
-    private Negation createNegation(final Queue<Expression> arguments) throws SMTLIBParserException {
-        if (arguments.size() == 1) {
-            return Negation.create(arguments.poll());
-        } else {
-            throw new SMTLIBParserException("Cannot use more than one Argument in a Negation Expr");
-        }
-    }
-
-    private Expression createExpression(final ExpressionOperator operator, final Queue<Expression> arguments) throws
-            SMTLIBParserNotSupportedException,
-            SMTLIBParserExceptionInvalidMethodCall {
-
-        checkOperatorNotNull(operator);
-        checkImpliesOperatorRequirements(operator, arguments);
-        
-        final ExpressionOperator newOperator = fixExpressionOperator(operator, arguments);
-        if(!(newOperator instanceof BooleanOperator || newOperator instanceof StringBooleanOperator ||newOperator instanceof StringIntegerOperator ||newOperator instanceof StringOperator ||
-        		newOperator instanceof RegExCompoundOperator ||newOperator instanceof RegExOperator || newOperator instanceof RegExBooleanOperator)) {
-        	Expression expr = arguments.poll();
-        	if (arguments.peek() == null) {
-        		if (newOperator == NumericOperator.MINUS && expr != null) {
-        			expr = UnaryMinus.create(expr);
-        		} else {
-        			arguments.add(expr);
-    				throw new SMTLIBParserExceptionInvalidMethodCall("It is strict required, that an operator is " +
-                                                                 "passed together with at least two arguments in the " +
-                                                                 "queue" + ".\n" + "This call got passed operator: " +
-                                                                 operator + " arguments: " + arguments);
-        		}
-        	}
-	        while (arguments.peek() != null) {
-	            final Expression next = arguments.poll();
-            
-	            Tuple<Expression, Expression> t = equalizeTypes(expr, next);
-	            if (newOperator instanceof NumericOperator) {
-	
-	                if (newOperator.equals(NumericOperator.DIV) &&
-	                    (t.left instanceof Constant || t.left instanceof UnaryMinus)) {
-	                    t = new Tuple<>(convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.left), t.right);
-	                }
-	
-	                if (newOperator.equals(NumericOperator.DIV) &&
-	                    (t.right instanceof Constant || t.right instanceof UnaryMinus)) {
-	                    t = new Tuple<>(t.left, convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.right));
-	                }
-	
-	                expr = NumericCompound.create(t.left, (NumericOperator) newOperator, t.right);
-	            } else if (newOperator instanceof LogicalOperator) {
-	                expr = PropositionalCompound.create(t.left, (LogicalOperator) newOperator, t.right);
-	            } else if (newOperator instanceof BitvectorOperator) {
-	                expr = BitvectorExpression.create(t.left, (BitvectorOperator) newOperator, t.right);
-	            } else if (newOperator instanceof NumericComparator) {
-	                expr = NumericBooleanExpression.create(t.left, (NumericComparator) newOperator, t.right);
-	            }
-            } 
-	        return expr;
+		final List<Variable> parameters = new ArrayList();
+		final Map<Variable, Expression> parameterValues = new HashMap<>();
+		for (final IExpr.IBinding binding : sExpr.bindings()) {
+			final Expression parameterValue = processExpression(binding.expr());
+			final Variable parameter = Variable.create(parameterValue.getType(), binding.parameter().value());
+			parameters.add(parameter);
+			parameterValues.put(parameter, parameterValue);
 		}
-        else if (newOperator instanceof BooleanOperator) {
-        	switch((BooleanOperator)newOperator) {
-			case EQ:
-				return BooleanExpression.createEquals(arguments.poll(), arguments.poll());
-			case NEQ:
-				return BooleanExpression.createNotEquals(arguments.poll(),arguments.poll());
-			default:
-				throw new IllegalArgumentException("Unknown BooleanOperator");
-        	}
-        }
-        else if (newOperator instanceof StringOperator) {
-        	switch((StringOperator) newOperator) {
-			case AT:
-				return StringCompoundExpression.createAt(arguments.poll(),arguments.poll());
-			case CONCAT:
-				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()];
-				tmpexpr[0]=arguments.poll();
-				tmpexpr[1]=arguments.poll();
-					for(int i=2; i<tmpexpr.length;i++) {
-						tmpexpr[i]=arguments.poll();
+		letContext.addAll(parameters);
+		final Expression mainValue = processExpression(sExpr.expr());
+		letContext.removeAll(parameters);
+		return LetExpression.create(parameters, parameterValues, mainValue);
+	}
+
+	private Expression processFunctionExpression(final FcnExpr sExpr) throws SMTLIBParserException {
+		final String operatorStr = sExpr.head().headSymbol().value();
+
+		final Queue<Expression> convertedArguments = new LinkedList<>();
+		for (final IExpr arg : sExpr.args()) {
+			final Expression jExpr = processArgument(arg);
+
+			convertedArguments.add(jExpr);
+		}
+		if (operatorStr.equals("re.loop")) {
+			String tmp = sExpr.toString();
+			Pattern p = Pattern.compile("[+-]?[0-9]+");
+			Matcher m = p.matcher(tmp);
+			SMT smt = new SMT();
+			IExpr.IFactory efactory = smt.smtConfig.exprFactory;
+			m.find();
+			IExpr low = efactory.numeral(m.group());
+			m.find();
+			IExpr high = efactory.numeral(m.group());
+			convertedArguments.add(processArgument(low));
+			convertedArguments.add(processArgument(high));
+		}
+		Expression ret = null;
+		if (operatorStr.equals("not")) {
+			ret = createNegation(convertedArguments);
+		} else {
+			final ExpressionOperator operator =
+					ExpressionOperator.fromString(FunctionOperatorMap.getjConstraintOperatorName(operatorStr));
+			ret = createExpression(operator, convertedArguments);
+		}
+		return ret;
+	}
+
+	private Negation createNegation(final Queue<Expression> arguments) throws SMTLIBParserException {
+		if (arguments.size() == 1) {
+			return Negation.create(arguments.poll());
+		} else {
+			throw new SMTLIBParserException("Cannot use more than one Argument in a Negation Expr");
+		}
+	}
+
+	private Expression createExpression(final ExpressionOperator operator, final Queue<Expression> arguments) throws
+			SMTLIBParserNotSupportedException,
+			SMTLIBParserExceptionInvalidMethodCall {
+
+		checkOperatorNotNull(operator);
+		checkImpliesOperatorRequirements(operator, arguments);
+
+		final ExpressionOperator newOperator = fixExpressionOperator(operator, arguments);
+		if (!(newOperator instanceof BooleanOperator || newOperator instanceof StringBooleanOperator ||
+			  newOperator instanceof StringIntegerOperator || newOperator instanceof StringOperator ||
+			  newOperator instanceof RegExCompoundOperator || newOperator instanceof RegExOperator ||
+			  newOperator instanceof RegExBooleanOperator)) {
+			Expression expr = arguments.poll();
+			if (arguments.peek() == null) {
+				if (newOperator == NumericOperator.MINUS && expr != null) {
+					expr = UnaryMinus.create(expr);
+				} else {
+					arguments.add(expr);
+					throw new SMTLIBParserExceptionInvalidMethodCall(
+							"It is strict required, that an operator " + "is " + "passed together with at least two " +
+							"arguments in the " + "queue" + ".\n" + "This call got passed " + "operator: " + operator +
+							" arguments: " + arguments);
+				}
+			}
+			while (arguments.peek() != null) {
+				final Expression next = arguments.poll();
+
+				Tuple<Expression, Expression> t = equalizeTypes(expr, next);
+				if (newOperator instanceof NumericOperator) {
+
+					if (newOperator.equals(NumericOperator.DIV) &&
+						(t.left instanceof Constant || t.left instanceof UnaryMinus)) {
+						t = new Tuple<>(convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.left), t.right);
 					}
-				return StringCompoundExpression.createConcat(tmpexpr);
-			case REPLACE:	
-				return StringCompoundExpression.createReplace(arguments.poll(),arguments.poll(),arguments.poll());
-			case SUBSTR:
-				return  StringCompoundExpression.createSubstring(arguments.poll(),arguments.poll(),arguments.poll());
-			case TOSTR:
-				return  StringCompoundExpression.createToString(arguments.poll());
-			default:
-				throw new IllegalArgumentException("Unknown StringCompoundOperator");
-        	}
-        } else if (newOperator instanceof StringBooleanOperator) {
-        	switch((StringBooleanOperator) newOperator) {
-			case CONTAINS:
-				return StringBooleanExpression.createContains(arguments.poll(),arguments.poll());
-			case EQUALS:
-				return StringBooleanExpression.createEquals(arguments.poll(),arguments.poll());
-			case PREFIXOF:
-				return StringBooleanExpression.createPrefixOf(arguments.poll(),arguments.poll());
-			case SUFFIXOF:
-				return StringBooleanExpression.createPrefixOf(arguments.poll(),arguments.poll());
-			default:
-				throw new IllegalArgumentException("Unknown StringBooleanOperator: " + newOperator);           	
-        	}
-        } else if (newOperator instanceof StringIntegerOperator) {
-        	switch((StringIntegerOperator) newOperator) {
-			case INDEXOF:
-				if(arguments.size()==0) {
-					return StringIntegerExpression.createIndexOf(arguments.poll(),arguments.poll());
-				}
-				else {
-					return StringIntegerExpression.createIndexOf(arguments.poll(),arguments.poll(),arguments.poll());
-				}
-			case LENGTH:
-				return StringIntegerExpression.createLength(arguments.poll());
-			case TOINT:
-				return StringIntegerExpression.createToInt(arguments.poll());
-			default:
-				throw new IllegalArgumentException("Unknown StringIntegerOperator: " + newOperator);
-        	}
-        } else if (newOperator instanceof RegExOperator) {
-        	switch((RegExOperator)newOperator) {
-        	
-			case ALLCHAR:
-				return RegexOperatorExpression.createAllChar();
-			case KLEENEPLUS:
-				return RegexOperatorExpression.createKleenePlus(arguments.poll());
-			case KLEENESTAR:
-				return RegexOperatorExpression.createKleeneStar(arguments.poll());
-			case LOOP:
-				Expression re = arguments.poll();
-				Constant lo = (Constant)arguments.poll();
-				BigInteger lowLoop = (BigInteger)lo.getValue();
-				
-				if(arguments.peek()!=null) {
-					Constant hi = (Constant) arguments.poll();
-					BigInteger highLoop = (BigInteger)hi.getValue();
-					return RegexOperatorExpression.createLoop(re,lowLoop.intValue(),highLoop.intValue());
-				}
-				return RegexOperatorExpression.createLoop(re, (int)lo.getValue());
-			case NOSTR:
-				return RegexOperatorExpression.createNoChar();
-			case OPTIONAL:
-				return RegexOperatorExpression.createOptional(arguments.poll());
-			case RANGE:
-				Constant loR = (Constant) arguments.poll();
-				Constant hiR = (Constant) arguments.poll();
-				String l = (String)loR.getValue();
-				String h = (String)hiR.getValue();
-				char low = l.charAt(0);
-				char high = h.charAt(0);
-				return RegexOperatorExpression.createRange(low,high);
-			case STRTORE:
-				Constant expr= (Constant)arguments.poll();
-				return RegexOperatorExpression.createStrToRe((String)expr.getValue());
-			default:
-				throw new UnsupportedOperationException("Unknown RegexOperator: " + newOperator);
-        	}
-        } else if (newOperator instanceof RegExCompoundOperator) {
-        	switch((RegExCompoundOperator)newOperator) {
-			case CONCAT:
-				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()];
-				tmpexpr[0]=arguments.poll();
-				tmpexpr[1]=arguments.poll();
-					for(int i=2; i<tmpexpr.length;i++) {
-						tmpexpr[i]=arguments.poll();
+
+					if (newOperator.equals(NumericOperator.DIV) &&
+						(t.right instanceof Constant || t.right instanceof UnaryMinus)) {
+						t = new Tuple<>(t.left, convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.right));
 					}
-				return RegexCompoundExpression.createConcat(tmpexpr);
-			case INTERSECTION:
-				return RegexCompoundExpression.createIntersection(arguments.poll(),arguments.poll());
-			case UNION:
-				return RegexCompoundExpression.createUnion(arguments.poll(), arguments.poll());
-			default:
-				throw new UnsupportedOperationException("Unknown RegexCompoundOperator: " + newOperator);
-        	}
-        }else if(newOperator instanceof RegExBooleanOperator) {
-        	switch((RegExBooleanOperator) newOperator) {
-			case STRINRE:
-				return RegExBooleanExpression.create(arguments.poll(),arguments.poll());
-			default:
-				throw new UnsupportedOperationException("Unknown RegexBooleanOperator: " + newOperator);       	
-        	}
-        } else {
-            throw new SMTLIBParserNotSupportedException(
-                    "Cannot convert the following operator class: " + operator.getClass());
-            }
-    }
 
-    private Constant resolveDecimal(final IDecimal decimal) {
-        return Constant.create(BuiltinTypes.DECIMAL, decimal.value());
-    }
+					expr = NumericCompound.create(t.left, (NumericOperator) newOperator, t.right);
+				} else if (newOperator instanceof LogicalOperator) {
+					expr = PropositionalCompound.create(t.left, (LogicalOperator) newOperator, t.right);
+				} else if (newOperator instanceof BitvectorOperator) {
+					expr = BitvectorExpression.create(t.left, (BitvectorOperator) newOperator, t.right);
+				} else if (newOperator instanceof NumericComparator) {
+					expr = NumericBooleanExpression.create(t.left, (NumericComparator) newOperator, t.right);
+				}
+			}
+			return expr;
+		} else if (newOperator instanceof BooleanOperator) {
+			switch ((BooleanOperator) newOperator) {
+				case EQ:
+					return BooleanExpression.createEquals(arguments.poll(), arguments.poll());
+				case NEQ:
+					return BooleanExpression.createNotEquals(arguments.poll(), arguments.poll());
+				default:
+					throw new IllegalArgumentException("Unknown BooleanOperator");
+			}
+		} else if (newOperator instanceof StringOperator) {
+			switch ((StringOperator) newOperator) {
+				case AT:
+					return StringCompoundExpression.createAt(arguments.poll(), arguments.poll());
+				case CONCAT:
+					Expression<?> tmpexpr[] = new Expression<?>[arguments.size()];
+					tmpexpr[0] = arguments.poll();
+					tmpexpr[1] = arguments.poll();
+					for (int i = 2; i < tmpexpr.length; i++) {
+						tmpexpr[i] = arguments.poll();
+					}
+					return StringCompoundExpression.createConcat(tmpexpr);
+				case REPLACE:
+					return StringCompoundExpression.createReplace(arguments.poll(), arguments.poll(),
+																  arguments.poll());
+				case SUBSTR:
+					return StringCompoundExpression.createSubstring(arguments.poll(),
+																	arguments.poll(),
+																	arguments.poll());
+				case TOSTR:
+					return StringCompoundExpression.createToString(arguments.poll());
+				default:
+					throw new IllegalArgumentException("Unknown StringCompoundOperator");
+			}
+		} else if (newOperator instanceof StringBooleanOperator) {
+			switch ((StringBooleanOperator) newOperator) {
+				case CONTAINS:
+					return StringBooleanExpression.createContains(arguments.poll(), arguments.poll());
+				case EQUALS:
+					return StringBooleanExpression.createEquals(arguments.poll(), arguments.poll());
+				case PREFIXOF:
+					return StringBooleanExpression.createPrefixOf(arguments.poll(), arguments.poll());
+				case SUFFIXOF:
+					return StringBooleanExpression.createPrefixOf(arguments.poll(), arguments.poll());
+				default:
+					throw new IllegalArgumentException("Unknown StringBooleanOperator: " + newOperator);
+			}
+		} else if (newOperator instanceof StringIntegerOperator) {
+			switch ((StringIntegerOperator) newOperator) {
+				case INDEXOF:
+					if (arguments.size() == 0) {
+						return StringIntegerExpression.createIndexOf(arguments.poll(), arguments.poll());
+					} else {
+						return StringIntegerExpression.createIndexOf(arguments.poll(),
+																	 arguments.poll(),
+																	 arguments.poll());
+					}
+				case LENGTH:
+					return StringIntegerExpression.createLength(arguments.poll());
+				case TOINT:
+					return StringIntegerExpression.createToInt(arguments.poll());
+				default:
+					throw new IllegalArgumentException("Unknown StringIntegerOperator: " + newOperator);
+			}
+		} else if (newOperator instanceof RegExOperator) {
+			switch ((RegExOperator) newOperator) {
 
-    private <L, R> Tuple<L, R> equalizeTypes(final Expression left, final Expression right) throws
-            SMTLIBParserExceptionInvalidMethodCall {
-        if (left.getType() == right.getType()) {
-            return new Tuple(left, right);
-        } else if (left instanceof UnaryMinus && right instanceof UnaryMinus) {
-            throw new SMTLIBParserExceptionInvalidMethodCall("Cannot equialize Types for two unary minus expressions");
-        } else if ((left instanceof Constant ||
-                    (left instanceof UnaryMinus && ((UnaryMinus) left).getNegated() instanceof Constant)) &&
-                   BuiltinTypes.isBuiltinType(right.getType())) {
-            final Expression constant = convertTypeConstOrMinusConst(right.getType(), left);
-            return new Tuple(constant, right);
-        } else if ((right instanceof Constant ||
-                    right instanceof UnaryMinus && ((UnaryMinus) right).getNegated() instanceof Constant) &&
-                   BuiltinTypes.isBuiltinType(left.getType())) {
-            final Expression constant = convertTypeConstOrMinusConst(left.getType(), right);
-            return new Tuple(left, constant);
-        } else {
-            throw new SMTLIBParserExceptionInvalidMethodCall(
-                    "The expressions are not equal, but they are also not a constant and another BuiltIn " +
-                    "expression type which might easily be type casted. left: " + left.getType() + " and right: " +
-                    right.getType());
-        }
-    }
+				case ALLCHAR:
+					return RegexOperatorExpression.createAllChar();
+				case KLEENEPLUS:
+					return RegexOperatorExpression.createKleenePlus(arguments.poll());
+				case KLEENESTAR:
+					return RegexOperatorExpression.createKleeneStar(arguments.poll());
+				case LOOP:
+					Expression re = arguments.poll();
+					Constant lo = (Constant) arguments.poll();
+					BigInteger lowLoop = (BigInteger) lo.getValue();
 
-    private Expression convertTypeConstOrMinusConst(final Type type, final Expression expr) throws
-            SMTLIBParserExceptionInvalidMethodCall {
-        if (expr instanceof UnaryMinus) {
-            return convertUnaryMinus(type, (UnaryMinus) expr);
-        } else if (expr instanceof Constant) {
-            return convertConstant(type, (Constant) expr);
-        } else {
-            throw new SMTLIBParserExceptionInvalidMethodCall(
-                    "Expected a Constant or Unary Expression, but got" + expr.getClass());
-        }
-    }
+					if (arguments.peek() != null) {
+						Constant hi = (Constant) arguments.poll();
+						BigInteger highLoop = (BigInteger) hi.getValue();
+						return RegexOperatorExpression.createLoop(re, lowLoop.intValue(), highLoop.intValue());
+					}
+					return RegexOperatorExpression.createLoop(re, (int) lo.getValue());
+				case NOSTR:
+					return RegexOperatorExpression.createNoChar();
+				case OPTIONAL:
+					return RegexOperatorExpression.createOptional(arguments.poll());
+				case RANGE:
+					Constant loR = (Constant) arguments.poll();
+					Constant hiR = (Constant) arguments.poll();
+					String l = (String) loR.getValue();
+					String h = (String) hiR.getValue();
+					char low = l.charAt(0);
+					char high = h.charAt(0);
+					return RegexOperatorExpression.createRange(low, high);
+				case STRTORE:
+					Constant expr = (Constant) arguments.poll();
+					return RegexOperatorExpression.createStrToRe((String) expr.getValue());
+				default:
+					throw new UnsupportedOperationException("Unknown RegexOperator: " + newOperator);
+			}
+		} else if (newOperator instanceof RegExCompoundOperator) {
+			switch ((RegExCompoundOperator) newOperator) {
+				case CONCAT:
+					Expression<?> tmpexpr[] = new Expression<?>[arguments.size()];
+					tmpexpr[0] = arguments.poll();
+					tmpexpr[1] = arguments.poll();
+					for (int i = 2; i < tmpexpr.length; i++) {
+						tmpexpr[i] = arguments.poll();
+					}
+					return RegexCompoundExpression.createConcat(tmpexpr);
+				case INTERSECTION:
+					return RegexCompoundExpression.createIntersection(arguments.poll(), arguments.poll());
+				case UNION:
+					return RegexCompoundExpression.createUnion(arguments.poll(), arguments.poll());
+				default:
+					throw new UnsupportedOperationException("Unknown RegexCompoundOperator: " + newOperator);
+			}
+		} else if (newOperator instanceof RegExBooleanOperator) {
+			switch ((RegExBooleanOperator) newOperator) {
+				case STRINRE:
+					return RegExBooleanExpression.create(arguments.poll(), arguments.poll());
+				default:
+					throw new UnsupportedOperationException("Unknown RegexBooleanOperator: " + newOperator);
+			}
+		} else {
+			throw new SMTLIBParserNotSupportedException(
+					"Cannot convert the following operator class: " + operator.getClass());
+		}
+	}
 
-    private UnaryMinus convertUnaryMinus(final Type type, final UnaryMinus unary) {
-        return UnaryMinus.create(convertConstant(type, (Constant) unary.getNegated()));
-    }
+	private Constant resolveDecimal(final IDecimal decimal) {
+		return Constant.create(BuiltinTypes.DECIMAL, decimal.value());
+	}
 
-    private Constant convertConstant(final Type type, final Constant constant) {
-        return Constant.create(type, constant.getValue());
-    }
+	private <L, R> Tuple<L, R> equalizeTypes(final Expression left, final Expression right) throws
+			SMTLIBParserExceptionInvalidMethodCall {
+		if (left.getType() == right.getType()) {
+			return new Tuple(left, right);
+		} else if (left instanceof UnaryMinus && right instanceof UnaryMinus) {
+			throw new SMTLIBParserExceptionInvalidMethodCall("Cannot equialize Types for two unary minus expressions");
+		} else if ((left instanceof Constant ||
+					(left instanceof UnaryMinus && ((UnaryMinus) left).getNegated() instanceof Constant)) &&
+				   BuiltinTypes.isBuiltinType(right.getType())) {
+			final Expression constant = convertTypeConstOrMinusConst(right.getType(), left);
+			return new Tuple(constant, right);
+		} else if ((right instanceof Constant ||
+					right instanceof UnaryMinus && ((UnaryMinus) right).getNegated() instanceof Constant) &&
+				   BuiltinTypes.isBuiltinType(left.getType())) {
+			final Expression constant = convertTypeConstOrMinusConst(left.getType(), right);
+			return new Tuple(left, constant);
+		} else {
+			throw new SMTLIBParserExceptionInvalidMethodCall(
+					"The expressions are not equal, but they are also not a constant and another BuiltIn " +
+					"expression type which might easily be type casted. left: " + left.getType() + " and right: " +
+					right.getType());
+		}
+	}
 
-    private Constant resolveNumeral(final INumeral numeral) {
-        return Constant.create(BuiltinTypes.INTEGER, numeral.value());
-    }
+	private Expression convertTypeConstOrMinusConst(final Type type, final Expression expr) throws
+			SMTLIBParserExceptionInvalidMethodCall {
+		if (expr instanceof UnaryMinus) {
+			return convertUnaryMinus(type, (UnaryMinus) expr);
+		} else if (expr instanceof Constant) {
+			return convertConstant(type, (Constant) expr);
+		} else {
+			throw new SMTLIBParserExceptionInvalidMethodCall(
+					"Expected a Constant or Unary Expression, but got" + expr.getClass());
+		}
+	}
 
-    private Constant resolveStringLiteral(final IStringLiteral stringliteral) {
-    	return Constant.create(BuiltinTypes.STRING, stringliteral.value());
-    }
-    private Variable resolveSymbol(final ISymbol symbol) throws SMTLIBParserExceptionInvalidMethodCall {
+	private UnaryMinus convertUnaryMinus(final Type type, final UnaryMinus unary) {
+		return UnaryMinus.create(convertConstant(type, (Constant) unary.getNegated()));
+	}
 
-    	for (final Variable var : problem.variables) {
-            if (var.getName().equals(symbol.value())) {
-                return var;
-            }
-        }
-        for (final Variable parameter : letContext) {
-            if (parameter.getName().equals(symbol.value())) {
-                return parameter;
-            }
-        }
-        throw new SMTLIBParserExceptionInvalidMethodCall("Cannot parse Symbol: " + symbol);
-    }
+	private Constant convertConstant(final Type type, final Constant constant) {
+		return Constant.create(type, constant.getValue());
+	}
 
-    private <E> Expression<E> successfulArgumentProcessing(final Expression<E> expr, final IExpr arg) throws
-            SMTLIBParserException {
-        if (expr == null) {
-            throw new SMTLIBParserException("Cannot process the following argument: " + arg);
-        }
-        return expr;
-    }
+	private Constant resolveNumeral(final INumeral numeral) {
+		return Constant.create(BuiltinTypes.INTEGER, numeral.value());
+	}
 
-    private boolean checkOperatorNotNull(final ExpressionOperator operator) throws
-            SMTLIBParserExceptionInvalidMethodCall {
-        if (operator == null) {
-            throw new SMTLIBParserExceptionInvalidMethodCall(
-                    "Operator is null. Cannot create Operator dependent Expression!");
-        }
-        return true;
-    }
 
-    private final ExpressionOperator fixExpressionOperator(final ExpressionOperator operator, final Queue<Expression> arguments) {
-    	final Queue<Expression> tmp = new LinkedList<Expression>(arguments);
-    	final StringBooleanOperator newOperator=StringBooleanOperator.EQUALS;
-  
-    	if (operator.equals(NumericComparator.EQ)){   		
-    		Expression left = tmp.poll();
-    		Expression right = tmp.poll();
-    		if (left instanceof StringBooleanExpression || left instanceof StringIntegerExpression ||left instanceof StringCompoundExpression||
-    				right instanceof StringBooleanExpression || right instanceof StringIntegerExpression || right instanceof StringCompoundExpression) {
-    			return newOperator;
-    		}
-    		if (left instanceof Variable<?> || left instanceof Constant<?>) {
-    			if(left.getType() instanceof BuiltinTypes.StringType) {
-    				return newOperator;
-    			}
-    		}
-    		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
-    			if(right.getType() instanceof BuiltinTypes.StringType) {
-    				return newOperator;
-    			}
-    		}
-    		if(right instanceof Negation && ((Negation) right).getNegated() instanceof StringBooleanExpression) {
-    			return newOperator;
-    		}
-    		
-       		if(left instanceof Negation && ((Negation) left).getNegated() instanceof StringBooleanExpression) {
-    			return newOperator;
-    		}
-    		if (left instanceof BooleanExpression ||  right instanceof BooleanExpression) {
-    			return BooleanOperator.EQ;
-    		}
-    		if (left instanceof Variable<?> || left instanceof Constant<?>) {
-    			if(left.getType() instanceof BuiltinTypes.BoolType) {
-    				return BooleanOperator.EQ;
-    			}
-    		}
-    		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
-    			if(right.getType() instanceof BuiltinTypes.BoolType) {
-    				return BooleanOperator.EQ;
-    			}
-    		}
-    		if(right instanceof Negation && ((Negation) right).getNegated() instanceof BooleanExpression) {
-    			return BooleanOperator.EQ;
-    		}
-    		
-       		if(left instanceof Negation && ((Negation) left).getNegated() instanceof BooleanExpression) {
-    			return BooleanOperator.EQ;
-    		}
-       		
-    	} 
-    	
-    	if (operator.equals(NumericComparator.NE)) {
-    		Expression left = tmp.poll();
-    		Expression right = tmp.poll();
-    		if (left instanceof BooleanExpression ||  right instanceof BooleanExpression) {
-    			return BooleanOperator.NEQ;
-    		}
-    		if (left instanceof Variable<?> || left instanceof Constant<?>) {
-    			if(left.getType() instanceof BuiltinTypes.BoolType) {
-    				return BooleanOperator.NEQ;
-    			}
-    		}
-    		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
-    			if(right.getType() instanceof BuiltinTypes.BoolType) {
-    				return BooleanOperator.NEQ;
-    			}
-    		}
-    		if(right instanceof Negation && ((Negation) right).getNegated() instanceof BooleanExpression) {
-    			return BooleanOperator.NEQ;
-    		}
-    		
-       		if(left instanceof Negation && ((Negation) left).getNegated() instanceof BooleanExpression) {
-    			return BooleanOperator.NEQ;
-    		}
-    	}
-    	return operator;
-    }
-    private boolean checkImpliesOperatorRequirements(final ExpressionOperator operator,
-                                                     final Queue<Expression> arguments) throws
-            SMTLIBParserExceptionInvalidMethodCall {
-        if (operator.equals(LogicalOperator.IMPLY)) {
-            if (arguments.size() == 2) {
-                return true;
-            } else {
-                throw new SMTLIBParserExceptionInvalidMethodCall(
-                        "Implies can only work with exactly two arguments, but got: " + arguments);
+	private Constant resolveStringLiteral(final IStringLiteral stringliteral) {
+		return Constant.create(BuiltinTypes.STRING, stringliteral.value());
+	}
 
-            }
-        }
-        return false;
-    }
+	private Variable resolveSymbol(final ISymbol symbol) throws SMTLIBParserExceptionInvalidMethodCall {
+		for (final Variable var : problem.variables) {
+			if (var.getName().equals(symbol.value())) {
+				return var;
+			}
+		}
+		for (final Variable parameter : letContext) {
+			if (parameter.getName().equals(symbol.value())) {
+				return parameter;
+			}
+		}
+		throw new SMTLIBParserExceptionInvalidMethodCall("Cannot parse Symbol: " + symbol);
+	}
+
+	private <E> Expression<E> successfulArgumentProcessing(final Expression<E> expr, final IExpr arg) throws
+			SMTLIBParserException {
+		if (expr == null) {
+			throw new SMTLIBParserException("Cannot process the following argument: " + arg);
+		}
+		return expr;
+	}
+
+	private boolean checkOperatorNotNull(final ExpressionOperator operator) throws
+			SMTLIBParserExceptionInvalidMethodCall {
+		if (operator == null) {
+			throw new SMTLIBParserExceptionInvalidMethodCall(
+					"Operator is null. Cannot create Operator dependent Expression!");
+		}
+		return true;
+	}
+
+	private final ExpressionOperator fixExpressionOperator(final ExpressionOperator operator,
+														   final Queue<Expression> arguments) {
+		final Queue<Expression> tmp = new LinkedList<Expression>(arguments);
+		final StringBooleanOperator newOperator = StringBooleanOperator.EQUALS;
+
+		if (operator.equals(NumericComparator.EQ)) {
+			Expression left = tmp.poll();
+			Expression right = tmp.poll();
+			if (left instanceof StringBooleanExpression || left instanceof StringIntegerExpression ||
+				left instanceof StringCompoundExpression || right instanceof StringBooleanExpression ||
+				right instanceof StringIntegerExpression || right instanceof StringCompoundExpression) {
+				return newOperator;
+			}
+			if (left instanceof Variable<?> || left instanceof Constant<?>) {
+				if (left.getType() instanceof BuiltinTypes.StringType) {
+					return newOperator;
+				}
+			}
+			if (right instanceof Variable<?> || right instanceof Constant<?>) {
+				if (right.getType() instanceof BuiltinTypes.StringType) {
+					return newOperator;
+				}
+			}
+			if (right instanceof Negation && ((Negation) right).getNegated() instanceof StringBooleanExpression) {
+				return newOperator;
+			}
+
+			if (left instanceof Negation && ((Negation) left).getNegated() instanceof StringBooleanExpression) {
+				return newOperator;
+			}
+			if (left instanceof BooleanExpression || right instanceof BooleanExpression) {
+				return BooleanOperator.EQ;
+			}
+			if (left instanceof Variable<?> || left instanceof Constant<?>) {
+				if (left.getType() instanceof BuiltinTypes.BoolType) {
+					return BooleanOperator.EQ;
+				}
+			}
+			if (right instanceof Variable<?> || right instanceof Constant<?>) {
+				if (right.getType() instanceof BuiltinTypes.BoolType) {
+					return BooleanOperator.EQ;
+				}
+			}
+			if (right instanceof Negation && ((Negation) right).getNegated() instanceof BooleanExpression) {
+				return BooleanOperator.EQ;
+			}
+
+			if (left instanceof Negation && ((Negation) left).getNegated() instanceof BooleanExpression) {
+				return BooleanOperator.EQ;
+			}
+
+		}
+
+		if (operator.equals(NumericComparator.NE)) {
+			Expression left = tmp.poll();
+			Expression right = tmp.poll();
+			if (left instanceof BooleanExpression || right instanceof BooleanExpression) {
+				return BooleanOperator.NEQ;
+			}
+			if (left instanceof Variable<?> || left instanceof Constant<?>) {
+				if (left.getType() instanceof BuiltinTypes.BoolType) {
+					return BooleanOperator.NEQ;
+				}
+			}
+			if (right instanceof Variable<?> || right instanceof Constant<?>) {
+				if (right.getType() instanceof BuiltinTypes.BoolType) {
+					return BooleanOperator.NEQ;
+				}
+			}
+			if (right instanceof Negation && ((Negation) right).getNegated() instanceof BooleanExpression) {
+				return BooleanOperator.NEQ;
+			}
+
+			if (left instanceof Negation && ((Negation) left).getNegated() instanceof BooleanExpression) {
+				return BooleanOperator.NEQ;
+			}
+		}
+		return operator;
+	}
+
+	private boolean checkImpliesOperatorRequirements(final ExpressionOperator operator,
+													 final Queue<Expression> arguments) throws
+			SMTLIBParserExceptionInvalidMethodCall {
+		if (operator.equals(LogicalOperator.IMPLY)) {
+			if (arguments.size() == 2) {
+				return true;
+			} else {
+				throw new SMTLIBParserExceptionInvalidMethodCall(
+						"Implies can only work with exactly two arguments, but got: " + arguments);
+
+			}
+		}
+		return false;
+	}
 
 }

@@ -4,7 +4,6 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.BooleanExpression;
 import gov.nasa.jpf.constraints.expressions.LetExpression;
-import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.smtlibUtility.SMTProblem;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
@@ -38,6 +37,7 @@ public class LetExpressionParsingTest {
                 assertEquals(var.getType(), BuiltinTypes.BOOL);
             }
         }
+
         final Expression assertion1 = problem.assertions.get(0);
         assertEquals(assertion1.getClass(),BooleanExpression.class);
         final BooleanExpression cAssertion1 = (BooleanExpression) assertion1;

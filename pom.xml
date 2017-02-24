@@ -25,10 +25,10 @@
     -->
     <groupId>gov.nasa</groupId>
     <artifactId>jconstraints</artifactId>
-    <version>0.9.3-SNAPSHOT</version>
+    <version>0.9.6-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>jConstraints</name>
-    <url>https://github.com/psycopaths/jconstraints</url>
+    <url>https://github.com/tudo-aqua/jconstraints</url>
     <description>A library for modeling expressions and for interacting with constraint solvers
     </description>
 
@@ -62,7 +62,17 @@
         <antlr.version>3.5.2</antlr.version>
         <z3.version>0.9</z3.version>
         <testng.version>6.8</testng.version>
+        <
+        <
+        <
+        <
+        <
+        <
+        < HEAD
         <jsmtlib.version>0.9.10.1</jsmtlib.version>
+        =======
+        <jsmtlib.version>SNAPSHOT</jsmtlib.version>
+        >>>>>>> Add some new features to jConstraints we developed in the last months.
     </properties>
 
     <!--
@@ -137,7 +147,7 @@
         </dependency>
         <dependency>
             <groupId>org</groupId>
-            <artifactId>jsmtlib</artifactId>
+            <artifactId>smtlib</artifactId>
             <version>${jsmtlib.version}</version>
         </dependency>
         <dependency>

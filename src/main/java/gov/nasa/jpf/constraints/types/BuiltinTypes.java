@@ -909,15 +909,15 @@ public abstract class BuiltinTypes {
 			throw new ClassCastException();
 		}
 	}
-	
-	public static final class RegExType extends ConcreteType<String>{
-		RegExType(){
-			super("string",String.class,"",null, new String[] {"string"},String.class);
+
+	public static final class RegExType extends ConcreteType<String> {
+		RegExType() {
+			super("string", String.class, "", null, new String[]{"string"}, String.class);
 		}
 
 		@Override
 		public String cast(Object other) {
-			if(other instanceof String) {
+			if (other instanceof String) {
 				return (String) other;
 			}
 			throw new ClassCastException();
@@ -947,15 +947,16 @@ public abstract class BuiltinTypes {
 		}
 
 		@Override
-		public String parse(final String string){
-			if(string.startsWith("\"") && string.endsWith("\"")) {
-				String parsed = string.substring(1,string.length()-1);
+		public String parse(final String string) {
+			if (string.startsWith("\"") && string.endsWith("\"")) {
+				String parsed = string.substring(1, string.length() - 1);
 				return parsed;
 			}
 			return string;
 		}
 	}
-	public static final RegExType REGEX = new RegExType();;
+
+	public static final RegExType REGEX = new RegExType();
 	public static final StringType STRING = new StringType();
 	public static final BoolType BOOL = new BoolType();
 	public static final BigDecimalType DECIMAL = new BigDecimalType();
@@ -979,8 +980,9 @@ public abstract class BuiltinTypes {
 		}
 	}
 
-	static final Type<?>[] BUILTIN_TYPES =
-			new Type<?>[]{STRING, REGEX,BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8};
+	static final Type<?>[] BUILTIN_TYPES = new Type<?>[]
+
+			{STRING, REGEX, BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8};
 
 	private BuiltinTypes() {
 	}
