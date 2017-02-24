@@ -26,8 +26,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,7 +52,9 @@ public class ConstraintSolverFactory {
 		return ROOT_FACTORY;
 	}
 	
-
+	public static Set<String> getLoadedProviders(){
+		return getRootFactory().providers.keySet();
+	}
 	
 	private final Map<String, ConstraintSolverProvider> providers = new HashMap<String, ConstraintSolverProvider>();
 	private final Properties config = new Properties();

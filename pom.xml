@@ -1,122 +1,151 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- Copyright (C) 2015, United States Government, as represented by the 
+ Copyright (C) 2015, United States Government, as represented by the
  Administrator of the National Aeronautics and Space Administration.
  All rights reserved.
- 
- The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
- platform is licensed under the Apache License, Version 2.0 (the "License"); you 
- may not use this file except in compliance with the License. You may obtain a 
- copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
- 
- Unless required by applicable law or agreed to in writing, software distributed 
- under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+
+ The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ may not use this file except in compliance with the License. You may obtain a
+ copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+ Unless required by applicable law or agreed to in writing, software distributed
+ under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ CONDITIONS OF ANY KIND, either express or implied. See the License for the
  specific language governing permissions and limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<!--
-	================================= PROJECT INFO ==============================	
-	-->
-	<groupId>gov.nasa</groupId>
-	<artifactId>jconstraints</artifactId>
-	<version>0.9.2-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<name>jConstraints</name>
-	<url>https://github.com/psycopaths/jconstraints</url>
-	<description>A library for modeling expressions and for interacting with constraint solvers</description>
+    <!--
+    ================================= PROJECT INFO ==============================
+    -->
+    <groupId>gov.nasa</groupId>
+    <artifactId>jconstraints</artifactId>
+    <version>0.9.6-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>jConstraints</name>
+    <url>https://github.com/tudo-aqua/jconstraints</url>
+    <description>A library for modeling expressions and for interacting with constraint solvers
+    </description>
 
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
-	<issueManagement>
-		<url>https://github.com/psycopaths/jconstraints/issues</url>
-		<system>GitHub Issues</system>
-	</issueManagement>
+    <issueManagement>
+        <url>https://github.com/psycopaths/jconstraints/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
 
-	<scm>
-        <developerConnection>scm:git:https://github.com/psycopaths/jconstraints.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+    <scm>
+        <developerConnection>scm:git:https://github.com/psycopaths/jconstraints.git
+        </developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
 
-	<!--	
-	================================= PROPERTIES ================================
-	-->
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-		<compiler-plugin.version>3.1</compiler-plugin.version>
-		<guava.version>14.0.1</guava.version>
-		<antlr.version>3.5.2</antlr.version>
-		<z3.version>0.9</z3.version>
-		<testng.version>6.8</testng.version>		
-	</properties>
-	
-	<!--	
-	================================= BUILD PLUGINS =============================	
-	-->
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${compiler-plugin.version}</version>
-				<configuration>
-					<fork>true</fork>
-					<meminitial>128m</meminitial>
-					<maxmem>512m</maxmem>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
+    <!--
+    ================================= PROPERTIES ================================
+    -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+        <compiler-plugin.version>3.1</compiler-plugin.version>
+        <guava.version>14.0.1</guava.version>
+        <antlr.version>3.5.2</antlr.version>
+        <z3.version>0.9</z3.version>
+        <testng.version>6.8</testng.version>
+        <jsmtlib.version>SNAPSHOT</jsmtlib.version>
+    </properties>
+
+    <!--
+    ================================= BUILD PLUGINS =============================
+    -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler-plugin.version}</version>
+                <configuration>
+                    <fork>true</fork>
+                    <meminitial>128m</meminitial>
+                    <maxmem>512m</maxmem>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>${maven-release-plugin.version}</version>
             </plugin>
-			<plugin>
-				<groupId>org.antlr</groupId>
-				<artifactId>antlr3-maven-plugin</artifactId>
-				<version>${antlr.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>antlr</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr3-maven-plugin</artifactId>
+                <version>${antlr.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-surefire-plugin</artifactId>-->
+<!--                <version>3.0.0-M3</version>-->
+<!--                <configuration>-->
+<!--                    <parallel>methods</parallel>-->
+<!--                    <threadCount>10</threadCount>-->
+<!--                    <groups>default</groups>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+        </plugins>
+    </build>
 
-	<!--	
-	================================= DEPENDENCIES ==============================	
-	-->
-	<dependencies>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${guava.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr-runtime</artifactId>
-			<version>${antlr.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<version>${testng.version}</version>
-			<scope>test</scope>
-		</dependency>		
-	</dependencies>
+    <!--
+    ================================= DEPENDENCIES ==============================
+    -->
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>${antlr.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org</groupId>
+            <artifactId>smtlib</artifactId>
+            <version>${jsmtlib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

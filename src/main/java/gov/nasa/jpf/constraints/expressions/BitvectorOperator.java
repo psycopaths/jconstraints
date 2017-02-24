@@ -16,7 +16,7 @@
 
 package gov.nasa.jpf.constraints.expressions;
 
-public enum BitvectorOperator {
+public enum BitvectorOperator implements ExpressionOperator{
 
   AND("&"),
   OR("|"),

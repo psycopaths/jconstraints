@@ -21,6 +21,8 @@ package gov.nasa.jpf.constraints.api;
  * Abstract superclass for constraint solvers.
  */
 public abstract class ConstraintSolver {
+
+  protected String name;
   
   /**
    * result returned by a constraint solver
@@ -72,5 +74,8 @@ public abstract class ConstraintSolver {
     //Expression<Boolean> mod = m.apply(f);
     return solve(f, val);
   }
-    
+
+  public String getName() {
+    return name;
+  }
 }

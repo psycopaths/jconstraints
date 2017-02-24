@@ -20,7 +20,7 @@ import gov.nasa.jpf.constraints.api.Variable;
 
 import com.google.common.base.Function;
 
-class RenameVarVisitor extends
+public class RenameVarVisitor extends
     DuplicatingVisitor<Function<String, String>> {
   
   private static final RenameVarVisitor INSTANCE = new RenameVarVisitor();

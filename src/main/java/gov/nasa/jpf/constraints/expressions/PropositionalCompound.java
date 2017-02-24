@@ -16,11 +16,13 @@
 
 package gov.nasa.jpf.constraints.expressions;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import gov.nasa.jpf.constraints.types.Type;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -39,8 +41,12 @@ public class PropositionalCompound extends AbstractBoolExpression {
     this.left = left;
     this.right = right;
   }
-  
 
+  public static PropositionalCompound create(Expression<Boolean> left, LogicalOperator operator, Expression<?> right) {
+    Expression l = left.requireAs(BuiltinTypes.BOOL);
+    Expression r = right.requireAs(BuiltinTypes.BOOL);
+    return new PropositionalCompound(l, operator, r);
+  }
   @Override
   public Boolean evaluate(Valuation values) {
     boolean lv = left.evaluate(values);

@@ -22,9 +22,11 @@ import java.util.Properties;
 
 public class DontKnowSolverProvider implements ConstraintSolverProvider {
 
+    public final static String providerName = "dontKnow";
+
     @Override
     public String[] getNames() {
-        return new String[] {"dontknow"};
+        return new String[] {DontKnowSolverProvider.providerName};
     }
 
     @Override
