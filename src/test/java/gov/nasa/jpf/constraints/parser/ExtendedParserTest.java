@@ -47,10 +47,42 @@ public class ExtendedParserTest {
   
 
   @Test
-  public void variableDeclaration() throws RecognitionException{
+  public void variableDeclarationOfPrimeVariables() throws RecognitionException {
+        String varDeclaration = "declare x:sint8, b:bool, c:sint32";
+        String primeVarDeclaration = "declare x':sint8, b':bool, c':sint32";
+        
+    List<Variable<?>> parsedVar = parser.parseVariableDeclaration(varDeclaration);
+    parsedVar.addAll(parser.parseVariableDeclaration(primeVarDeclaration));
+    assert(parsedVar.contains(x));
+    assert(parsedVar.contains(b));
+    assert(parsedVar.contains(c));
+    
+    Variable xprime, bprime, cprime;
+    xprime = new Variable(BuiltinTypes.SINT8, "x'");
+    bprime = new Variable(BuiltinTypes.BOOL, "b'");
+    cprime = new Variable(BuiltinTypes.SINT32, "c'");
+    assert(parsedVar.contains(xprime));
+    assert(parsedVar.contains(bprime));
+    assert(parsedVar.contains(cprime));
+  }
+
+  @Test
+  public void usingPrimeVariables() throws RecognitionException {
+    String testInput = "declare x:sint32, x':sint32 in x > 5 && x' == 5";
+    Expression parsedRes = parser.parseLogical(testInput);
+    assertEquals(parsedRes.getClass(), PropositionalCompound.class);
+    
+    testInput = "declare x':sint32 in forall (x') : (x' > 5b && (exists (c) : (c > x)))";
+    parsedRes = parser.parseLogical(testInput, new TypeContext(true), vars);
+    
+    assertEquals(QuantifierExpression.class, parsedRes.getClass());
+  }
+
+  @Test
+  public void variableDeclaration() throws RecognitionException {
     String varDeclaration ="declare x:sint8, b:bool, c:sint32";
     
-    List<Variable> parsedVar = parser.parseVariableDeclaration(varDeclaration);
+    List<Variable<?>> parsedVar = parser.parseVariableDeclaration(varDeclaration);
     
     assert(parsedVar.contains(x));
     assert(parsedVar.contains(b));
@@ -58,7 +90,7 @@ public class ExtendedParserTest {
   }
   
   @Test
-  public void andBooleanExpression() throws RecognitionException{
+  public void andBooleanExpression() throws RecognitionException {
     String testString = "declare x:sint8, b:bool, c:sint32 in (c == 5) && (b == false) && (x > c)";
     Expression expr = parser.parseLogical(testString);
     
@@ -71,7 +103,7 @@ public class ExtendedParserTest {
   }
   
   @Test
-  public void orBooleanExpression() throws RecognitionException{
+  public void orBooleanExpression() throws RecognitionException {
     //the 5b forces the parser to interpret 5 of type sint8. Otherwise an
     //undesired castexpression is added...
     String testString = "x + 5b > c || b == false";
@@ -127,7 +159,7 @@ public class ExtendedParserTest {
   }
   
   @Test
-  public void quantifierExpression() throws RecognitionException{
+  public void quantifierExpression() throws RecognitionException {
     String testString = "forall (x) : (x > 5b && (exists (c) : (c > x)))";
     
     Expression expr = parser.parseLogical(testString, new TypeContext(true), vars);
@@ -149,8 +181,14 @@ public class ExtendedParserTest {
   }
   
   @Test(expectedExceptions = {UndeclaredVariableException.class})
-  public void undeclaredVarInQuantifiedExpression() throws RecognitionException{
+  public void undeclaredVarInQuantifiedExpression() throws RecognitionException {
     String testString = "forall (y:sint32) : (exists (a) : (x > 5b && c > 3))";
     Expression expr = parser.parseLogical(testString, new TypeContext(true), vars);
+  }
+  
+  @Test(expectedExceptions = {RecognitionException.class})
+  public void wrongEQ() throws RecognitionException{
+    String testString = "declare x:sint32 in x = 5";
+    Expression expr = parser.parseLogical(testString);
   }
 }

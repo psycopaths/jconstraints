@@ -34,7 +34,7 @@ import org.antlr.runtime.tree.Tree;
 
 public class ParserUtil {
   
-  public static List<Variable> parseVariableDeclaration(String string) throws RecognitionException{
+  public static List<Variable<?>> parseVariableDeclaration(String string) throws RecognitionException{
     ExpressionParser parser = getParser(string);
     Tree ast = parser.start().tree;
     ASTTranslator translator = new ASTTranslator(new TypeContext(true));
@@ -51,6 +51,7 @@ public class ParserUtil {
     Collection<? extends Variable<?>> variables) throws RecognitionException {
     ExpressionParser parser = getParser(string);
     Tree ast = parser.start().tree;
+    System.out.println(ast.toStringTree());
     ASTTranslator translator = new ASTTranslator(types);
     translator.declareVariables(variables);    
     return translator.translateRootLogical(ast);

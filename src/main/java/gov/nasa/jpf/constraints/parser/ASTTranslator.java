@@ -75,6 +75,7 @@ import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.expressions.Quantifier;
 import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
+import static gov.nasa.jpf.constraints.parser.ExpressionLexer.PRIMEID;
 import static gov.nasa.jpf.constraints.parser.ExpressionParser.QUANTIFIER_VAR;
 import static gov.nasa.jpf.constraints.parser.ExpressionParser.QUANTIFIER_VAR_LIST;
 import static gov.nasa.jpf.constraints.parser.ExpressionParser.TYPED_VAR;
@@ -228,6 +229,7 @@ public class ASTTranslator extends TreeVisitor {
       return ExpressionUtil.FALSE;
     case QID:
     case ID:
+    case PRIMEID:
       return (Expression<Boolean>) translateVariable(n);
     }
     System.out.println("invalid Token: " +  n.toStringTree());
@@ -348,6 +350,7 @@ public class ASTTranslator extends TreeVisitor {
     case TYPE_CAST:
       return translateTypeCast(n);
     case ID:
+    case PRIMEID:
     case QID:
       return translateVariable(n);
     case BYTE_LITERAL:
@@ -559,6 +562,7 @@ public class ASTTranslator extends TreeVisitor {
   public String translateIdentifier(Tree n) {
     switch(n.getType()) {
     case ExpressionParser.ID:
+    case ExpressionParser.PRIMEID:
       return n.getText();
     case ExpressionParser.QID:
       String txt = n.getText();

@@ -28,6 +28,23 @@ package gov.nasa.jpf.constraints.parser;
 package gov.nasa.jpf.constraints.parser;
 }
 
+@rulecatch{
+  catch(RecognitionException e){
+    throw e;
+  }
+}
+
+
+@members {
+protected Object recoverFromMismatchedToken(IntStream input,
+                                            int ttype,
+                                            BitSet follow)
+    throws RecognitionException
+{  
+    throw new RecognitionException(input);
+}  
+}
+
 start
 	: (root_lexpression | root_declare_stmt ) EOF!
 	;
@@ -91,7 +108,7 @@ lexpr_xor
 lexpr_unary
 	: LNOT^ lexpr_unary
 	| lexpr_atomic;
-	
+
 lexpr_atomic
 	: (TRUE|FALSE)^
 	| aexpression ((EQ|NE|LE|LT|GE|GT)^ aexpression)?
@@ -147,6 +164,7 @@ aexpr_literal
     
 identifier
 	:	ID^
+	| 	PRIMEID^
 	|	QID^;
         
 typed_var
@@ -273,7 +291,7 @@ fragment SPACE
 
 WS      :   SPACE+ {$channel=HIDDEN;};
 QID  :   QUOTE (options {greedy=false;} : . )* QUOTE;
-    	
+PRIMEID	:	 ID QUOTE+;
 
 
 fragment
