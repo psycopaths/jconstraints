@@ -30,6 +30,7 @@ import gov.nasa.jpf.constraints.expressions.functions.math.axioms.PowProperties;
 import gov.nasa.jpf.constraints.expressions.functions.math.axioms.SinProperties;
 import gov.nasa.jpf.constraints.expressions.functions.math.axioms.SqrtProperties;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
+import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3SolverContext;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import java.util.Properties;
 import junit.framework.Assert;
@@ -130,7 +131,7 @@ public class TrigonometricTest {
         Properties conf = new Properties();
         //conf.setProperty("z3.timeout", "1000");              
         SolverContext ctx = createContext(conf);
-        
+
         SinProperties sin = new SinProperties(10);
         CosProperties cos = new CosProperties(sin);
                 
@@ -139,29 +140,32 @@ public class TrigonometricTest {
 
         Variable x1 = new Variable(BuiltinTypes.DOUBLE, "x1");
         Variable x2 = new Variable(BuiltinTypes.DOUBLE, "x2");
-                
+
         //ctx.add(sin.getRangeBounds());
         //ctx.add(cos.getRangeBounds());
-        
+
         ctx.add(sin.getDomainBounds(x1));
         ctx.add(cos.getDomainBounds(x2));
-        
-        Expression<Boolean> test = new NumericBooleanExpression(new NumericCompound(
-                new FunctionExpression(MathFunctions.SIN, x1), NumericOperator.MINUS, 
-                    new FunctionExpression<>(MathFunctions.COS, x2)),
-                        NumericComparator.EQ, new Constant<>(BuiltinTypes.DOUBLE, 0.0));
-        
+
+        Expression<Boolean> test =
+                new NumericBooleanExpression(new NumericCompound(new FunctionExpression(MathFunctions.SIN, x1),
+                                                                 NumericOperator.MINUS,
+                                                                 new FunctionExpression<>(MathFunctions.COS, x2)),
+                                             NumericComparator.EQ,
+                                             new Constant<>(BuiltinTypes.DOUBLE, 0.0));
+
         ctx.add(test);
-                
+
         Valuation val = new Valuation();
-        Result res = ctx.solve(val);
+        assert (ctx instanceof NativeZ3SolverContext);
+        Result res = ((NativeZ3SolverContext) ctx).approximate(val);
         System.out.println(res + " : " + val);
         System.out.println(test.evaluate(val));
-        System.out.println("sin(x1): " + Math.sin( (Double) val.getValue(x1)));
-        System.out.println("cos(x2): " + Math.cos( (Double) val.getValue(x2)));
-        System.out.println( Math.sin( (Double) val.getValue(x1)) -  Math.cos( (Double) val.getValue(x2)));
+        System.out.println("sin(x1): " + Math.sin((Double) val.getValue(x1)));
+        System.out.println("cos(x2): " + Math.cos((Double) val.getValue(x2)));
+        System.out.println(Math.sin((Double) val.getValue(x1)) - Math.cos((Double) val.getValue(x2)));
         Assert.assertEquals(Result.SAT, res);
-        
+
     }
     
     @Test
@@ -219,22 +223,22 @@ public class TrigonometricTest {
                                         new NumericCompound(c1, NumericOperator.MUL, x3)
                                     ), 
                         NumericOperator.PLUS, zero))),
-                new Constant<>(BuiltinTypes.DOUBLE, 2.0)
-        );
+                new Constant<>(BuiltinTypes.DOUBLE, 2.0));
 
-        
+
         //Constraint: 0.0 == a1
         NumericCompound a1 = new NumericCompound(pow1, NumericOperator.PLUS, pow2);
         Expression<Boolean> test = new NumericBooleanExpression(zero, NumericComparator.EQ, a1);
-        
+
         ctx.add(test);
-                
+
         Valuation val = new Valuation();
-        Result res = ctx.solve(val);
+        assert (ctx instanceof NativeZ3SolverContext);
+        Result res = ((NativeZ3SolverContext) ctx).approximate(val);
         System.out.println(res + " : " + val);
         System.out.println(test.evaluate(val));
-        Assert.assertEquals(Result.SAT, res);        
-        
+        Assert.assertEquals(Result.SAT, res);
+
     }
     
     

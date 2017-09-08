@@ -1,30 +1,22 @@
 /*
- * Copyright (C) 2015, United States Government, as represented by the 
+ * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
  *
- * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
- * platform is licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may obtain a 
- * copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 package gov.nasa.jpf.constraints.solvers.nativez3;
 
 import com.microsoft.z3.ApplyResult;
 import com.microsoft.z3.BoolExpr;
-import gov.nasa.jpf.constraints.api.ConstraintSolver;
-import gov.nasa.jpf.constraints.api.QuantifierEliminator;
-import gov.nasa.jpf.constraints.api.Expression;
-import gov.nasa.jpf.constraints.api.Valuation;
-
-import java.util.Collections;
-import java.util.Map;
-
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Global;
 import com.microsoft.z3.Goal;
@@ -32,171 +24,182 @@ import com.microsoft.z3.Params;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Tactic;
 import com.microsoft.z3.Z3Exception;
+import gov.nasa.jpf.constraints.api.ConstraintSolver;
+import gov.nasa.jpf.constraints.api.Expression;
+import gov.nasa.jpf.constraints.api.QuantifierEliminator;
 import gov.nasa.jpf.constraints.api.Simplifier;
+import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
+
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-public class NativeZ3Solver extends ConstraintSolver
-        implements QuantifierEliminator, Simplifier<Boolean> {
+public class NativeZ3Solver extends ConstraintSolver implements QuantifierEliminator, Simplifier<Boolean> {
 
-  private static final Logger logger = Logger.getLogger("constraints");
-    
-  private Context ctx;
+	private static final Logger logger = Logger.getLogger("constraints");
 
-  private NativeZ3SolverContext defaultContext;
+	private Context ctx;
 
-  private final int timeout;
+	private NativeZ3SolverContext defaultContext;
 
-  private final Map<String, String> options;
+	private final int timeout;
 
-  static {
-    // This has to be set globally
-    // TODO: this should be moved to options as well
-    Global.setParameter("smt.bv.enable_int2bv", "true");
-  }
+	private final Map<String, String> options;
 
-  public NativeZ3Solver() {
-    this(-1, new HashMap<String, String>());
-  }
+	static {
+		// This has to be set globally
+		// TODO: this should be moved to options as well
+		Global.setParameter("smt.bv.enable_int2bv", "true");
+		Global.setParameter("pp.decimal", "true");
+	}
 
-  public NativeZ3Solver(int to, Map<String, String> properties) {
-    this.timeout = to;
-    this.options = properties;
+	public NativeZ3Solver() {
+		this(-1, new HashMap<String, String>());
+	}
 
-    Map<String, String> cfg = Collections.singletonMap("model", "true");
-    for (Entry<String, String> o : options.entrySet()) {
-      Global.setParameter(o.getKey(), o.getValue());
-    }
+	public NativeZ3Solver(final int to, final Map<String, String> properties) {
+		super.name = "Z3";
 
-    try {
-      this.ctx = new Context(cfg);
-      defaultContext = createContext();
-    } catch (Z3Exception ex) {
-      if (ctx != null) {
-        try {
-          //ctx.dispose();
-        } catch (Throwable t) {
-        }
-      }
-      throw new RuntimeException(ex);
-    }
-  }
+		this.timeout = to;
+		this.options = properties;
 
-  Context getContext() {
-    return ctx;
-  }
+		final Map<String, String> cfg = Collections.singletonMap("model", "true");
+		for (final Entry<String, String> o : options.entrySet()) {
+			Global.setParameter(o.getKey(), o.getValue());
+		}
 
-  public void dispose() {
-    defaultContext.dispose();
-    defaultContext = null;
-    //ctx.dispose();
-    ctx = null;
-  }
+		try {
+			this.ctx = new Context(cfg);
+			defaultContext = createContext();
+		}
+		catch (final Z3Exception ex) {
+			if (ctx != null) {
+				try {
+					//ctx.dispose();
+				}
+				catch (final Throwable t) {
+				}
+			}
+			throw new RuntimeException(ex);
+		}
+	}
 
-  protected void finalize() throws Throwable {
-    super.finalize();
-    if (ctx != null) {
-      dispose();
-    }
-  }
+	Context getContext() {
+		return ctx;
+	}
 
-  @Override
-  public Result solve(Expression<Boolean> f, Valuation result) {
-    try {
-      defaultContext.push();
-      defaultContext.add(f);
-      return defaultContext.solve(result);
-    } finally {
-      defaultContext.pop();
-    }
-  }
+	public void dispose() {
+		defaultContext.dispose();
+		defaultContext = null;
+		//ctx.dispose();
+		ctx = null;
+	}
 
-  @Override
-  public NativeZ3SolverContext createContext() {
-    Solver solver = null;
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		if (ctx != null) {
+			dispose();
+		}
+	}
 
-    try {
-      solver = ctx.mkSolver();
-      NativeZ3ExpressionGenerator root;
+	@Override
+	public Result solve(final Expression<Boolean> f, final Valuation result) {
+		try {
+			defaultContext.push();
+			defaultContext.add(f);
+			return defaultContext.solve(result);
+		}
+		finally {
+			defaultContext.pop();
+		}
+	}
 
-      if (timeout > 0) {
-        Params p = ctx.mkParams();
-        //p.add("timeout",timeout);
-        //p.add(":timeout", timeout); 
-        p.add("timeout", timeout);
-        solver.setParameters(p);
-      }
+	@Override
+	public NativeZ3SolverContext createContext() {
+		Solver solver = null;
 
-      root = new NativeZ3ExpressionGenerator(ctx, solver);
+		try {
+			solver = ctx.mkSolver();
+			final NativeZ3ExpressionGenerator root;
 
-      return new NativeZ3SolverContext(solver, root);
-    } catch (Z3Exception ex) {
-      if (solver != null) {
-        try {
-          //solver.dispose();
-        } catch (Throwable t) {
-        }
-      }
-      throw new RuntimeException(ex);
-    }
-  }
+			if (timeout > 0) {
+				final Params p = ctx.mkParams();
+				//p.add("timeout",timeout);
+				//p.add(":timeout", timeout);
+				p.add("timeout", timeout);
+				solver.setParameters(p);
+			}
 
-  @Override
-  public Expression eliminateQuantifiers(Expression<Boolean> expr) {
-    Solver solver = ctx.mkSolver();
-    NativeZ3ExpressionGenerator rootGenerator
-            = new NativeZ3ExpressionGenerator(ctx, solver);
-    Tactic tactic = ctx.mkTactic("qe");
-    //The booleans are model genertation, unsat core, proof generation
-    Goal goal = ctx.mkGoal(true, false, false);
+			root = new NativeZ3ExpressionGenerator(ctx, solver);
 
-    BoolExpr z3Expr = rootGenerator.generateAssertion(expr);
-    goal.add(z3Expr);
+			return new NativeZ3SolverContext(solver, root);
+		}
+		catch (final Z3Exception ex) {
+			if (solver != null) {
+				try {
+					//solver.dispose();
+				}
+				catch (final Throwable t) {
+				}
+			}
+			throw new RuntimeException(ex);
+		}
+	}
 
-    ApplyResult res = tactic.apply(goal);
-    Goal[] subgoals = res.getSubgoals();
-    return convertSubgoals(subgoals);
-  }
-  
-  @Override
-  public Expression<Boolean> simplify(Expression<Boolean> expr) {
-    Solver solver = ctx.mkSolver();
-    NativeZ3ExpressionGenerator rootGenerator
-            = new NativeZ3ExpressionGenerator(ctx, solver);
-    
-    Tactic tactic = ctx.mkTactic("ctx-solver-simplify");
-    Goal goal = ctx.mkGoal(true, false, false);
-    
-    BoolExpr z3Expr = rootGenerator.generateAssertion(expr);
-    goal.add(z3Expr);
-    
-    ApplyResult res = tactic.apply(goal);    
-    if (res.getNumSubgoals() == 1 && 
-            (res.getSubgoals()[0].isDecidedSat() || 
-            res.getSubgoals()[0].isDecidedUnsat())) {
-        
-        logger.warning("Simplification failed.");
-        return expr;
-    }
-    
-    Goal[] subgoals = res.getSubgoals();
-    return convertSubgoals(subgoals);    
-  }
-  
-  private Expression<Boolean> convertSubgoals(Goal[] subgoals) {
-    Expression result = null;
-    NativeZ3TojConstraintConverter converter = new NativeZ3TojConstraintConverter();
-    for (Goal g : subgoals) {
-      BoolExpr[] formulas = g.getFormulas();
-      for (BoolExpr f : formulas) {
-        Expression<Boolean> jConstraintExpr = converter.parse(f);
-        result = (result == null) ? jConstraintExpr
-                : ExpressionUtil.and(result, jConstraintExpr);
-      }
-    }
-    return result;      
-  }
-  
+	@Override
+	public Expression eliminateQuantifiers(final Expression<Boolean> expr) {
+		final Solver solver = ctx.mkSolver();
+		final NativeZ3ExpressionGenerator rootGenerator = new NativeZ3ExpressionGenerator(ctx, solver);
+		final Tactic tactic = ctx.mkTactic("qe");
+		//The booleans are model genertation, unsat core, proof generation
+		final Goal goal = ctx.mkGoal(true, false, false);
+
+		final BoolExpr z3Expr = rootGenerator.generateAssertion(expr);
+		goal.add(z3Expr);
+
+		final ApplyResult res = tactic.apply(goal);
+		final Goal[] subgoals = res.getSubgoals();
+		return convertSubgoals(subgoals);
+	}
+
+	@Override
+	public Expression<Boolean> simplify(final Expression<Boolean> expr) {
+		final Solver solver = ctx.mkSolver();
+		final NativeZ3ExpressionGenerator rootGenerator = new NativeZ3ExpressionGenerator(ctx, solver);
+
+		final Tactic tactic = ctx.mkTactic("ctx-solver-simplify");
+		final Goal goal = ctx.mkGoal(true, false, false);
+
+		final BoolExpr z3Expr = rootGenerator.generateAssertion(expr);
+		goal.add(z3Expr);
+
+		final ApplyResult res = tactic.apply(goal);
+		if (res.getNumSubgoals() == 1 &&
+			(res.getSubgoals()[0].isDecidedSat() || res.getSubgoals()[0].isDecidedUnsat())) {
+
+			logger.warning("Simplification failed.");
+			return expr;
+		}
+
+		final Goal[] subgoals = res.getSubgoals();
+		return convertSubgoals(subgoals);
+	}
+
+	private Expression<Boolean> convertSubgoals(final Goal[] subgoals) {
+		Expression result = null;
+		final NativeZ3TojConstraintConverter converter = new NativeZ3TojConstraintConverter();
+		for (final Goal g : subgoals) {
+			final BoolExpr[] formulas = g.getFormulas();
+			for (final BoolExpr f : formulas) {
+				final Expression<Boolean> jConstraintExpr = converter.parse(f);
+				result = (result == null) ? jConstraintExpr : ExpressionUtil.and(result, jConstraintExpr);
+			}
+		}
+		return result;
+	}
+
 }

@@ -32,7 +32,8 @@ public class NativeZ3SolverProviderLegacy extends NativeZ3SolverProvider {
 
   @Override
   public ConstraintSolver createSolver(Properties config) {
-    logger.warning("Using deprecated solver name 'NativeZ3' might fail in future releases");
+    //TODO: Why should this fail and what is the new name?
+    //logger.warning("Using deprecated solver name 'NativeZ3' might fail in future releases");
     return super.createSolver(config);
   }
 }
