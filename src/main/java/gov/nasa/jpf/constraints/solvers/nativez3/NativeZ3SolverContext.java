@@ -1,16 +1,16 @@
 /*
- * Copyright (C) 2015, United States Government, as represented by the 
+ * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
  *
- * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
- * platform is licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may obtain a 
- * copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 package gov.nasa.jpf.constraints.solvers.nativez3;
@@ -45,19 +45,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class NativeZ3SolverContext extends SolverContext {
-
   private static final Logger logger = Logger.getLogger("constraints");
 
-  private final Deque<NativeZ3ExpressionGenerator> generatorStack
-          = new ArrayDeque<NativeZ3ExpressionGenerator>();
-  private final Deque<Map<String, Variable<?>>> freeVarsStack
-          = new ArrayDeque<Map<String, Variable<?>>>();
+  private final Deque<NativeZ3ExpressionGenerator> generatorStack = new ArrayDeque<>();
+  private final Deque<Expression<Boolean>> expressionStack = new ArrayDeque<>();
+  private final Deque<Map<String, Variable<?>>> freeVarsStack = new ArrayDeque<>();
 
   private Solver solver;
 
-  public NativeZ3SolverContext(Solver solver, NativeZ3ExpressionGenerator rootGenerator) {
+  public NativeZ3SolverContext(final Solver solver, final NativeZ3ExpressionGenerator rootGenerator) {
     this.solver = solver;
     this.generatorStack.push(rootGenerator);
+    this.expressionStack.push(ExpressionUtil.TRUE);
     this.freeVarsStack.push(new HashMap<String, Variable<?>>());
   }
 
@@ -65,56 +64,59 @@ public class NativeZ3SolverContext extends SolverContext {
   public void push() {
     try {
       solver.push();
-      Map<String, Variable<?>> fvMap = freeVarsStack.peek();
+      final Map<String, Variable<?>> fvMap = freeVarsStack.peek();
       generatorStack.push(generatorStack.peek().createChild());
       freeVarsStack.push(new HashMap<String, Variable<?>>(fvMap));
-    } catch (Z3Exception ex) {
+      expressionStack.push(ExpressionUtil.TRUE);
+    }
+    catch (final Z3Exception ex) {
       throw new RuntimeException(ex);
     }
   }
 
   @Override
-  public void pop(int n) {
+  public void pop(final int n) {
     for (int i = 0; i < n; i++) {
-      NativeZ3ExpressionGenerator gen = generatorStack.pop();
+      final NativeZ3ExpressionGenerator gen = generatorStack.pop();
       gen.dispose();
       freeVarsStack.pop();
+      expressionStack.pop();
     }
     try {
       solver.pop(n);
-    } catch (Z3Exception ex) {
+    }
+    catch (final Z3Exception ex) {
       throw new RuntimeException(ex);
     }
   }
 
-  @Override
-  public Result solve(Valuation val) {
+  public Result approximate(final Valuation val) {
     logger.finer("Solving ...");
     try {
-      Status status = solver.check();
+      final Status status = solver.check();
       if (status != Status.SATISFIABLE || val == null) {
         logger.finer("Not satisfiable: " + status);
 
         if (status == Status.UNSATISFIABLE) {
           logger.finest("unsat core: ");
-          for (Expr e : solver.getUnsatCore()) {
+          for (final Expr e : solver.getUnsatCore()) {
             logger.finest("  " + e.getSExpr());
           }
         }
+
         return translateStatus(status);
       }
 
       Model model = solver.getModel();
-//      System.out.println("Model: " + model);
       try {
         if (logger.isLoggable(Level.FINE)) {
-          String modelText = model.toString().replace("\n", ", ").trim();
+          final String modelText = model.toString().replace("\n", ", ").trim();
           logger.fine(modelText);
         }
 
-        NativeZ3ExpressionGenerator gen = generatorStack.peek();
+        final NativeZ3ExpressionGenerator gen = generatorStack.peek();
         if (gen.isTainted(model)) {
-//          model.dispose();
+          //          model.dispose();
           logger.info("Model is tainted, rechecking ...");
           model = gen.recheckUntainted();
           if (model == null) {
@@ -122,73 +124,188 @@ public class NativeZ3SolverContext extends SolverContext {
           }
         }
 
-        Map<String, Variable<?>> freeVars = new HashMap<String, Variable<?>>(freeVarsStack.peek());
-
         // FIXME mi: using origVars here fixes the issue that variables occuring only in the
         //           scope of quantifiers are part of the valuation. Might it break something
         //           else?
-        long max = model.getNumConsts();
-        FuncDecl[] decls = model.getConstDecls();
+        final long max = model.getNumConsts();
+        final FuncDecl[] decls = model.getConstDecls();
         try {
-          for (int i = 0; i < max; i++) {
-            FuncDecl decl = decls[i];
-
-            Symbol sym = null;
-            String text = null;
-            try {
-              sym = decl.getName();
-              text = sym.toString().trim();
-            } finally {
-//              sym.dispose();
-            }
-
-            Variable<?> v = freeVars.get(text);
-            if (v == null) {
-              continue;
-            }
-            freeVars.remove(text);
-
-            AST res = model.getConstInterp(decl);
-            try {
-              String value = res.toString().trim();
-              if (TypeUtil.isRealSort(v) && value.contains("/")) {
-                String[] split = value.split("/");
-                BigDecimal nom = new BigDecimal(split[0].trim());
-                BigDecimal den = new BigDecimal(split[1].trim());
-                BigDecimal quot = nom.divide(den, 10, RoundingMode.FLOOR);
-
-                val.setParsedValue(v, quot.toPlainString());
-              } else {
-                val.setParsedValue(v, value);
-              }
-            } catch (ImpreciseRepresentationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-//              res.dispose();
-            }
+          try {
+            val.putAll(parseModel(model, true));
           }
-        } finally {
+          catch (ImpreciseRepresentationException e) {
+            throw new RuntimeException("Imprecise Representation");
+          }
+
+        }
+        finally {
           for (int i = 0; i < decls.length; i++) {
-//            decls[i].dispose();
+            //            decls[i].dispose();
           }
         }
 
-        for (Variable<?> r : freeVars.values()) {
-          val.setDefaultValue(r);
-        }
 
-      } finally {
-//        model.dispose();
+      }
+      finally {
+        //        model.dispose();
       }
 
       logger.finer("Satisfiable, valuation " + val);
       return Result.SAT;
-    } catch (Z3Exception ex) {
+    }
+    catch (final Z3Exception ex) {
       throw new RuntimeException(ex);
     }
   }
 
+  @Override
+  public Result solve(final Valuation val) {
+    logger.finer("Solving ...");
+    try {
+      final Status status = solver.check();
+      if (status != Status.SATISFIABLE || val == null) {
+        logger.finer("Not satisfiable: " + status);
+
+        if (status == Status.UNSATISFIABLE) {
+          logger.finest("unsat core: ");
+          for (final Expr e : solver.getUnsatCore()) {
+            logger.finest("  " + e.getSExpr());
+          }
+        }
+
+        return translateStatus(status);
+      }
+
+      Model model = solver.getModel();
+      try {
+        if (logger.isLoggable(Level.FINE)) {
+          final String modelText = model.toString().replace("\n", ", ").trim();
+          logger.fine(modelText);
+        }
+
+        final NativeZ3ExpressionGenerator gen = generatorStack.peek();
+        if (gen.isTainted(model)) {
+          //          model.dispose();
+          logger.info("Model is tainted, rechecking ...");
+          model = gen.recheckUntainted();
+          if (model == null) {
+            return Result.DONT_KNOW;
+          }
+        }
+
+        // FIXME mi: using origVars here fixes the issue that variables occuring only in the
+        //           scope of quantifiers are part of the valuation. Might it break something
+        //           else?
+        final long max = model.getNumConsts();
+        final FuncDecl[] decls = model.getConstDecls();
+        try {
+          try {
+            val.putAll(parseModel(model));
+          }
+          catch (ImpreciseRepresentationException e) {
+            Valuation testVal = new Valuation();
+            testVal.putAll(val);
+            try {
+              testVal.putAll(parseModel(model, true));
+              if (validateExpressionStack(testVal)) {
+                val.putAll(testVal, true);
+              } else {
+                throw new ImpreciseRepresentationException("Cannot fix the imprecise " + "Representation");
+              }
+            }
+            catch (ImpreciseRepresentationException e2) {
+              throw new RuntimeException("Imprecise Representation");
+            }
+          }
+
+        }
+        finally {
+          for (int i = 0; i < decls.length; i++) {
+            //            decls[i].dispose();
+          }
+        }
+
+
+      }
+      finally {
+        //        model.dispose();
+      }
+
+      logger.finer("Satisfiable, valuation " + val);
+      return Result.SAT;
+    }
+    catch (final Z3Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  private boolean validateExpressionStack(Valuation val) {
+    Expression<Boolean> combined = ExpressionUtil.and(expressionStack);
+    return combined.evaluate(val);
+  }
+
+  private Valuation parseModel(final Model model) throws ImpreciseRepresentationException {
+    return parseModel(model, false);
+  }
+
+  private Valuation parseModel(final Model model, boolean unsafe) throws ImpreciseRepresentationException {
+    Valuation val = new Valuation();
+
+    final Map<String, Variable<?>> freeVars = new HashMap<>(freeVarsStack.peek());
+    final long max = model.getNumConsts();
+    final FuncDecl[] decls = model.getConstDecls();
+    for (int i = 0; i < max; i++) {
+      final FuncDecl decl = decls[i];
+      Symbol sym = null;
+      String text = null;
+      try {
+        sym = decl.getName();
+        text = sym.toString().trim();
+      }
+      finally {
+        //              sym.dispose();
+      }
+
+      final Variable<?> v = freeVars.get(text);
+      if (v == null) {
+        continue;
+      }
+      freeVars.remove(text);
+
+      final AST res = model.getConstInterp(decl);
+      final String value = res.toString().trim();
+      if (TypeUtil.isRealSort(v) && value.contains("/")) {
+        final String[] split = value.split("/");
+        final BigDecimal nom = new BigDecimal(split[0].trim());
+        final BigDecimal den = new BigDecimal(split[1].trim());
+        final BigDecimal quot = nom.divide(den, 10, RoundingMode.FLOOR);
+        if (unsafe) {
+          val.setUnsafeParsedValue(v, quot.toPlainString());
+        } else {
+          val.setParsedValue(v, quot.toPlainString());
+        }
+      } else {
+        //Z3 might print a question mark at the end of the number, if it is an inexact
+        // representation
+        // and Z3 is aware of the inexact representation. Java cannot handle the question
+        // mark.
+        //TODO: How to do this right.
+        // Z3 return originally: (root-obj (+ (^ x 2) (- 2)) 2) for root of 2.
+        String tmpValue = value.replace("?", "");
+        if (unsafe) {
+          val.setUnsafeParsedValue(v, tmpValue);
+        } else {
+          val.setParsedValue(v, tmpValue);
+        }
+      }
+    }
+    for (final Variable<?> r : freeVars.values()) {
+      val.setDefaultValue(r);
+    }
+    return val;
+  }
+
+  @Override
   public void dispose() {
     while (!generatorStack.isEmpty()) {
       generatorStack.pop().dispose();
@@ -196,13 +313,16 @@ public class NativeZ3SolverContext extends SolverContext {
     freeVarsStack.clear();
 
     try {
-//      solver.dispose();
-    } catch (Z3Exception ex) {
-    } finally {
+      //      solver.dispose();
+    }
+    catch (final Z3Exception ex) {
+    }
+    finally {
       solver = null;
     }
   }
 
+  @Override
   protected void finalize() throws Throwable {
     super.finalize();
 
@@ -212,35 +332,40 @@ public class NativeZ3SolverContext extends SolverContext {
   }
 
   @Override
-  public void add(List<Expression<Boolean>> expressions) {
-    BoolExpr[] exprs = new BoolExpr[expressions.size()];
-    
-    NativeZ3ExpressionGenerator gen = generatorStack.peek();
+  public void add(final List<Expression<Boolean>> expressions) {
+    final BoolExpr[] exprs = new BoolExpr[expressions.size()];
 
-    Map<String, Variable<?>> fvMap = freeVarsStack.peek();
+    final NativeZ3ExpressionGenerator gen = generatorStack.peek();
+
+    final Map<String, Variable<?>> fvMap = freeVarsStack.peek();
+
+    Expression<Boolean> currentExpression = expressionStack.pop();
+    expressionStack.push(ExpressionUtil.and(currentExpression, ExpressionUtil.and(expressions)));
 
     int i = 0;
     try {
-      for (Expression<Boolean> ex : expressions) {
+      for (final Expression<Boolean> ex : expressions) {
         //logger.finer("Checking " + ex);
         exprs[i++] = gen.generateAssertion(ex);
-        Set<Variable<?>> fvs = ExpressionUtil.freeVariables(ex);
-        for (Variable<?> v : fvs) {
+        final Set<Variable<?>> fvs = ExpressionUtil.freeVariables(ex);
+        for (final Variable<?> v : fvs) {
           fvMap.put(v.getName(), v);
         }
       }
 
       solver.add(exprs);
-    } catch (Z3Exception ex) {
+    }
+    catch (final Z3Exception ex) {
       throw new RuntimeException(ex);
-    } finally {
+    }
+    finally {
       // !!! This is a very important corner case. Sometimes, the expression
       // might just be a single boolean variable, WHICH MAY BE PROTECTED!
       gen.safeDispose(exprs);
     }
   }
 
-  private static Result translateStatus(Status status) {
+  private static Result translateStatus(final Status status) {
     switch (status) {
       case SATISFIABLE:
         return Result.SAT;
@@ -253,12 +378,13 @@ public class NativeZ3SolverContext extends SolverContext {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     try {
-      for (BoolExpr e : this.solver.getAssertions()) {
+      for (final BoolExpr e : this.solver.getAssertions()) {
         sb.append(e.getSExpr()).append("\n");
       }
-    } catch (Z3Exception ex) {
+    }
+    catch (final Z3Exception ex) {
       sb.append("Error: ").append(ex.getMessage());
     }
     return sb.toString();

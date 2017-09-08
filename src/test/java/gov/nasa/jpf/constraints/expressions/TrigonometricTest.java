@@ -31,6 +31,7 @@ import gov.nasa.jpf.constraints.expressions.functions.math.axioms.PowProperties;
 import gov.nasa.jpf.constraints.expressions.functions.math.axioms.SinProperties;
 import gov.nasa.jpf.constraints.expressions.functions.math.axioms.SqrtProperties;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
+import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3SolverContext;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import java.util.Properties;
 import junit.framework.Assert;
@@ -122,120 +123,137 @@ public class TrigonometricTest {
         Assert.assertEquals(Result.SAT, res);
         System.out.println(test.evaluate(val));
     }
-    
+
     @Test
-    public void testCoral1() throws ImpreciseDoubleException{
-//        //Constraint: (sin(x1) - cos(x2)) = 0.0 
-//        //        && x1 >= -1 
-//        //        && x2 <= 1
-//        Properties conf = new Properties();
-//        //conf.setProperty("z3.timeout", "1000");              
-//        SolverContext ctx = createContext(conf);
-//        
-//        SinProperties sin = new SinProperties(10);
-//        CosProperties cos = new CosProperties(sin);
-//                
-//        ctx.add(sin.getDefinition());
-//        ctx.add(cos.getDefinition());
-//
-//        Variable<Double> x1 = new Variable<>(BuiltinTypes.DOUBLE, "x1");
-//        Variable<Double> x2 = new Variable<>(BuiltinTypes.DOUBLE, "x2");
-//                
-//        //ctx.add(sin.getRangeBounds());
-//        //ctx.add(cos.getRangeBounds());
-//        
-//        ctx.add(sin.getDomainBounds(x1));
-//        ctx.add(cos.getDomainBounds(x2));
-//        
-//        Expression<Boolean> test = new NumericBooleanExpression(new NumericCompound<>(
-//                new FunctionExpression<>(MathFunctions.SIN, x1), NumericOperator.MINUS, 
-//                    new FunctionExpression<>(MathFunctions.COS, x2)),
-//                        NumericComparator.EQ, new Constant<>(BuiltinTypes.DOUBLE, 0.0));
-//        
-//        ctx.add(test);
-//                
-//        Valuation val = new Valuation();
-//        Result res = ctx.solve(val);
-//        System.out.println(res + " : " + val);
-//        System.out.println(test.evaluate(val));
-//        System.out.println("sin(x1): " + Math.sin( (Double) val.getValue(x1)));
-//        System.out.println("cos(x2): " + Math.cos( (Double) val.getValue(x2)));
-//        System.out.println( Math.sin( (Double) val.getValue(x1)) -  Math.cos( (Double) val.getValue(x2)));
-//        Assert.assertEquals(Result.SAT, res);
-        
+    public void testCoral1() {
+        //Constraint: (sin(x1) - cos(x2)) = 0.0 
+        //        && x1 >= -1 
+        //        && x2 <= 1
+        Properties conf = new Properties();
+        //conf.setProperty("z3.timeout", "1000");              
+        SolverContext ctx = createContext(conf);
+
+        SinProperties sin = new SinProperties(10);
+        CosProperties cos = new CosProperties(sin);
+
+        ctx.add(sin.getDefinition());
+        ctx.add(cos.getDefinition());
+
+        Variable x1 = new Variable(BuiltinTypes.DOUBLE, "x1");
+        Variable x2 = new Variable(BuiltinTypes.DOUBLE, "x2");
+
+        //ctx.add(sin.getRangeBounds());
+        //ctx.add(cos.getRangeBounds());
+
+        ctx.add(sin.getDomainBounds(x1));
+        ctx.add(cos.getDomainBounds(x2));
+
+        Expression<Boolean> test =
+                new NumericBooleanExpression(new NumericCompound(new FunctionExpression(MathFunctions.SIN, x1),
+                                                                 NumericOperator.MINUS,
+                                                                 new FunctionExpression<>(MathFunctions.COS, x2)),
+                                             NumericComparator.EQ,
+                                             new Constant<>(BuiltinTypes.DOUBLE, 0.0));
+
+        ctx.add(test);
+
+        Valuation val = new Valuation();
+        assert (ctx instanceof NativeZ3SolverContext);
+        Result res = ((NativeZ3SolverContext) ctx).approximate(val);
+        System.out.println(res + " : " + val);
+        System.out.println(test.evaluate(val));
+        System.out.println("sin(x1): " + Math.sin((Double) val.getValue(x1)));
+        System.out.println("cos(x2): " + Math.cos((Double) val.getValue(x2)));
+        System.out.println(Math.sin((Double) val.getValue(x1)) - Math.cos((Double) val.getValue(x2)));
+        Assert.assertEquals(Result.SAT, res);
+
     }
-    
+
     @Test
-    public void testCoral2()throws ImpreciseDoubleException {
-//        //Constraint: (sin(x1) - cos(x2)) = 0.0 
-//        //        && x1 >= -1 
-//        //        && x2 <= 1
-//        Properties conf = new Properties();
-//        //conf.setProperty("z3.timeout", "1000");              
-//        SolverContext ctx = createContext(conf);
-//        
-//        PowProperties pow = new PowProperties();
-//        SinProperties sin = new SinProperties(10);
-//        CosProperties cos = new CosProperties(sin);
-//                
-//        ctx.add(pow.getDefinition());
-//        ctx.add(sin.getDefinition());
-//        ctx.add(cos.getDefinition());
-//        
-//        // && c1 == 0.017453292519943295
-//        Constant<Double> c1 = new Constant<>(BuiltinTypes.DOUBLE, 0.017453292519943295);
-//        Constant<Double> zero = new Constant<>(BuiltinTypes.DOUBLE, 0.0);
-//        Variable<Double> x1 = new Variable<>(BuiltinTypes.DOUBLE, "x1");
-//        Variable<Double> x2 = new Variable<>(BuiltinTypes.DOUBLE, "x2");
-//        Variable<Double> x3 = new Variable<>(BuiltinTypes.DOUBLE, "x3");
-//        Variable<Double> x4 = new Variable<>(BuiltinTypes.DOUBLE, "x4");
-//        Variable<Double> x5 = new Variable<>(BuiltinTypes.DOUBLE, "x5");
-//        
-//        // && x5 != 0.0 
-//        ctx.add(new NumericBooleanExpression(x5, NumericComparator.NE, zero));
-//        
-//        
-//        // a1: pow(((x1 * sin(((c1 * x2) - (c1 * x3)))) - (0.0 * x4)), 2.0)
-//        FunctionExpression<Double> pow1 = new FunctionExpression<>(MathFunctions.POW, 
-//                new NumericCompound<>( 
-//                        new NumericCompound<>(
-//                            x1, NumericOperator.MUL, new FunctionExpression<>(MathFunctions.SIN,
-//                                    new NumericCompound<>(
-//                                        new NumericCompound<>(c1, NumericOperator.MUL, x2),
-//                                        NumericOperator.MINUS,
-//                                        new NumericCompound<>(c1, NumericOperator.MUL, x3)
-//                                    ))), 
-//                        NumericOperator.MINUS, 
-//                        new NumericCompound<>(zero, NumericOperator.MUL, x4)),
-//                new Constant<>(BuiltinTypes.DOUBLE, 2.0)
-//        );
-//        
-//        // + pow((x1 * cos((((c1 * x2) - (c1 * x3)) + 0.0))), 2.0) 
-//        FunctionExpression<Double> pow2 = new FunctionExpression<>(MathFunctions.POW, 
-//                new NumericCompound<>(x1, NumericOperator.MUL, new FunctionExpression<>(MathFunctions.COS,
-//                        new NumericCompound<>( 
-//                                    new NumericCompound<>(
-//                                        new NumericCompound<>(c1, NumericOperator.MUL, x2),
-//                                        NumericOperator.MINUS,
-//                                        new NumericCompound<>(c1, NumericOperator.MUL, x3)
-//                                    ), 
-//                        NumericOperator.PLUS, zero))),
-//                new Constant<>(BuiltinTypes.DOUBLE, 2.0)
-//        );
-//
-//        
-//        //Constraint: 0.0 == a1
-//        NumericCompound<Double> a1 = new NumericCompound<>(pow1, NumericOperator.PLUS, pow2);
-//        Expression<Boolean> test = new NumericBooleanExpression(zero, NumericComparator.EQ, a1);
-//        
-//        ctx.add(test);
-//                
-//        Valuation val = new Valuation();
-//        Result res = ctx.solve(val);
-//        System.out.println(res + " : " + val);
-//        System.out.println(test.evaluate(val));
-//        Assert.assertEquals(Result.SAT, res);        
-        
+    public void testCoral2() {
+        //Constraint: (sin(x1) - cos(x2)) = 0.0 
+        //        && x1 >= -1 
+        //        && x2 <= 1
+        Properties conf = new Properties();
+        //conf.setProperty("z3.timeout", "1000");              
+        SolverContext ctx = createContext(conf);
+
+        PowProperties pow = new PowProperties();
+        SinProperties sin = new SinProperties(10);
+        CosProperties cos = new CosProperties(sin);
+
+        ctx.add(pow.getDefinition());
+        ctx.add(sin.getDefinition());
+        ctx.add(cos.getDefinition());
+
+        // && c1 == 0.017453292519943295
+        Constant c1 = new Constant(BuiltinTypes.DOUBLE, 0.017453292519943295);
+        Constant zero = new Constant(BuiltinTypes.DOUBLE, 0.0);
+        Variable x1 = new Variable(BuiltinTypes.DOUBLE, "x1");
+        Variable x2 = new Variable(BuiltinTypes.DOUBLE, "x2");
+        Variable x3 = new Variable(BuiltinTypes.DOUBLE, "x3");
+        Variable x4 = new Variable(BuiltinTypes.DOUBLE, "x4");
+        Variable x5 = new Variable(BuiltinTypes.DOUBLE, "x5");
+
+        // && x5 != 0.0 
+        ctx.add(new NumericBooleanExpression(x5, NumericComparator.NE, zero));
+
+
+        // a1: pow(((x1 * sin(((c1 * x2) - (c1 * x3)))) - (0.0 * x4)), 2.0)
+        FunctionExpression pow1 = new FunctionExpression(MathFunctions.POW,
+                                                         new NumericCompound(new NumericCompound(x1,
+                                                                                                 NumericOperator.MUL,
+                                                                                                 new FunctionExpression<>(
+                                                                                                         MathFunctions.SIN,
+                                                                                                         new NumericCompound(
+                                                                                                                 new NumericCompound(
+                                                                                                                         c1,
+                                                                                                                         NumericOperator.MUL,
+                                                                                                                         x2),
+                                                                                                                 NumericOperator.MINUS,
+                                                                                                                 new NumericCompound(
+                                                                                                                         c1,
+                                                                                                                         NumericOperator.MUL,
+                                                                                                                         x3)))),
+                                                                             NumericOperator.MINUS,
+                                                                             new NumericCompound(zero,
+                                                                                                 NumericOperator.MUL,
+                                                                                                 x4)),
+                                                         new Constant<>(BuiltinTypes.DOUBLE, 2.0));
+
+        // + pow((x1 * cos((((c1 * x2) - (c1 * x3)) + 0.0))), 2.0) 
+        FunctionExpression pow2 = new FunctionExpression(MathFunctions.POW,
+                                                         new NumericCompound(x1,
+                                                                             NumericOperator.MUL,
+                                                                             new FunctionExpression<>(MathFunctions.COS,
+                                                                                                      new NumericCompound(
+                                                                                                              new NumericCompound(
+                                                                                                                      new NumericCompound(
+                                                                                                                              c1,
+                                                                                                                              NumericOperator.MUL,
+                                                                                                                              x2),
+                                                                                                                      NumericOperator.MINUS,
+                                                                                                                      new NumericCompound(
+                                                                                                                              c1,
+                                                                                                                              NumericOperator.MUL,
+                                                                                                                              x3)),
+                                                                                                              NumericOperator.PLUS,
+                                                                                                              zero))),
+                                                         new Constant<>(BuiltinTypes.DOUBLE, 2.0));
+
+
+        //Constraint: 0.0 == a1
+        NumericCompound a1 = new NumericCompound(pow1, NumericOperator.PLUS, pow2);
+        Expression<Boolean> test = new NumericBooleanExpression(zero, NumericComparator.EQ, a1);
+
+        ctx.add(test);
+
+        Valuation val = new Valuation();
+        assert (ctx instanceof NativeZ3SolverContext);
+        Result res = ((NativeZ3SolverContext) ctx).approximate(val);
+        System.out.println(res + " : " + val);
+        System.out.println(test.evaluate(val));
+        Assert.assertEquals(Result.SAT, res);
     }
     
     
