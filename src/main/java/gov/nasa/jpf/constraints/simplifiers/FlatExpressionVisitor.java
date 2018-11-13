@@ -5,6 +5,8 @@ import gov.nasa.jpf.constraints.expressions.*;
 import gov.nasa.jpf.constraints.flattenedExpression.DuplicateFlattenedExpressionVisitor;
 import gov.nasa.jpf.constraints.flattenedExpression.FlatBooleanExpression;
 
+import java.io.IOException;
+
 public class FlatExpressionVisitor<D> extends DuplicateFlattenedExpressionVisitor<D> {
 
     private static FlatExpressionVisitor instance;

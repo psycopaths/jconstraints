@@ -3,9 +3,9 @@ package gov.nasa.jpf.constraints.flattenedExpression;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
 
-public abstract class DuplicateFlattenedExpressionVisitor<D> extends AbstractExpressionVisitor<Expression,D> implements FlattenedExpressionVisitior<Expression,D> {
+public abstract class DuplicateFlattenedExpressionVisitor<D> extends AbstractExpressionVisitor<Expression<Boolean>,D> implements FlattenedExpressionVisitior<Expression<Boolean>,D> {
     @Override
-    public abstract Expression visit(FlatBooleanExpression n, D data);
+    public abstract Expression<Boolean> visit(FlatBooleanExpression n, D data);
 
     @Override
     protected <E> Expression defaultVisit(Expression<E> expression, D data) {
