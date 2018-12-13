@@ -19,7 +19,7 @@ package gov.nasa.jpf.constraints.expressions;
 /**
  * numeric comparator
  */
-public enum NumericComparator {
+public enum NumericComparator implements ExpressionOperator{
 
    EQ("==") { public NumericComparator not() { return NE; } public boolean eval(int cmpResult) { return (cmpResult == 0); }},
    NE("!=") { public NumericComparator not() { return EQ; } public boolean eval(int cmpResult) { return (cmpResult != 0); }},

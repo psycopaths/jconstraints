@@ -19,7 +19,7 @@ package gov.nasa.jpf.constraints.expressions;
 /**
  * operator on numbers
  */
-public enum NumericOperator {
+public enum NumericOperator implements ExpressionOperator {
 
   DIV("/"),
   MUL("*"),

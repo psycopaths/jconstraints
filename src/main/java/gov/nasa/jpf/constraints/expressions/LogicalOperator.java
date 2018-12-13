@@ -19,7 +19,7 @@ package gov.nasa.jpf.constraints.expressions;
 /**
  * operator for logic formulas
  */
-public enum LogicalOperator {
+public enum LogicalOperator implements ExpressionOperator {
 
   AND("&&") { public boolean eval(boolean lv, boolean rv) { return lv && rv; } }, 
   OR("||") { public boolean eval(boolean lv, boolean rv) { return lv || rv; } }, 

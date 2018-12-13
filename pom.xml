@@ -57,7 +57,8 @@
 		<guava.version>14.0.1</guava.version>
 		<antlr.version>3.5.2</antlr.version>
 		<z3.version>0.9</z3.version>
-		<testng.version>6.8</testng.version>		
+		<testng.version>6.8</testng.version>
+		<jsmtlib.version>SNAPSHOT</jsmtlib.version>
 	</properties>
 	
 	<!--	
@@ -110,6 +111,11 @@
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
 			<version>${antlr.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org</groupId>
+			<artifactId>smtlib</artifactId>
+			<version>${jsmtlib.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>
