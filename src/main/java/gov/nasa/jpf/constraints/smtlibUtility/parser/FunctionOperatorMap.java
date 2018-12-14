@@ -7,9 +7,17 @@ import java.util.HashMap;
 
 import static gov.nasa.jpf.constraints.smtlibUtility.parser.Constants.sortInt;
 
+/**
+ * The same function operators are slightly named differently in jConstraints
+ * and SMT-LIB due to historic reasons.
+ * While jConstraints use function operators closer to programming languages
+ * SMT-LIB uses them in the mathematical sense.
+ *
+ * @Author Malte Mues
+ */
 public class FunctionOperatorMap {
     public static FunctionOperatorMap instance;
-    public HashMap<String, Type> typeMap;
+    public HashMap<String, String> typeMap;
 
     public FunctionOperatorMap(){
         typeMap = new HashMap();
@@ -17,7 +25,9 @@ public class FunctionOperatorMap {
     }
 
     public void initializeBasicTypes(){
-        typeMap.put(sortInt.toLowerCase(), BuiltinTypes.INTEGER);
+        typeMap.put("=", "==");
+        typeMap.put("and", "&&");
+        typeMap.put("or", "||");
     }
 
     private static FunctionOperatorMap getInstance(){
@@ -27,7 +37,7 @@ public class FunctionOperatorMap {
         return instance;
     }
 
-    public static Type getType(String symbol){
-        return getInstance().typeMap.get(symbol.toLowerCase());
+    public static String getjConstraintOperatorName(String symbol){
+        return getInstance().typeMap.getOrDefault(symbol.toLowerCase(), symbol);
     }
 }
