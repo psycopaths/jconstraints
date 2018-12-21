@@ -5,8 +5,6 @@ import gov.nasa.jpf.constraints.types.Type;
 
 import java.util.HashMap;
 
-import static gov.nasa.jpf.constraints.smtlibUtility.parser.Constants.sortInt;
-
 /**
  * The same function operators are slightly named differently in jConstraints
  * and SMT-LIB due to historic reasons.

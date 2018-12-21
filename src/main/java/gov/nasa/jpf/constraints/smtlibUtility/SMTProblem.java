@@ -1,6 +1,8 @@
 package gov.nasa.jpf.constraints.smtlibUtility;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
+import gov.nasa.jpf.constraints.api.ConstraintSolver;
+import gov.nasa.jpf.constraints.api.ConstraintSolver.Result;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Variable;

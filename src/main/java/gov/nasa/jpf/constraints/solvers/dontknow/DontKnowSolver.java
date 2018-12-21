@@ -22,6 +22,9 @@ import gov.nasa.jpf.constraints.api.Valuation;
 
 public class DontKnowSolver extends ConstraintSolver {
 
+    public DontKnowSolver(){
+        super.name = "DontKnowSolver";
+    }
     @Override
     public Result solve(Expression<Boolean> f, Valuation result) {
         return Result.DONT_KNOW;
