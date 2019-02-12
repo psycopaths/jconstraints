@@ -28,7 +28,7 @@ public class SMTCommandLine {
             ConstraintSolver.Result result = solver.isSatisfiable(problem.getAllAssertionsAsConjunction());
             System.out.println("The result ist: " + result.name());
         }else{
-            System.out.println("This script exepcts at least one filename to solve.");
+            System.out.println("This script expects at least one filename to solve.");
         }
     }
 }
