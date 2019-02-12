@@ -14,6 +14,7 @@ import org.smtlib.IParser;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -25,16 +26,7 @@ public class SMTLIBParserTest {
 
     @Test
     public void parsingRoundTripPrimeConesTest() throws IOException, SMTLIBParserException, IParser.ParserException {
-        ClassLoader loader = getClass().getClassLoader();
-        File inputFile = new File(loader.getResource("test_inputs/prime_cone_sat_15.smt2").getFile());
-
-        StringBuilder content = new StringBuilder();
-        try (Scanner inputScanner = new Scanner(inputFile)) {
-            while (inputScanner.hasNextLine()) {
-                content.append(inputScanner.nextLine());
-            }
-        }
-        SMTProblem problem = SMTLIBParser.parseSMTProgram(content.toString());
+        SMTProblem problem = parseFile("test_inputs/prime_cone_sat_15.smt2");
 
         assertEquals(problem.variables.size(), 15,
                 "There are 15 variables declared in the original SMT-Problem,"
@@ -71,5 +63,31 @@ public class SMTLIBParserTest {
         assertEquals(leftTarget.getNegated().getClass(), Constant.class);
         Constant v282 = (Constant) leftTarget.getNegated();
         assertEquals(v282.getValue(), BigInteger.valueOf(282));
+    }
+
+    //This test is used for driving the development and the next, that should be enabled an make pass.
+    @Test(enabled=false)
+    public void parsingRoundTripPRP718Test() throws SMTLIBParserException, IParser.ParserException, IOException {
+        SMTProblem problem = parseFile("test_inputs/prp-7-18.smt2");
+
+        assertEquals(problem.variables.size(), 17);
+        assertEquals(problem.assertions.size(), 1);
+
+    }
+    
+    public static SMTProblem parseFile(String ressourceName) throws
+            IOException,
+            SMTLIBParserException,
+            IParser.ParserException {
+        ClassLoader loader = SMTLIBParserTest.class.getClassLoader();
+        File inputFile = new File(loader.getResource(ressourceName).getFile());
+
+        StringBuilder content = new StringBuilder();
+        try (Scanner inputScanner = new Scanner(inputFile)) {
+            while (inputScanner.hasNextLine()) {
+                content.append(inputScanner.nextLine());
+            }
+        }
+        return SMTLIBParser.parseSMTProgram(content.toString());
     }
 }
