@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Scanner;
 
+import static gov.nasa.jpf.constraints.smtlibUtility.parser.Helper.parseFile;
 import static org.testng.Assert.assertEquals;
 
 public class SMTLIBParserTest {
@@ -73,21 +74,5 @@ public class SMTLIBParserTest {
         assertEquals(problem.variables.size(), 17);
         assertEquals(problem.assertions.size(), 1);
 
-    }
-    
-    public static SMTProblem parseFile(String ressourceName) throws
-            IOException,
-            SMTLIBParserException,
-            IParser.ParserException {
-        ClassLoader loader = SMTLIBParserTest.class.getClassLoader();
-        File inputFile = new File(loader.getResource(ressourceName).getFile());
-
-        StringBuilder content = new StringBuilder();
-        try (Scanner inputScanner = new Scanner(inputFile)) {
-            while (inputScanner.hasNextLine()) {
-                content.append(inputScanner.nextLine());
-            }
-        }
-        return SMTLIBParser.parseSMTProgram(content.toString());
     }
 }

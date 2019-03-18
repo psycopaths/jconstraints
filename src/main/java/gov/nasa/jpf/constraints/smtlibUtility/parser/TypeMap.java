@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import static gov.nasa.jpf.constraints.smtlibUtility.parser.Constants.SORT_INT;
 import static gov.nasa.jpf.constraints.smtlibUtility.parser.Constants.SORT_BOOL;
+import static gov.nasa.jpf.constraints.smtlibUtility.parser.Constants.SORT_REAL;
 
 public class TypeMap {
     public static TypeMap instance;
@@ -21,6 +22,7 @@ public class TypeMap {
     public void initializeBasicTypes(){
         typeMap.put(SORT_INT.toLowerCase(), BuiltinTypes.INTEGER);
         typeMap.put(SORT_BOOL.toLowerCase(), BuiltinTypes.BOOL);
+        typeMap.put(SORT_REAL.toLowerCase(), BuiltinTypes.DECIMAL);
     }
 
     private static TypeMap getInstance(){
