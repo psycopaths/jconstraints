@@ -230,6 +230,12 @@ public class SMTLIBParser {
             SMTLIBParserExceptionInvalidMethodCall {
         if (left.getType() == right.getType()) {
             return new Tuple(left, right);
+        } else if (left instanceof Constant && BuiltinTypes.isBuiltinType(right.getType())) {
+            final Constant constant = convertConstant(right.getType(), (Constant) left);
+            return new Tuple(constant, right);
+        } else if (right instanceof Constant && BuiltinTypes.isBuiltinType(left.getType())) {
+            final Constant constant = convertConstant(left.getType(), (Constant) right);
+            return new Tuple(left, constant);
         } else if (left instanceof UnaryMinus && right instanceof UnaryMinus) {
             throw new SMTLIBParserExceptionInvalidMethodCall("Cannot equialize Types for two unary minus expressions");
         } else if (left instanceof UnaryMinus && BuiltinTypes.isBuiltinType(right.getType())) {
@@ -239,18 +245,10 @@ public class SMTLIBParser {
             final UnaryMinus converted = convertUnaryMinus(left.getType(), (UnaryMinus) right);
             return new Tuple(left, converted);
         } else {
-            if (left instanceof Constant && BuiltinTypes.isBuiltinType(right.getType())) {
-                final Constant constant = convertConstant(right.getType(), (Constant) left);
-                return new Tuple(constant, right);
-            } else if (right instanceof Constant && BuiltinTypes.isBuiltinType(left.getType())) {
-                final Constant constant = convertConstant(left.getType(), (Constant) right);
-                return new Tuple(left, constant);
-            } else {
-                throw new SMTLIBParserExceptionInvalidMethodCall(
-                        "The expressions are not equal, but they are also not a constant and another BuiltIn " +
-                        "expression type which might easily be type casted. left: " + left.getType() + " and right: " +
-                        right);
-            }
+            throw new SMTLIBParserExceptionInvalidMethodCall(
+                    "The expressions are not equal, but they are also not a constant and another BuiltIn " +
+                    "expression type which might easily be type casted. left: " + left.getType() + " and right: " +
+                    right);
         }
     }
 

@@ -62,4 +62,17 @@ public class QF_NRA_Test {
         assertEquals(castedAssertStmt.getRight().getType(), BuiltinTypes.DECIMAL);
     }
 
+    @Test
+    public void realParsingMgc02Test() throws SMTLIBParserException, IParser.ParserException, IOException {
+        final SMTProblem problem = parseFile("test_inputs/mgc_02.smt2");
+        assertEquals(problem.assertions.size(), 1);
+        final Expression assertion = problem.assertions.get(0);
+        assertEquals(assertion.getType(), BuiltinTypes.BOOL);
+
+        final Set<Variable<?>> vars = ExpressionUtil.freeVariables(assertion);
+        for (final Variable v : vars) {
+            assertEquals(v.getType(), BuiltinTypes.DECIMAL);
+        }
+
+    }
 }
