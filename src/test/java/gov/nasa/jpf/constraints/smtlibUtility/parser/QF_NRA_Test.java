@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.Set;
 
-import static gov.nasa.jpf.constraints.smtlibUtility.parser.Helper.parseFile;
+import static gov.nasa.jpf.constraints.smtlibUtility.parser.utility.ResourceParsingHelper.parseResourceFile;
 import static org.testng.Assert.assertEquals;
 
 /*
@@ -26,7 +26,7 @@ import static org.testng.Assert.assertEquals;
 public class QF_NRA_Test {
     @Test
     public void realParsingGen09Test() throws SMTLIBParserException, IParser.ParserException, IOException {
-        final SMTProblem problem = parseFile("test_inputs/gen-09.smt2");
+        final SMTProblem problem = parseResourceFile("test_inputs/gen-09.smt2");
 
         final Expression singleExpr = problem.getAllAssertionsAsConjunction();
         final Set<Variable<?>> vars = ExpressionUtil.freeVariables(singleExpr);
@@ -54,7 +54,7 @@ public class QF_NRA_Test {
 
     @Test
     public void realParsingGen14Test() throws SMTLIBParserException, IParser.ParserException, IOException {
-        final SMTProblem problem = parseFile("test_inputs/gen-14.smt2");
+        final SMTProblem problem = parseResourceFile("test_inputs/gen-14.smt2");
         final Expression assertStmt = problem.assertions.get(0);
         assertEquals(assertStmt.getClass(), NumericBooleanExpression.class);
         final NumericBooleanExpression castedAssertStmt = (NumericBooleanExpression) assertStmt;
@@ -64,7 +64,7 @@ public class QF_NRA_Test {
 
     @Test
     public void realParsingMgc02Test() throws SMTLIBParserException, IParser.ParserException, IOException {
-        final SMTProblem problem = parseFile("test_inputs/mgc_02.smt2");
+        final SMTProblem problem = parseResourceFile("test_inputs/mgc_02.smt2");
         assertEquals(problem.assertions.size(), 1);
         final Expression assertion = problem.assertions.get(0);
         assertEquals(assertion.getType(), BuiltinTypes.BOOL);

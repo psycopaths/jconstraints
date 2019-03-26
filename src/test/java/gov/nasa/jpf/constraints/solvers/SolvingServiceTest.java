@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-import static gov.nasa.jpf.constraints.smtlibUtility.parser.Helper.parseFile;
+import static gov.nasa.jpf.constraints.smtlibUtility.parser.utility.ResourceParsingHelper.parseResourceFile;
 import static org.testng.Assert.assertEquals;
 
 /*
@@ -30,53 +30,53 @@ import static org.testng.Assert.assertEquals;
 public class SolvingServiceTest {
 
     @Test(groups = {"testSolver"})
-    public void atLeastZ3available(){
-        SolvingService service = new SolvingService();
+    public void atLeastZ3available() {
+        final SolvingService service = new SolvingService();
         System.out.println(service.supportedSolvers);
-        assert(service.supportedSolvers.contains("Z3") || service.supportedSolvers.contains("NativeZ3"));
+        assert (service.supportedSolvers.contains("Z3") || service.supportedSolvers.contains("NativeZ3"));
     }
 
     @Test(groups = {"testSolver"})
     public void simpleSolving() {
-        SolvingService service = new SolvingService();
-        Variable x = Variable.create(BuiltinTypes.SINT32, "x");
-        Variable y = Variable.create(BuiltinTypes.SINT32, "y");
-        Constant c0 = Constant.create(BuiltinTypes.SINT32, 10);
-        Constant c1 = Constant.create(BuiltinTypes.SINT32, 3);
+        final SolvingService service = new SolvingService();
+        final Variable x = Variable.create(BuiltinTypes.SINT32, "x");
+        final Variable y = Variable.create(BuiltinTypes.SINT32, "y");
+        final Constant c0 = Constant.create(BuiltinTypes.SINT32, 10);
+        final Constant c1 = Constant.create(BuiltinTypes.SINT32, 3);
 
-        NumericBooleanExpression expr1 = NumericBooleanExpression.create(x, NumericComparator.EQ, c0);
-        NumericBooleanExpression expr2 = NumericBooleanExpression.create(y, NumericComparator.EQ, x);
-        NumericBooleanExpression expr3 = NumericBooleanExpression.create(y, NumericComparator.LE, c1);
+        final NumericBooleanExpression expr1 = NumericBooleanExpression.create(x, NumericComparator.EQ, c0);
+        final NumericBooleanExpression expr2 = NumericBooleanExpression.create(y, NumericComparator.EQ, x);
+        final NumericBooleanExpression expr3 = NumericBooleanExpression.create(y, NumericComparator.LE, c1);
 
 
-        ConstraintSolver.Result res = service.solve(ExpressionUtil.and(expr1, expr2, expr3), null);
+        final ConstraintSolver.Result res = service.solve(ExpressionUtil.and(expr1, expr2, expr3), null);
         assertEquals(res, ConstraintSolver.Result.UNSAT);
     }
 
     @Test(groups = {"testSolver"})
     public void solveSMTProblemSATTest() throws SMTLIBParserException, IParser.ParserException, IOException {
-        SMTProblem problem = parseFile("test_inputs/prime_cone_sat_15.smt2");
+        final SMTProblem problem = parseResourceFile("test_inputs/prime_cone_sat_15.smt2");
 
-        SolvingService service = new SolvingService();
-        Result res = service.solve(problem);
+        final SolvingService service = new SolvingService();
+        final Result res = service.solve(problem);
         assertEquals(res, Result.SAT);
     }
 
     @Test(groups = {"testSolver"})
     public void solveSMTProblemUNSATTest() throws SMTLIBParserException, IParser.ParserException, IOException {
-        SMTProblem problem = parseFile("test_inputs/prime_cone_unsat_10.smt2");
+        final SMTProblem problem = parseResourceFile("test_inputs/prime_cone_unsat_10.smt2");
 
-        SolvingService service = new SolvingService();
-        Result res = service.solve(problem);
+        final SolvingService service = new SolvingService();
+        final Result res = service.solve(problem);
         assertEquals(res, Result.UNSAT);
     }
 
     @Test(groups = {"testSolver"})
     public void solveGen09Test() throws SMTLIBParserException, IParser.ParserException, IOException {
-        SMTProblem problem = parseFile("test_inputs/gen-09.smt2");
+        final SMTProblem problem = parseResourceFile("test_inputs/gen-09.smt2");
 
-        SolvingService service = new SolvingService();
-        Result res = service.solve(problem);
+        final SolvingService service = new SolvingService();
+        final Result res = service.solve(problem);
         assertEquals(res, Result.SAT);
     }
 }

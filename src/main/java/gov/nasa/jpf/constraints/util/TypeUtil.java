@@ -1,16 +1,16 @@
 /*
- * Copyright (C) 2015, United States Government, as represented by the 
+ * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
  *
- * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
- * platform is licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may obtain a 
- * copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 
@@ -29,7 +29,7 @@ import java.math.BigInteger;
  * static helpers for dealing with types
  */
 public class TypeUtil {
-  
+
   /**
    * real number value
    */
@@ -43,7 +43,7 @@ public class TypeUtil {
       this.den = den;
       this.pow = pow;
     }
-    
+
     public Real(BigDecimal d) {
       BigInteger power = BigInteger.ZERO;
       BigInteger div = BigInteger.ONE;
@@ -67,21 +67,21 @@ public class TypeUtil {
       this.pow = power;
       this.num = div;
     }
-    
+
     public BigDecimal getDecimalValue() {
       return new BigDecimal(num).divide(new BigDecimal(den)).pow(pow.intValue());
     }
   };
-  
-  
+
+
   public static boolean isBoolSort(Expression<?> expression) {
     return expression.getType().equals(BuiltinTypes.BOOL);
   }
-  
+
   public static boolean isIntSort(Expression<?> expression) {
     return (expression.getType() instanceof IntegerType);
   }
-  
+
   public static boolean isRealSort(Expression<?> expression) {
     return (expression.getType() instanceof RealType);
   }
