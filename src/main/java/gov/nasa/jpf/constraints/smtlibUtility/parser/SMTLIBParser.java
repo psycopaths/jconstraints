@@ -105,6 +105,7 @@ public class SMTLIBParser {
     }
 
     public Expression processAssert(final C_assert cmd) throws SMTLIBParserException {
+        System.out.println("assert: " + cmd);
         final Expression res = processExpression(cmd.expr());
         problem.addAssertion(res);
         return res;
@@ -204,8 +205,19 @@ public class SMTLIBParser {
         }
         while (arguments.peek() != null) {
             final Expression next = arguments.poll();
-            final Tuple<Expression, Expression> t = equalizeTypes(expr, next);
+            Tuple<Expression, Expression> t = equalizeTypes(expr, next);
             if (operator instanceof NumericOperator) {
+
+                if (operator.equals(NumericOperator.DIV) &&
+                    (t.left instanceof Constant || t.left instanceof UnaryMinus)) {
+                    t = new Tuple<>(convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.left), t.right);
+                }
+
+                if (operator.equals(NumericOperator.DIV) &&
+                    (t.right instanceof Constant || t.right instanceof UnaryMinus)) {
+                    t = new Tuple<>(t.left, convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.right));
+                }
+
                 expr = NumericCompound.create(t.left, (NumericOperator) operator, t.right);
             } else if (operator instanceof LogicalOperator) {
                 expr = PropositionalCompound.create(t.left, (LogicalOperator) operator, t.right);
@@ -230,25 +242,33 @@ public class SMTLIBParser {
             SMTLIBParserExceptionInvalidMethodCall {
         if (left.getType() == right.getType()) {
             return new Tuple(left, right);
-        } else if (left instanceof Constant && BuiltinTypes.isBuiltinType(right.getType())) {
-            final Constant constant = convertConstant(right.getType(), (Constant) left);
-            return new Tuple(constant, right);
-        } else if (right instanceof Constant && BuiltinTypes.isBuiltinType(left.getType())) {
-            final Constant constant = convertConstant(left.getType(), (Constant) right);
-            return new Tuple(left, constant);
         } else if (left instanceof UnaryMinus && right instanceof UnaryMinus) {
             throw new SMTLIBParserExceptionInvalidMethodCall("Cannot equialize Types for two unary minus expressions");
-        } else if (left instanceof UnaryMinus && BuiltinTypes.isBuiltinType(right.getType())) {
-            final UnaryMinus converted = convertUnaryMinus(right.getType(), (UnaryMinus) left);
-            return new Tuple(converted, right);
-        } else if (right instanceof UnaryMinus && BuiltinTypes.isBuiltinType(left.getType())) {
-            final UnaryMinus converted = convertUnaryMinus(left.getType(), (UnaryMinus) right);
-            return new Tuple(left, converted);
+        } else if ((left instanceof Constant || left instanceof UnaryMinus) &&
+                   BuiltinTypes.isBuiltinType(right.getType())) {
+            final Expression constant = convertTypeConstOrMinusConst(right.getType(), (Constant) left);
+            return new Tuple(constant, right);
+        } else if ((right instanceof Constant || right instanceof UnaryMinus) &&
+                   BuiltinTypes.isBuiltinType(left.getType())) {
+            final Expression constant = convertTypeConstOrMinusConst(left.getType(), (Constant) right);
+            return new Tuple(left, constant);
         } else {
             throw new SMTLIBParserExceptionInvalidMethodCall(
                     "The expressions are not equal, but they are also not a constant and another BuiltIn " +
                     "expression type which might easily be type casted. left: " + left.getType() + " and right: " +
-                    right);
+                    right.getType());
+        }
+    }
+
+    private Expression convertTypeConstOrMinusConst(final Type type, final Expression expr) throws
+            SMTLIBParserExceptionInvalidMethodCall {
+        if (expr instanceof UnaryMinus) {
+            return convertUnaryMinus(type, (UnaryMinus) expr);
+        } else if (expr instanceof Constant) {
+            return convertConstant(type, (Constant) expr);
+        } else {
+            throw new SMTLIBParserExceptionInvalidMethodCall(
+                    "Expected a Constant or Unary Expression, but got" + expr.getClass());
         }
     }
 
