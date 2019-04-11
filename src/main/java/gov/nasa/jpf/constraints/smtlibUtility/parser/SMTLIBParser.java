@@ -261,13 +261,15 @@ public class SMTLIBParser {
             return new Tuple(left, right);
         } else if (left instanceof UnaryMinus && right instanceof UnaryMinus) {
             throw new SMTLIBParserExceptionInvalidMethodCall("Cannot equialize Types for two unary minus expressions");
-        } else if ((left instanceof Constant || left instanceof UnaryMinus) &&
+        } else if ((left instanceof Constant ||
+                    (left instanceof UnaryMinus && ((UnaryMinus) left).getNegated() instanceof Constant)) &&
                    BuiltinTypes.isBuiltinType(right.getType())) {
-            final Expression constant = convertTypeConstOrMinusConst(right.getType(), (Constant) left);
+            final Expression constant = convertTypeConstOrMinusConst(right.getType(), left);
             return new Tuple(constant, right);
-        } else if ((right instanceof Constant || right instanceof UnaryMinus) &&
+        } else if ((right instanceof Constant ||
+                    right instanceof UnaryMinus && ((UnaryMinus) right).getNegated() instanceof Constant) &&
                    BuiltinTypes.isBuiltinType(left.getType())) {
-            final Expression constant = convertTypeConstOrMinusConst(left.getType(), (Constant) right);
+            final Expression constant = convertTypeConstOrMinusConst(left.getType(), right);
             return new Tuple(left, constant);
         } else {
             throw new SMTLIBParserExceptionInvalidMethodCall(
