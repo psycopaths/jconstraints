@@ -11,12 +11,17 @@ import java.util.Scanner;
 
 public class ResourceParsingHelper {
 
-    public static SMTProblem parseResourceFile(final String ressourceName) throws
+    public static File loadResource(final String resourceName) {
+        final ClassLoader loader = ResourceParsingHelper.class.getClassLoader();
+        return new File(loader.getResource(resourceName).getFile());
+    }
+
+    public static SMTProblem parseResourceFile(final String resourceName) throws
             IOException,
             SMTLIBParserException,
             IParser.ParserException {
         final ClassLoader loader = ResourceParsingHelper.class.getClassLoader();
-        final File inputFile = new File(loader.getResource(ressourceName).getFile());
+        final File inputFile = loadResource(resourceName);
 
         final StringBuilder content = new StringBuilder();
         try (final Scanner inputScanner = new Scanner(inputFile)) {

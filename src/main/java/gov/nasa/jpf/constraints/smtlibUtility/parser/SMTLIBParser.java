@@ -8,6 +8,7 @@ import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.ExpressionOperator;
 import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.expressions.LogicalOperator;
+import gov.nasa.jpf.constraints.expressions.Negation;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
@@ -74,9 +75,10 @@ public class SMTLIBParser {
             SMTLIBParserException {
         final SMT smt = new SMT();
 
-        final ISource toBeParsed =
-                smt.smtConfig.smtFactory.createSource(new CharSequenceReader(new StringReader(input)),
-                                                                         null);
+        final ISource toBeParsed = smt.smtConfig.smtFactory.createSource(new CharSequenceReader(new StringReader(input),
+                                                                                                input.length(),
+                                                                                                100,
+                                                                                                2), null);
         final IParser parser = smt.smtConfig.smtFactory.createParser(smt.smtConfig, toBeParsed);
         final SMTLIBParser smtParser = new SMTLIBParser();
 
@@ -105,7 +107,6 @@ public class SMTLIBParser {
     }
 
     public Expression processAssert(final C_assert cmd) throws SMTLIBParserException {
-        System.out.println("assert: " + cmd);
         final Expression res = processExpression(cmd.expr());
         problem.addAssertion(res);
         return res;
@@ -177,20 +178,36 @@ public class SMTLIBParser {
 
     private Expression processFunctionExpression(final FcnExpr sExpr) throws SMTLIBParserException {
         final String operatorStr = sExpr.head().headSymbol().value();
-        final ExpressionOperator operator =
-                ExpressionOperator.fromString(FunctionOperatorMap.getjConstraintOperatorName(
-                operatorStr));
         final Queue<Expression> convertedArguments = new LinkedList<>();
         for (final IExpr arg : sExpr.args()) {
             final Expression jExpr = processArgument(arg);
             convertedArguments.add(jExpr);
         }
-        return createExpression(operator, convertedArguments);
+
+        Expression ret = null;
+        if (operatorStr.equals("not")) {
+            ret = createNegation(convertedArguments);
+        } else {
+            final ExpressionOperator operator =
+                    ExpressionOperator.fromString(FunctionOperatorMap.getjConstraintOperatorName(
+                    operatorStr));
+            ret = createExpression(operator, convertedArguments);
+        }
+        return ret;
+    }
+
+    private Negation createNegation(final Queue<Expression> arguments) throws SMTLIBParserException {
+        if (arguments.size() == 1) {
+            return Negation.create(arguments.poll());
+        } else {
+            throw new SMTLIBParserException("Cannot use more than one Argument in a Negation Expr");
+        }
     }
 
     private Expression createExpression(final ExpressionOperator operator, final Queue<Expression> arguments) throws
             SMTLIBParserNotSupportedException,
             SMTLIBParserExceptionInvalidMethodCall {
+
         Expression expr = arguments.poll();
         if (arguments.peek() == null) {
             if (operator == NumericOperator.MINUS && expr != null) {
@@ -284,7 +301,7 @@ public class SMTLIBParser {
         return Constant.create(BuiltinTypes.INTEGER, numeral.value());
     }
 
-    private Variable resolveSymbol(final ISymbol symbol) {
+    private Variable resolveSymbol(final ISymbol symbol) throws SMTLIBParserExceptionInvalidMethodCall {
         for (final Variable var : problem.variables) {
             if (var.getName().equals(symbol.value())) {
                 return var;
@@ -295,7 +312,7 @@ public class SMTLIBParser {
                 return parameter;
             }
         }
-        return null;
+        throw new SMTLIBParserExceptionInvalidMethodCall("Cannot parse Symbol: " + symbol);
     }
 
     private <E> Expression<E> successfulArgumentProcessing(final Expression<E> expr, final IExpr arg) throws
