@@ -191,6 +191,9 @@ public class SMTLIBParser {
             final ExpressionOperator operator =
                     ExpressionOperator.fromString(FunctionOperatorMap.getjConstraintOperatorName(
                     operatorStr));
+            if (operator == null) {
+                System.out.println("sExpr: " + sExpr);
+            }
             ret = createExpression(operator, convertedArguments);
         }
         return ret;
@@ -207,6 +210,9 @@ public class SMTLIBParser {
     private Expression createExpression(final ExpressionOperator operator, final Queue<Expression> arguments) throws
             SMTLIBParserNotSupportedException,
             SMTLIBParserExceptionInvalidMethodCall {
+
+        checkOperatorNotNull(operator);
+        checkImpliesOperatorRequirements(operator, arguments);
 
         Expression expr = arguments.poll();
         if (arguments.peek() == null) {
@@ -323,6 +329,30 @@ public class SMTLIBParser {
             throw new SMTLIBParserException("Cannot process the following argument: " + arg);
         }
         return expr;
+    }
+
+    private boolean checkOperatorNotNull(final ExpressionOperator operator) throws
+            SMTLIBParserExceptionInvalidMethodCall {
+        if (operator == null) {
+            throw new SMTLIBParserExceptionInvalidMethodCall(
+                    "Operator is null. Cannot create Operator dependent Expression!");
+        }
+        return true;
+    }
+
+    private boolean checkImpliesOperatorRequirements(final ExpressionOperator operator,
+                                                     final Queue<Expression> arguments) throws
+            SMTLIBParserExceptionInvalidMethodCall {
+        if (operator.equals(LogicalOperator.IMPLY)) {
+            if (arguments.size() == 2) {
+                return true;
+            } else {
+                throw new SMTLIBParserExceptionInvalidMethodCall(
+                        "Implies can only work with exactly two arguments, but got: " + arguments);
+
+            }
+        }
+        return false;
     }
 
 }

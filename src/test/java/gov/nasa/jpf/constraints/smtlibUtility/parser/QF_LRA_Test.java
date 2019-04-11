@@ -48,6 +48,13 @@ public class QF_LRA_Test {
         assertEquals(assertStmt.getType(), BuiltinTypes.BOOL);
     }
 
+    @Test
+    public void realParsingWaterTankTest() throws SMTLIBParserException, IParser.ParserException, IOException {
+        final SMTProblem problem = parseResourceFile("test_inputs/water_tank-node28718.smt2");
+        assertEquals(problem.getAllAssertionsAsConjunction().getClass(), Negation.class);
+        assertEquals(problem.getAllAssertionsAsConjunction().getType(), BuiltinTypes.BOOL);
+    }
+
     /*
      * For some reason, we have encountered a problem, whenever the size of the input buffer used by the
      * CharSequenceReader
