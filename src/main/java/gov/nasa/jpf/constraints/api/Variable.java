@@ -71,8 +71,8 @@ public class Variable<E> extends Expression<E> {
     if(name == null) {
       return false;
     }
-    
-    if(obj.getClass() != Variable.class) {
+
+    if (obj.getClass() != Variable.class && !(obj instanceof Variable)) {
       return false;
     }
     final Variable<?> other = (Variable<?>) obj;
