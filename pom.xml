@@ -62,7 +62,7 @@
         <antlr.version>3.5.2</antlr.version>
         <z3.version>0.9</z3.version>
         <testng.version>6.8</testng.version>
-        <jsmtlib.version>SNAPSHOT</jsmtlib.version>
+        <jsmtlib.version>0.9.10.1</jsmtlib.version>
     </properties>
 
     <!--
@@ -137,7 +137,7 @@
         </dependency>
         <dependency>
             <groupId>org</groupId>
-            <artifactId>smtlib</artifactId>
+            <artifactId>jsmtlib</artifactId>
             <version>${jsmtlib.version}</version>
         </dependency>
         <dependency>
