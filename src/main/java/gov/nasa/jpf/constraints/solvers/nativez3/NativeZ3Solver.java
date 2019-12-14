@@ -62,7 +62,7 @@ public class NativeZ3Solver extends ConstraintSolver
   }
 
   public NativeZ3Solver(int to, Map<String, String> properties) {
-    super.name = "Z3";
+    //super.name = "Z3";
 
     this.timeout = to;
     this.options = properties;
