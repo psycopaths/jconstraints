@@ -19,6 +19,7 @@ import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.parser.ParserUtil;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
@@ -35,7 +36,7 @@ public class ExpressionZ3BVTest {
 
   
   @Test
-  public void expressionTest() throws RecognitionException {
+  public void expressionTest() throws RecognitionException, ImpreciseRepresentationException {
 
     Properties conf = new Properties();    
     conf.setProperty("symbolic.dp","NativeZ3");
