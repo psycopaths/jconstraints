@@ -909,7 +909,46 @@ public abstract class BuiltinTypes {
 			throw new ClassCastException();
 		}
 	}
+	
+	public static final class RegExType extends ConcreteType<String>{
+		RegExType(){
+			super("string",String.class,"",null, new String[] {"string"},String.class);
+		}
 
+		@Override
+		public String cast(Object other) {
+			if(other instanceof String) {
+				return (String) other;
+			}
+			throw new ClassCastException();
+		}
+
+		@Override
+		public String parse(String string) throws ImpreciseRepresentationException {
+			return string;
+		}
+	}
+	
+	public static final class StringType extends ConcreteType<String>{
+		StringType(){
+			super("string",String.class,"",null, new String[] {"string"},String.class);
+		}
+
+		@Override
+		public String cast(Object other) {
+			if(other instanceof String) {
+				return (String) other;
+			}
+			throw new ClassCastException();
+		}
+
+		@Override
+		public String parse(String string) throws ImpreciseRepresentationException {
+			return string;
+		}
+	}
+	
+	public static final StringType STRING = new StringType();
 	public static final BoolType BOOL = new BoolType();
 	public static final BigDecimalType DECIMAL = new BigDecimalType();
 	public static final BigIntegerType INTEGER = new BigIntegerType();
