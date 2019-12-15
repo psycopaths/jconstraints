@@ -947,7 +947,7 @@ public abstract class BuiltinTypes {
 			return string;
 		}
 	}
-	
+	public static final RegExType REGEX = new RegExType();
 	public static final StringType STRING = new StringType();
 	public static final BoolType BOOL = new BoolType();
 	public static final BigDecimalType DECIMAL = new BigDecimalType();
