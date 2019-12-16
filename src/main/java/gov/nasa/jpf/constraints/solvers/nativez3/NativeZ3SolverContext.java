@@ -20,6 +20,7 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import gov.nasa.jpf.constraints.util.TypeUtil;
 
@@ -161,7 +162,10 @@ public class NativeZ3SolverContext extends SolverContext {
               } else {
                 val.setParsedValue(v, value);
               }
-            } finally {
+            } catch (ImpreciseRepresentationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
 //              res.dispose();
             }
           }
