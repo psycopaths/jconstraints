@@ -924,7 +924,7 @@ public abstract class BuiltinTypes {
 		}
 
 		@Override
-		public String parse(String string) throws ImpreciseRepresentationException {
+		public String parse(String string){
 			return string;
 		}
 	}
@@ -943,7 +943,7 @@ public abstract class BuiltinTypes {
 		}
 
 		@Override
-		public String parse(String string) throws ImpreciseRepresentationException {
+		public String parse(String string){
 			return string;
 		}
 	}
@@ -964,7 +964,7 @@ public abstract class BuiltinTypes {
 		if (aType instanceof BoolType || aType instanceof BigDecimalType || aType instanceof BigIntegerType ||
 			aType instanceof DoubleType || aType instanceof FloatType || aType instanceof SInt64Type ||
 			aType instanceof SInt32Type || aType instanceof SInt16Type || aType instanceof UInt16Type ||
-			aType instanceof SInt8Type) {
+			aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType) {
 			return true;
 		} else {
 			return false;
@@ -972,7 +972,7 @@ public abstract class BuiltinTypes {
 	}
 
 	static final Type<?>[] BUILTIN_TYPES =
-			new Type<?>[]{BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8};
+			new Type<?>[]{STRING, REGEX,BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8};
 
 	private BuiltinTypes() {
 	}
