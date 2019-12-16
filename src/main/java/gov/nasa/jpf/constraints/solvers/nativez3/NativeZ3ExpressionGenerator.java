@@ -29,6 +29,7 @@ import gov.nasa.jpf.constraints.expressions.NumericCompound;
 import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
+import gov.nasa.jpf.constraints.expressions.RegExBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.types.BVIntegerType;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
@@ -58,7 +59,9 @@ import com.microsoft.z3.FuncDecl;
 
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.Model;
+import com.microsoft.z3.ReExpr;
 import com.microsoft.z3.RealExpr;
+import com.microsoft.z3.SeqExpr;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Sort;
 import com.microsoft.z3.Status;
@@ -126,6 +129,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	}
 
 	
+	
+
 	/* (non-Javadoc)
    * @see gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor#visit(gov.nasa.jpf.constraints.api.Variable, java.lang.Object)
    */
@@ -143,6 +148,10 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
     try {
       if(type.equals(BuiltinTypes.BOOL))
         return ctx.mkBool(((Boolean)c.getValue()).booleanValue());
+      if(type.equals(BuiltinTypes.REGEX))
+    	  return ctx.mkToRe(ctx.mkString((String)c.getValue()));
+      if(type.equals(BuiltinTypes.STRING))
+    	  return ctx.mkString((String)c.getValue());
       if(type instanceof BVIntegerType) {
         BVIntegerType<? super E> bvt = (BVIntegerType<? super E>)type;
         return ctx.mkBV(c.getValue().toString(), bvt.getNumBits());
@@ -250,6 +259,20 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
     }    
   }
   
+	public Expr visit(RegExBooleanExpression n, Void data) {
+		Expr regex = null, string= null;
+		try {
+			regex = visit(n.getRegex(),null);
+			string = visit(n.getString(),null);
+			BoolExpr result = ctx.mkInRe((SeqExpr)string, (ReExpr)regex);
+			return result;
+		}
+		catch (Z3Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	
   /* (non-Javadoc)
    * @see gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions.NumericBooleanExpression, java.lang.Object)
    */
