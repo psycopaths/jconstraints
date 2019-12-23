@@ -259,6 +259,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
     }    
   }
   
+  	@Override
 	public Expr visit(RegExBooleanExpression n, Void data) {
 		Expr regex = null, string= null;
 		try {
@@ -279,7 +280,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
   @Override
   public Expr visit(
       NumericBooleanExpression n, Void data) {
-    
+
     Expr left = null, right = null;
     BoolExpr tmpEq = null;
     try {

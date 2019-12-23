@@ -215,7 +215,7 @@ public class NativeZ3SolverContext extends SolverContext {
   @Override
   public void add(List<Expression<Boolean>> expressions) {
     BoolExpr[] exprs = new BoolExpr[expressions.size()];
-
+    
     NativeZ3ExpressionGenerator gen = generatorStack.peek();
 
     Map<String, Variable<?>> fvMap = freeVarsStack.peek();

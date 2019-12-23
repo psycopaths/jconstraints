@@ -21,7 +21,6 @@ import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.QuantifierEliminator;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Valuation;
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -146,7 +145,7 @@ public class NativeZ3Solver extends ConstraintSolver
   }
 
   @Override
-  public Expression eliminateQuantifiers(Expression<Boolean> expr) {
+  public Expression<?> eliminateQuantifiers(Expression<Boolean> expr) {
     Solver solver = ctx.mkSolver();
     NativeZ3ExpressionGenerator rootGenerator
             = new NativeZ3ExpressionGenerator(ctx, solver);
@@ -188,7 +187,7 @@ public class NativeZ3Solver extends ConstraintSolver
   }
   
   private Expression<Boolean> convertSubgoals(Goal[] subgoals) {
-    Expression result = null;
+    Expression<Boolean> result = null;
     NativeZ3TojConstraintConverter converter = new NativeZ3TojConstraintConverter();
     for (Goal g : subgoals) {
       BoolExpr[] formulas = g.getFormulas();
