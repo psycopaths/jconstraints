@@ -1,6 +1,7 @@
 package gov.nasa.jpf.constraints.expressions;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import gov.nasa.jpf.constraints.api.Expression;
@@ -8,6 +9,7 @@ import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import gov.nasa.jpf.constraints.types.NumericType;
 
 public class RegExBooleanExpression extends AbstractBoolExpression {
 	public static RegExBooleanExpression create (Expression<?> regex,Expression<?> string) {
@@ -29,44 +31,50 @@ public class RegExBooleanExpression extends AbstractBoolExpression {
 	}
 	@Override
 	public Boolean evaluate(Valuation values) {
-		// TODO Auto-generated method stub
+		//throw new UnsupportedOperationException();
 		return null;
 	}
 
-	@Override
-	public void collectFreeVariables(Collection<? super Variable<?>> variables) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
-		// TODO Auto-generated method stub
-		return null;
+		return visitor.visit(this, data);
+		
 	}
 
 	@Override
 	public Expression<?>[] getChildren() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Expression[]{regex, string};
 	}
 
 	@Override
 	public Expression<?> duplicate(Expression<?>[] newChildren) {
-		// TODO Auto-generated method stub
-		return null;
+		assert newChildren.length == 2;
+	    Expression<?> newLeft = newChildren[0], newRight = newChildren[1];
+	    if(regex == newLeft && string == newRight)
+	      return this;
+	    return new RegExBooleanExpression(newLeft,newRight);
 	}
 
 	@Override
 	public void print(Appendable a, int flags) throws IOException {
-		// TODO Auto-generated method stub
+		a.append('(');
+		string.print(a, flags);
+		a.append(" MATCHES: ");
+		regex.print(a,flags);
+		a.append(')');
 
 	}
 
 	@Override
 	public void printMalformedExpression(Appendable a, int flags) throws IOException {
-		// TODO Auto-generated method stub
+		//throw new UnsupportedOperationException();
 
+	}
+
+	@Override
+	public void collectFreeVariables(Collection<? super Variable<?>> variables) {
+		// TODO Auto-generated method stub
 	}
 	
 

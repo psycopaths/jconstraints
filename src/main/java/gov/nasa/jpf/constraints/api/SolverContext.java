@@ -45,6 +45,7 @@ public abstract class SolverContext {
 	@SafeVarargs
 	public final void add(Expression<Boolean> ...expressions) {
 		add(Arrays.asList(expressions));
+		
 	}
 	
 	public abstract void add(List<Expression<Boolean>> expressions);

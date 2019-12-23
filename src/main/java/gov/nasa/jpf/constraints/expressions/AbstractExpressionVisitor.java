@@ -51,6 +51,10 @@ public abstract class AbstractExpressionVisitor<R,D> implements ExpressionVisito
   public <E>
   R visit(NumericBooleanExpression n, D data) { return defaultVisit(n, data); }
   
+  @Override
+  public <E>
+  R visit(RegExBooleanExpression n, D data) {return defaultVisit(n,data);}
+  
   /* (non-Javadoc)
    * @see gov.nasa.jpf.constraints.api.ExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions.CastExpression, D)
    */
@@ -115,7 +119,6 @@ public abstract class AbstractExpressionVisitor<R,D> implements ExpressionVisito
   
   
   protected <E> R defaultVisit(Expression<E> expression, D data) {
-    //System.err.println("Visit: " + expression);
     throw new UnsupportedOperationException();
   }
 
