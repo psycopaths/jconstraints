@@ -12,22 +12,22 @@ import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.NumericType;
 
 public class RegExBooleanExpression extends AbstractBoolExpression {
-	public static RegExBooleanExpression create (Expression<?> regex,Expression<?> string) {
-		return new RegExBooleanExpression(regex,string);
+	public static RegExBooleanExpression create (Expression<?> left,Expression<?> right) {
+		return new RegExBooleanExpression(left,right);
 	}
-	private final Expression<?> regex;
-	private final Expression<?> string;
-	public RegExBooleanExpression(Expression<?> regex,Expression<?> string) {
-		this.regex=regex;
-		this.string=string;
-	}
-	
-	public Expression<?> getRegex() {
-	    return this.regex;
+	private final Expression<?> left;
+	private final Expression<?> right;
+	public RegExBooleanExpression(Expression<?> left,Expression<?> right) {
+		this.left=left;
+		this.right=right;
 	}
 	
-	public Expression<?> getString(){
-		return this.string;
+	public Expression<?> getLeft() {
+	    return this.left;
+	}
+	
+	public Expression<?> getRight(){
+		return this.right;
 	}
 	@Override
 	public Boolean evaluate(Valuation values) {
@@ -38,20 +38,19 @@ public class RegExBooleanExpression extends AbstractBoolExpression {
 
 	@Override
 	public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
-		return visitor.visit(this, data);
-		
+		return visitor.visit(this, data);		
 	}
 
 	@Override
 	public Expression<?>[] getChildren() {
-		return new Expression[]{regex, string};
+		return new Expression[]{left, right};
 	}
 
 	@Override
 	public Expression<?> duplicate(Expression<?>[] newChildren) {
 		assert newChildren.length == 2;
 	    Expression<?> newLeft = newChildren[0], newRight = newChildren[1];
-	    if(regex == newLeft && string == newRight)
+	    if(left == newLeft && right == newRight)
 	      return this;
 	    return new RegExBooleanExpression(newLeft,newRight);
 	}
@@ -59,9 +58,9 @@ public class RegExBooleanExpression extends AbstractBoolExpression {
 	@Override
 	public void print(Appendable a, int flags) throws IOException {
 		a.append('(');
-		string.print(a, flags);
+		right.print(a, flags);
 		a.append(" MATCHES: ");
-		regex.print(a,flags);
+		left.print(a,flags);
 		a.append(')');
 
 	}
@@ -74,7 +73,8 @@ public class RegExBooleanExpression extends AbstractBoolExpression {
 
 	@Override
 	public void collectFreeVariables(Collection<? super Variable<?>> variables) {
-		// TODO Auto-generated method stub
+	    this.left.collectFreeVariables(variables);
+	    this.right.collectFreeVariables(variables);
 	}
 	
 

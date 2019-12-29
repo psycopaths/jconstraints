@@ -27,6 +27,8 @@ import gov.nasa.jpf.constraints.expressions.NumericCompound;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
 import gov.nasa.jpf.constraints.expressions.RegExBooleanExpression;
+import gov.nasa.jpf.constraints.expressions.RegexCompoundExpression;
+import gov.nasa.jpf.constraints.expressions.RegexOperatorExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
 
@@ -41,9 +43,12 @@ public interface ExpressionVisitor<R, D> {
   public <E> R visit(NumericBooleanExpression n, D data);
   
   public <E> R visit(RegExBooleanExpression n, D data);
-
-  public <F, E> R visit(
-      CastExpression<F, E> cast, D data);
+  
+  public <E> R visit(RegexCompoundExpression n, D data);
+  
+  public <E> R visit(RegexOperatorExpression n , D data);
+  
+  public <F, E> R visit(CastExpression<F, E> cast, D data);
 
   public <E> R visit(NumericCompound<E> n, D data);
 

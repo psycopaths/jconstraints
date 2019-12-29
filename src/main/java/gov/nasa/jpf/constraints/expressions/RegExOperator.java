@@ -2,9 +2,6 @@ package gov.nasa.jpf.constraints.expressions;
 
 public enum RegExOperator implements ExpressionOperator {
 
-	INTERSECTION("intersection"),
-	UNION("union"),
-	CONCAT("concat"),
 	KLEENESTAR("*"),
 	KLEENEPLUS("+"),
 	OPTIONAL("?");
@@ -22,9 +19,6 @@ public enum RegExOperator implements ExpressionOperator {
 	  
 	  public static RegExOperator fromString(String str){
 	    switch(str){
-	      case "intersection": return INTERSECTION;
-	      case "union": return UNION;
-	      case "concat": return CONCAT;
 	      case "*": return KLEENESTAR;
 	      case "+": return KLEENEPLUS;
 	      case "?": return OPTIONAL;

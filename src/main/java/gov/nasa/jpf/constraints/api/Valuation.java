@@ -99,8 +99,9 @@ public class Valuation extends AbstractPrintable
 	@Override
 	public void print(Appendable a) throws IOException {
 		boolean first = true;
-
+		System.out.println("ValuationEntry.size: " + entries.size());
 		for (ValuationEntry<?> e : entries.values()) {
+			System.out.println("ValuationEntry: " + entries.values());
           if (first) {
             first = false;
           } else {

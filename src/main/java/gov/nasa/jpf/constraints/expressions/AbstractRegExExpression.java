@@ -1,5 +1,6 @@
 package gov.nasa.jpf.constraints.expressions;
 
+import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.Type;
 
 public abstract class AbstractRegExExpression extends
@@ -7,6 +8,6 @@ public abstract class AbstractRegExExpression extends
 
 	@Override
 	public Type<String> getType() {
-		return null;
+		return BuiltinTypes.REGEX;
 	}
 }

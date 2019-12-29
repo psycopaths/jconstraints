@@ -928,7 +928,43 @@ public abstract class BuiltinTypes {
 			return string;
 		}
 	}
-	
+
+	public static final class RegExTypeAll extends ConcreteType<String>{
+		RegExTypeAll(){
+			super("string",String.class,"",null, new String[] {"string"},String.class);
+		}
+
+		@Override
+		public String cast(Object other) {
+			if(other instanceof String) {
+				return (String) other;
+			}
+			throw new ClassCastException();
+		}
+
+		@Override
+		public String parse(String string){
+			return string;
+		}
+	}
+	public static final class RegExTypeNone extends ConcreteType<String>{
+		RegExTypeNone(){
+			super("string",String.class,"",null, new String[] {"string"},String.class);
+		}
+
+		@Override
+		public String cast(Object other) {
+			if(other instanceof String) {
+				return (String) other;
+			}
+			throw new ClassCastException();
+		}
+
+		@Override
+		public String parse(String string){
+			return string;
+		}
+	}
 	public static final class StringType extends ConcreteType<String>{
 		StringType(){
 			super("string",String.class,"",null, new String[] {"string"},String.class);
@@ -948,6 +984,8 @@ public abstract class BuiltinTypes {
 		}
 	}
 	public static final RegExType REGEX = new RegExType();
+	public static final RegExTypeAll REGEXALL = new RegExTypeAll();
+	public static final RegExTypeNone REGEXNONE = new RegExTypeNone();
 	public static final StringType STRING = new StringType();
 	public static final BoolType BOOL = new BoolType();
 	public static final BigDecimalType DECIMAL = new BigDecimalType();
@@ -964,7 +1002,7 @@ public abstract class BuiltinTypes {
 		if (aType instanceof BoolType || aType instanceof BigDecimalType || aType instanceof BigIntegerType ||
 			aType instanceof DoubleType || aType instanceof FloatType || aType instanceof SInt64Type ||
 			aType instanceof SInt32Type || aType instanceof SInt16Type || aType instanceof UInt16Type ||
-			aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType) {
+			aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType || aType instanceof RegExTypeAll || aType instanceof RegExTypeNone) {
 			return true;
 		} else {
 			return false;
@@ -972,7 +1010,7 @@ public abstract class BuiltinTypes {
 	}
 
 	static final Type<?>[] BUILTIN_TYPES =
-			new Type<?>[]{STRING, REGEX,BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8};
+			new Type<?>[]{STRING, REGEX, REGEXALL, REGEXNONE,BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8};
 
 	private BuiltinTypes() {
 	}
