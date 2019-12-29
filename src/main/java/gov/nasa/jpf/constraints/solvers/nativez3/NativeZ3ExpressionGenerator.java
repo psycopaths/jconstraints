@@ -30,6 +30,10 @@ import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
 import gov.nasa.jpf.constraints.expressions.RegExBooleanExpression;
+import gov.nasa.jpf.constraints.expressions.RegExCompoundOperator;
+import gov.nasa.jpf.constraints.expressions.RegExOperator;
+import gov.nasa.jpf.constraints.expressions.RegexCompoundExpression;
+import gov.nasa.jpf.constraints.expressions.RegexOperatorExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.types.BVIntegerType;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
@@ -48,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import javax.management.RuntimeErrorException;
 
 import com.microsoft.z3.ArithExpr;
 import com.microsoft.z3.BitVecExpr;
@@ -150,6 +156,10 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
         return ctx.mkBool(((Boolean)c.getValue()).booleanValue());
       if(type.equals(BuiltinTypes.REGEX))
     	  return ctx.mkToRe(ctx.mkString((String)c.getValue()));
+      if(type.equals(BuiltinTypes.REGEXALL))
+    	  return ctx.mkFullRe(ctx.mkReSort(ctx.mkStringSort()));
+      if(type.equals(BuiltinTypes.REGEXNONE))
+    	  return ctx.mkEmptyRe(ctx.mkStringSort());
       if(type.equals(BuiltinTypes.STRING))
     	  return ctx.mkString((String)c.getValue());
       if(type instanceof BVIntegerType) {
@@ -261,18 +271,64 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
   
   	@Override
 	public Expr visit(RegExBooleanExpression n, Void data) {
-		Expr regex = null, string= null;
+		Expr left = null, right = null;
 		try {
-			regex = visit(n.getRegex(),null);
-			string = visit(n.getString(),null);
-			BoolExpr result = ctx.mkInRe((SeqExpr)string, (ReExpr)regex);
+			left = visit(n.getLeft(),null);
+			right = visit(n.getRight(),null);
+			BoolExpr result = ctx.mkInRe((SeqExpr)right, (ReExpr)left);
 			return result;
 		}
 		catch (Z3Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
+	@Override
+	public Expr visit(RegexOperatorExpression n ,Void data) {
+		Expr left = null;
+		RegExOperator operator = null;
+		try {
+			left = visit(n.getLeft(),null);
+			operator = n.getOperator();
+			switch (operator) {
+			case KLEENEPLUS:
+				return ctx.mkPlus((ReExpr) left);
+			case KLEENESTAR:
+				return ctx.mkStar((ReExpr) left);
+			case OPTIONAL:
+				return ctx.mkOption((ReExpr) left);
+			default:
+				throw new RuntimeException();
+			}
+		}
+		catch (Z3Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
+  	@Override
+  	public Expr visit(RegexCompoundExpression n, Void data) {
+  		Expr left = null, right = null;
+  		RegExCompoundOperator operator = null;
+  		try {
+  			left=visit(n.getChildren()[0],null);
+  			right=visit(n.getChildren()[1],null);
+  			operator= n.getOperator();
+  			switch (operator) {
+			case CONCAT:
+				return ctx.mkConcat((ReExpr)left,(ReExpr)right);
+			case INTERSECTION:
+				return ctx.mkIntersect((ReExpr)left,(ReExpr)right);
+			case UNION:
+				return ctx.mkUnion((ReExpr)left,(ReExpr)right);
+			default:
+				throw new RuntimeException();
+  			}
+  		}
+  		catch (Z3Exception e) {
+  			throw new RuntimeException();
+  		}
+  		
+  	}
 	
   /* (non-Javadoc)
    * @see gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions.NumericBooleanExpression, java.lang.Object)
@@ -851,9 +907,35 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
     if(type instanceof RealType) {
       return getOrCreateRealVar((Variable<?>)v);
     }
+    if(type instanceof BuiltinTypes.StringType) {
+    	return getOrCreateStringVar((Variable<?>)v);
+    }
     throw new IllegalArgumentException("Cannot handle variable type " + type);
   }
   
+
+	private Expr getOrCreateStringVar(Variable<?> v) {
+		Expr ret = this.variables.get(v);
+		if(ret!=null) {
+			return (SeqExpr) ret;
+		}
+		
+		Expr var = createSeqVar(v);
+		this.variables.put(v, var);
+		return var;
+}
+
+	protected Expr createSeqVar(Variable<?> v) {
+		try {
+			// define var
+			SeqExpr z3Var = (SeqExpr)ctx.mkConst(v.getName(), ctx.getStringSort());
+
+			// logger.fine("Creating boolean variable " + v.getName());
+			return z3Var;
+		} catch (Z3Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 
 	protected Expr getOrCreateBoolVar(Variable<?> v)  {
 		Expr ret = this.variables.get(v);
