@@ -34,9 +34,11 @@ import gov.nasa.jpf.constraints.expressions.RegExCompoundOperator;
 import gov.nasa.jpf.constraints.expressions.RegExOperator;
 import gov.nasa.jpf.constraints.expressions.RegexCompoundExpression;
 import gov.nasa.jpf.constraints.expressions.RegexOperatorExpression;
+import gov.nasa.jpf.constraints.expressions.StringBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.types.BVIntegerType;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import gov.nasa.jpf.constraints.types.BuiltinTypes.RegExTypeRange;
 import gov.nasa.jpf.constraints.types.FloatingPointType;
 import gov.nasa.jpf.constraints.types.IntegerType;
 import gov.nasa.jpf.constraints.types.NumericType;
@@ -162,10 +164,14 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
     	  return ctx.mkEmptyRe(ctx.mkStringSort());
       if(type.equals(BuiltinTypes.STRING))
     	  return ctx.mkString((String)c.getValue());
+      if(type instanceof BuiltinTypes.RegExTypeRange) {
+    	  RegExTypeRange range= (RegExTypeRange)type;
+    	  return ctx.mkRange(ctx.mkString(String.valueOf(range.getLow())),ctx.mkString(String.valueOf(range.getHigh())));
+      }
       if(type instanceof BVIntegerType) {
         BVIntegerType<? super E> bvt = (BVIntegerType<? super E>)type;
         return ctx.mkBV(c.getValue().toString(), bvt.getNumBits());
-      }
+      }     
       if(type instanceof IntegerType) {
         return ctx.mkInt(c.getValue().toString());
       }
@@ -271,7 +277,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
   
   	@Override
 	public Expr visit(RegExBooleanExpression n, Void data) {
-		Expr left = null, right = null;
+  		Expr left = null, right = null;
 		try {
 			left = visit(n.getLeft(),null);
 			right = visit(n.getRight(),null);
@@ -282,6 +288,21 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			throw new RuntimeException(ex);
 		}
 	}
+  	
+  	@Override
+	public Expr visit(StringBooleanExpression n, Void data) {
+  		Expr left = null, right = null;
+		try {
+			left = visit(n.getLeft(),null);
+			right = visit(n.getRight(),null);
+			BoolExpr result = ctx.mkEq(right,left);
+			return result;
+		}
+		catch (Z3Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+  	
 	@Override
 	public Expr visit(RegexOperatorExpression n ,Void data) {
 		Expr left = null;
@@ -290,6 +311,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			left = visit(n.getLeft(),null);
 			operator = n.getOperator();
 			switch (operator) {
+			case LOOP: 
+				return ctx.mkLoop((ReExpr) left, n.getLow(),n.getHigh());
 			case KLEENEPLUS:
 				return ctx.mkPlus((ReExpr) left);
 			case KLEENESTAR:
@@ -314,7 +337,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
   			right=visit(n.getChildren()[1],null);
   			operator= n.getOperator();
   			switch (operator) {
-			case CONCAT:
+			case CONCAT:			
 				return ctx.mkConcat((ReExpr)left,(ReExpr)right);
 			case INTERSECTION:
 				return ctx.mkIntersect((ReExpr)left,(ReExpr)right);
@@ -894,7 +917,6 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
   
   protected Expr getOrCreateVar(Variable<?> v) {
     Type<?> type = v.getType();
-    
     if(type.equals(BuiltinTypes.BOOL)) {
       return getOrCreateBoolVar(v);
     }

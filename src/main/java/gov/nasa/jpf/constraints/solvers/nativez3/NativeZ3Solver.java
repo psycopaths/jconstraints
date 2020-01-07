@@ -68,9 +68,11 @@ public class NativeZ3Solver extends ConstraintSolver
 
     Map<String, String> cfg = Collections.singletonMap("model", "true");
     for (Entry<String, String> o : options.entrySet()) {
-      Global.setParameter(o.getKey(), o.getValue());
+    	System.out.println("Key: " + o.getKey());
+    	System.out.println("Value: " + o.getValue());
+    	Global.setParameter(o.getKey(), o.getValue());
+      
     }
-
     try {
       this.ctx = new Context(cfg);
       defaultContext = createContext();

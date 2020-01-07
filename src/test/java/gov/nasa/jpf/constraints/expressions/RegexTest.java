@@ -6,6 +6,8 @@ import java.util.Properties;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.microsoft.z3.Global;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
@@ -22,9 +24,39 @@ import gov.nasa.jpf.constraints.util.ExpressionUtil;
 public class RegexTest {
 	public static void main(String[]args) {
 		RegexTest t = new RegexTest();
-		t.testToString();
-	}
+		t.regexMatches02();
+		}
 	
+	public void regexMatches02() {
+		Properties conf = new Properties();
+	    conf.setProperty("symbolic.dp", "z3");
+	    conf.setProperty("z3.options","smt.string_solver=seq");
+//	    conf.setProperty("z3.options", "dump_models=false");
+
+	    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
+	    ConstraintSolver solver = factory.createSolver();
+	    System.out.println("RegexMatches02");
+	    SolverContext ctx = solver.createContext();
+	    Constant<String> string = Constant.create(BuiltinTypes.STRING, "WWWWW's Birthday is 41-17-77");
+	    Constant<String> w = Constant.create(BuiltinTypes.REGEX, "W");
+	    Constant<String> c09 = Constant.create(BuiltinTypes.range('0','9'),"test");
+	    RegexOperatorExpression full = RegexOperatorExpression.create(Constant.create(BuiltinTypes.REGEXALL,""),RegExOperator.KLEENESTAR);
+	    Constant<String> c03 = Constant.create(BuiltinTypes.range('0','3'),"test");
+	    Constant<String> c59 = Constant.create(BuiltinTypes.range('5','9'),"test");
+	    RegexCompoundExpression union = RegexCompoundExpression.create(c03, RegExCompoundOperator.UNION,c59);
+	    Constant<String> c2 = Constant.create(BuiltinTypes.REGEX, "-");
+	    RegexOperatorExpression loop = RegexOperatorExpression.create(c09,RegExOperator.LOOP, 2, 2);
+	    RegexCompoundExpression completeRegex = RegexCompoundExpression.create(w, RegExCompoundOperator.CONCAT,full,union,c2,loop,c2,loop);
+	    Variable<String> v1 = Variable.create(BuiltinTypes.STRING, "v1");
+		RegExBooleanExpression boolexpr = RegExBooleanExpression.create(completeRegex, v1);
+		StringBooleanExpression boolexpr2 = StringBooleanExpression.create(string,v1);
+		Expression<Boolean> expr = ExpressionUtil.and(boolexpr,boolexpr2);
+		Valuation val = new Valuation();
+		ConstraintSolver.Result result = solver.solve(expr, val);
+		System.out.println("Expression: " + expr);
+		System.out.println("result: " + result);
+		System.out.println("valuation: " + val);
+	}
 	public void testToString() {
 		Properties conf = new Properties();
 	    conf.setProperty("symbolic.dp", "Z3");
