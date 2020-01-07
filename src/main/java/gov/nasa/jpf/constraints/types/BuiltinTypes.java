@@ -965,6 +965,38 @@ public abstract class BuiltinTypes {
 			return string;
 		}
 	}
+	
+	public static final class RegExTypeRange extends ConcreteType<String>{
+		private final char low;
+		private final char high;
+		RegExTypeRange(char low, char high){
+			super("string",String.class,"",null, new String[] {"string"},String.class);
+			this.low = low;
+			this.high = high;
+		}
+
+		@Override
+		public String cast(Object other) {
+			if(other instanceof String) {
+				return (String) other;
+			}
+			throw new ClassCastException();
+		}
+
+		@Override
+		public String parse(String string){
+			return string;
+		}
+
+		public char getLow() {
+			return low;
+		}
+
+		public char getHigh() {
+			return high;
+		}
+	}
+	
 	public static final class StringType extends ConcreteType<String>{
 		StringType(){
 			super("string",String.class,"",null, new String[] {"string"},String.class);
@@ -983,6 +1015,7 @@ public abstract class BuiltinTypes {
 			return string;
 		}
 	}
+	public static final RegExTypeRange range(char low, char high) {return new RegExTypeRange(low, high);}
 	public static final RegExType REGEX = new RegExType();
 	public static final RegExTypeAll REGEXALL = new RegExTypeAll();
 	public static final RegExTypeNone REGEXNONE = new RegExTypeNone();
@@ -1002,7 +1035,8 @@ public abstract class BuiltinTypes {
 		if (aType instanceof BoolType || aType instanceof BigDecimalType || aType instanceof BigIntegerType ||
 			aType instanceof DoubleType || aType instanceof FloatType || aType instanceof SInt64Type ||
 			aType instanceof SInt32Type || aType instanceof SInt16Type || aType instanceof UInt16Type ||
-			aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType || aType instanceof RegExTypeAll || aType instanceof RegExTypeNone) {
+			aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType || 
+			aType instanceof RegExTypeAll || aType instanceof RegExTypeNone || aType instanceof RegExTypeRange) {
 			return true;
 		} else {
 			return false;

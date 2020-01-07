@@ -56,6 +56,10 @@ public abstract class AbstractExpressionVisitor<R,D> implements ExpressionVisito
   R visit(RegExBooleanExpression n, D data) {return defaultVisit(n,data);}
   
   @Override
+  public <E>
+  R visit(StringBooleanExpression n, D data) {return defaultVisit(n,data);}
+  
+  @Override
   public<E>
   R visit(RegexCompoundExpression n, D data) {return defaultVisit(n,data);}
   

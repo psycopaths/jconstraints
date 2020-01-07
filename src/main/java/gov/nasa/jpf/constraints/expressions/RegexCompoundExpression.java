@@ -17,7 +17,17 @@ public class RegexCompoundExpression extends AbstractRegExExpression {
 	public static RegexCompoundExpression create(Expression<?> left, RegExCompoundOperator operator, Expression<?> right) {
 		return new RegexCompoundExpression(left, operator,right);
 	}
-	
+	public static RegexCompoundExpression create(Expression<?>left, RegExCompoundOperator operator, Expression<?> ...expressions) {
+		RegexCompoundExpression result;
+		if (expressions.length>=1 && left != null) {
+			result = new RegexCompoundExpression(left, operator,expressions[0]);
+			for (int i = 1; i<expressions.length;i++) {
+				result = new RegexCompoundExpression(result, RegExCompoundOperator.CONCAT,expressions[i]);
+			}
+			return result;
+		}
+		throw new IllegalArgumentException();
+	}
 	private RegexCompoundExpression(Expression<?> left, RegExCompoundOperator operator, Expression<?> right) {
 		this.left=left;
 		this.right=right;
