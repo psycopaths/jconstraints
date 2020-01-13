@@ -2,9 +2,9 @@ package gov.nasa.jpf.constraints.expressions;
 
 public enum RegExCompoundOperator implements ExpressionOperator {
 
-	INTERSECTION("intersection"),
-	UNION("union"),
-	CONCAT("concat");
+	INTERSECTION("re.inter"),
+	UNION("re.union"),
+	CONCAT("re.++");
 	
 	private final String str;
 
@@ -19,9 +19,9 @@ public enum RegExCompoundOperator implements ExpressionOperator {
 	  
 	  public static RegExCompoundOperator fromString(String str){
 	    switch(str){
-	      case "intersection": return INTERSECTION;
-	      case "union": return UNION;
-	      case "concat": return CONCAT;
+	      case "re.inter": return INTERSECTION;
+	      case "re.union": return UNION;
+	      case "re.++": return CONCAT;
 	      default: return null;
 	    }
 	  }

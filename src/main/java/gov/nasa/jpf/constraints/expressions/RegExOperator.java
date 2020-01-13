@@ -2,11 +2,14 @@ package gov.nasa.jpf.constraints.expressions;
 
 public enum RegExOperator implements ExpressionOperator {
 
-	KLEENESTAR("*"),
-	KLEENEPLUS("+"),
-	LOOP("low_high"),
-	OPTIONAL("?");
-	
+	KLEENESTAR("re.*"),
+	KLEENEPLUS("re.+"),
+	LOOP("re.loop"),
+	RANGE("re.range"),
+	OPTIONAL("re.opt"),
+	STRTORE ("str.to.re"),
+	ALLCHAR ("re.allchar"),
+	NOCHAR	("re.nochar");
 	  
 	private final String str;
 
@@ -21,10 +24,14 @@ public enum RegExOperator implements ExpressionOperator {
 	  
 	  public static RegExOperator fromString(String str){
 	    switch(str){
-	      case "low_high": return LOOP; 
-	      case "*": return KLEENESTAR;
-	      case "+": return KLEENEPLUS;
-	      case "?": return OPTIONAL;
+	      case "re.loop": return LOOP; 
+	      case "re.range": return RANGE;
+	      case "re.*": return KLEENESTAR;
+	      case "re.+": return KLEENEPLUS;
+	      case "re.opt": return OPTIONAL;
+	      case "str.to.re": return STRTORE;
+	      case "re.allchar": return ALLCHAR;
+	      case "re.nochar": return NOCHAR;
 	      default: return null;
 	    }
 	  }

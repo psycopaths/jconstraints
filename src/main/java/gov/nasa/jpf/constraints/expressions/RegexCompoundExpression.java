@@ -7,21 +7,23 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.types.BuiltinTypes;
 
 public class RegexCompoundExpression extends AbstractRegExExpression {
 	private final Expression<?> left;
 	private final Expression<?> right;
 	private final RegExCompoundOperator operator;
 
-	public static RegexCompoundExpression create(Expression<?> left, RegExCompoundOperator operator, Expression<?> right) {
-		return new RegexCompoundExpression(left, operator,right);
+	public static RegexCompoundExpression createUnion(Expression<?> left,Expression<?> right) {
+		return new RegexCompoundExpression(left,RegExCompoundOperator.UNION,right);
 	}
-	public static RegexCompoundExpression create(Expression<?>left, RegExCompoundOperator operator, Expression<?> ...expressions) {
+	public static RegexCompoundExpression createIntersection(Expression<?> left,Expression<?> right) {
+		return new RegexCompoundExpression(left,RegExCompoundOperator.INTERSECTION,right);
+	}
+	public static RegexCompoundExpression createConcat(Expression<?> ...expressions) {
 		RegexCompoundExpression result;
-		if (expressions.length>=1 && left != null) {
-			result = new RegexCompoundExpression(left, operator,expressions[0]);
-			for (int i = 1; i<expressions.length;i++) {
+		if (expressions.length>=2) {
+			result = new RegexCompoundExpression(expressions[0],RegExCompoundOperator.CONCAT,expressions[1]);
+			for (int i = 2; i<expressions.length;i++) {
 				result = new RegexCompoundExpression(result, RegExCompoundOperator.CONCAT,expressions[i]);
 			}
 			return result;
