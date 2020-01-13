@@ -35,10 +35,14 @@ import gov.nasa.jpf.constraints.expressions.RegExOperator;
 import gov.nasa.jpf.constraints.expressions.RegexCompoundExpression;
 import gov.nasa.jpf.constraints.expressions.RegexOperatorExpression;
 import gov.nasa.jpf.constraints.expressions.StringBooleanExpression;
+import gov.nasa.jpf.constraints.expressions.StringBooleanOperator;
+import gov.nasa.jpf.constraints.expressions.StringCompoundExpression;
+import gov.nasa.jpf.constraints.expressions.StringIntegerExpression;
+import gov.nasa.jpf.constraints.expressions.StringIntegerOperator;
+import gov.nasa.jpf.constraints.expressions.StringOperator;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.types.BVIntegerType;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
-import gov.nasa.jpf.constraints.types.BuiltinTypes.RegExTypeRange;
 import gov.nasa.jpf.constraints.types.FloatingPointType;
 import gov.nasa.jpf.constraints.types.IntegerType;
 import gov.nasa.jpf.constraints.types.NumericType;
@@ -158,16 +162,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
         return ctx.mkBool(((Boolean)c.getValue()).booleanValue());
       if(type.equals(BuiltinTypes.REGEX))
     	  return ctx.mkToRe(ctx.mkString((String)c.getValue()));
-      if(type.equals(BuiltinTypes.REGEXALL))
-    	  return ctx.mkFullRe(ctx.mkReSort(ctx.mkStringSort()));
-      if(type.equals(BuiltinTypes.REGEXNONE))
-    	  return ctx.mkEmptyRe(ctx.mkStringSort());
       if(type.equals(BuiltinTypes.STRING))
     	  return ctx.mkString((String)c.getValue());
-      if(type instanceof BuiltinTypes.RegExTypeRange) {
-    	  RegExTypeRange range= (RegExTypeRange)type;
-    	  return ctx.mkRange(ctx.mkString(String.valueOf(range.getLow())),ctx.mkString(String.valueOf(range.getHigh())));
-      }
       if(type instanceof BVIntegerType) {
         BVIntegerType<? super E> bvt = (BVIntegerType<? super E>)type;
         return ctx.mkBV(c.getValue().toString(), bvt.getNumBits());
@@ -289,14 +285,94 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 		}
 	}
   	
+  	@Override 
+  	public Expr visit(StringCompoundExpression n, Void data) {
+  		Expr main = null,src=null,dst=null,position=null,length=null,offset=null;
+  		StringOperator operator;
+  		try {
+			operator= n.getOperator();
+			switch (operator) {
+			case AT:
+				main= visit(n.getMain());
+				position=visit(n.getPosition());
+				return ctx.mkAt((SeqExpr)main, (IntExpr)position);
+			case CONCAT:
+				Expression<?>[]expressions = n.getExpressions();
+				System.out.println("Expressions.size " + expressions.length);
+				SeqExpr [] expr = new SeqExpr[expressions.length];
+				for(int i=0; i< expressions.length;i++) {
+					expr[i]=(SeqExpr)visit(expressions[i],null);
+					System.out.println("Expr[i] = " +expr[i]);
+				}
+				return ctx.mkConcat(expr);
+			case REPLACE:
+				main= visit(n.getMain());
+				src= visit(n.getSrc());
+				dst= visit(n.getDst());
+				return ctx.mkReplace((SeqExpr)main, (SeqExpr)src, (SeqExpr)dst);
+			case SUBSTR:
+				main= visit(n.getMain());
+				offset= visit(n.getOffset());
+				length= visit(n.getLength());
+				return ctx.mkExtract((SeqExpr)main, (IntExpr)offset, (IntExpr)length);
+			case TOSTR:
+				main = visit(n.getMain());
+				return ctx.intToString(main);
+			default:
+				throw new RuntimeException();			
+			}
+		}
+		catch (Z3Exception ex) {
+			throw new RuntimeException(ex);
+		}
+  	}
+ 
+  	@Override
+	public Expr visit(StringIntegerExpression n, Void data) {
+  		Expr left = null, right = null, offset = null;
+  		StringIntegerOperator operator;
+		try {
+			operator= n.getOperator();
+			left = visit(n.getLeft(),null);
+			switch (operator) {
+			case INDEXOF:
+				right = visit(n.getRight(),null);
+				offset = visit(n.getOffset(),null);
+				return ctx.mkIndexOf((SeqExpr)left,(SeqExpr)right,(ArithExpr)offset);
+			case LENGTH:
+				return ctx.mkLength((SeqExpr)left);
+			case TOINT:
+				return ctx.stringToInt(left);
+			default:
+				throw new RuntimeException();
+			}
+		}
+		catch (Z3Exception ex) {
+			throw new RuntimeException(ex);
+		}
+  	}
+  	
   	@Override
 	public Expr visit(StringBooleanExpression n, Void data) {
   		Expr left = null, right = null;
+  		StringBooleanOperator operator;
 		try {
+			operator= n.getOperator();
 			left = visit(n.getLeft(),null);
 			right = visit(n.getRight(),null);
-			BoolExpr result = ctx.mkEq(right,left);
-			return result;
+			System.out.println("right: " + right);
+			switch (operator) {
+				case EQUALS: 
+					return ctx.mkEq(left,right);
+				case CONTAINS:
+					return ctx.mkContains((SeqExpr)left, (SeqExpr)right);
+				case PREFIXOF:
+					return ctx.mkPrefixOf((SeqExpr)left, (SeqExpr)right);
+				case SUFFIXOF:
+					return ctx.mkSuffixOf((SeqExpr)left, (SeqExpr)right);
+				default:
+					throw new RuntimeException();
+			}
 		}
 		catch (Z3Exception ex) {
 			throw new RuntimeException(ex);
@@ -308,17 +384,28 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 		Expr left = null;
 		RegExOperator operator = null;
 		try {
-			left = visit(n.getLeft(),null);
 			operator = n.getOperator();
 			switch (operator) {
 			case LOOP: 
-				return ctx.mkLoop((ReExpr) left, n.getLow(),n.getHigh());
+				left = visit(n.getLeft());
+				return ctx.mkLoop((ReExpr) left,n.getLow(),n.getHigh());
 			case KLEENEPLUS:
+				left = visit(n.getLeft());
 				return ctx.mkPlus((ReExpr) left);
 			case KLEENESTAR:
+				left = visit(n.getLeft());
 				return ctx.mkStar((ReExpr) left);
 			case OPTIONAL:
+				left = visit(n.getLeft());
 				return ctx.mkOption((ReExpr) left);
+			case RANGE:
+				return ctx.mkRange(ctx.mkString(String.valueOf(n.getCh1())),ctx.mkString(String.valueOf(n.getCh2())));
+			case ALLCHAR:
+				return ctx.mkFullRe(ctx.mkReSort(ctx.mkStringSort()));
+			case NOCHAR:
+				return ctx.mkEmptyRe(ctx.mkStringSort());
+			case STRTORE:
+				return ctx.mkToRe(ctx.mkString(n.getS()));
 			default:
 				throw new RuntimeException();
 			}

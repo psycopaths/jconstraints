@@ -3,19 +3,10 @@ package gov.nasa.jpf.constraints.expressions;
 import java.math.BigInteger;
 import java.util.Properties;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import com.microsoft.z3.Global;
-
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
-import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.api.ConstraintSolver.Result;
-import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
-import gov.nasa.jpf.constraints.expressions.functions.math.MathFunctions;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
@@ -24,74 +15,88 @@ import gov.nasa.jpf.constraints.util.ExpressionUtil;
 public class RegexTest {
 	public static void main(String[]args) {
 		RegexTest t = new RegexTest();
-		t.regexMatches02();
+		t.SimpleStringTests();
 		}
 	
+	public void SimpleStringTests() {
+		Properties conf = new Properties();
+	    conf.setProperty("symbolic.dp", "z3");
+		ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
+		System.out.println("Simple Tests");
+		ConstraintSolver solver = factory.createSolver();
+		Variable<String> v1 = Variable.create(BuiltinTypes.STRING, "v1");
+		Constant<String> c3 = Constant.create(BuiltinTypes.STRING, "b");
+		Constant<BigInteger>i2 = Constant.create(BuiltinTypes.INTEGER,BigInteger.valueOf(0));
+		StringIntegerExpression sie1= StringIntegerExpression.createIndexOf(c3,i2);
+		StringBooleanExpression sbe1 = StringBooleanExpression.createEquals(StringIntegerExpression.createToInt(v1),sie1);
+		Valuation val = new Valuation();
+		ConstraintSolver.Result result = solver.solve(sbe1, val);
+		System.out.println("result: " + result);
+		System.out.println("valuation: " + val);
+	}
+	public void StringTest() {
+		Properties conf = new Properties();
+	    conf.setProperty("symbolic.dp", "z3");
+		ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
+	    
+		System.out.println(" A string cannot overlap with two different characters. Unsat:");
+		ConstraintSolver solver = factory.createSolver();
+		Variable<String> v1 = Variable.create(BuiltinTypes.STRING, "v1");
+		Constant<String> c1 = Constant.create(BuiltinTypes.STRING, "b");
+		Constant<String> c2 = Constant.create(BuiltinTypes.STRING, "a");
+		StringCompoundExpression e1 = StringCompoundExpression.createConcat(v1,c1);
+		StringCompoundExpression e2 = StringCompoundExpression.createConcat(c2,v1);
+		StringBooleanExpression boolexp = StringBooleanExpression.createEquals(e1,e2);
+		Valuation val = new Valuation();
+		ConstraintSolver.Result result = solver.solve(boolexp, val);
+		System.out.println("result: " + result);
+		System.out.println("valuation: " + val);
+		System.out.println("");
+		System.out.println("Strings a, b, c can have a non-trivial overlap. ");
+		Variable<String> v2 = Variable.create(BuiltinTypes.STRING, "v2");
+		Variable<String> v3 = Variable.create(BuiltinTypes.STRING, "v3");
+		Variable<String> v4 = Variable.create(BuiltinTypes.STRING, "v4");
+		Constant<String> c3 = Constant.create(BuiltinTypes.STRING, "abcd");
+		Constant<String> c4 = Constant.create(BuiltinTypes.STRING, "cdef");
+		StringCompoundExpression e3 = StringCompoundExpression.createConcat(v2,v3);
+		StringBooleanExpression boolexpr2 = StringBooleanExpression.createEquals(e3,c3);
+		StringCompoundExpression e4 = StringCompoundExpression.createConcat(v3,v4);
+		StringBooleanExpression boolexpr3 = StringBooleanExpression.createEquals(e4, c4);
+		Valuation val2 = new Valuation();
+		ConstraintSolver.Result result2 = solver.solve(ExpressionUtil.and(boolexpr2,boolexpr3),val2);
+		System.out.println("result: " + result2);
+		System.out.println("valuation: " + val2);
+		System.out.println("");
+
+		
+	}
 	public void regexMatches02() {
 		Properties conf = new Properties();
 	    conf.setProperty("symbolic.dp", "z3");
 	    conf.setProperty("z3.options","smt.string_solver=seq");
+	    System.out.println("property: " + conf.getProperty("symbolic.dp"));
 //	    conf.setProperty("z3.options", "dump_models=false");
 
 	    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
 	    ConstraintSolver solver = factory.createSolver();
 	    System.out.println("RegexMatches02");
-	    SolverContext ctx = solver.createContext();
 	    Constant<String> string = Constant.create(BuiltinTypes.STRING, "WWWWW's Birthday is 41-17-77");
 	    Constant<String> w = Constant.create(BuiltinTypes.REGEX, "W");
-	    Constant<String> c09 = Constant.create(BuiltinTypes.range('0','9'),"test");
-	    RegexOperatorExpression full = RegexOperatorExpression.create(Constant.create(BuiltinTypes.REGEXALL,""),RegExOperator.KLEENESTAR);
-	    Constant<String> c03 = Constant.create(BuiltinTypes.range('0','3'),"test");
-	    Constant<String> c59 = Constant.create(BuiltinTypes.range('5','9'),"test");
-	    RegexCompoundExpression union = RegexCompoundExpression.create(c03, RegExCompoundOperator.UNION,c59);
+	    RegexOperatorExpression c09 = RegexOperatorExpression.createRange('0','9');
+	    RegexOperatorExpression full = RegexOperatorExpression.createAllChar();
+	    RegexOperatorExpression c03 = RegexOperatorExpression.createRange('0','3');
+	    RegexOperatorExpression c59 = RegexOperatorExpression.createRange('5','9');
+	    RegexCompoundExpression union = RegexCompoundExpression.createUnion(c03,c59);
 	    Constant<String> c2 = Constant.create(BuiltinTypes.REGEX, "-");
-	    RegexOperatorExpression loop = RegexOperatorExpression.create(c09,RegExOperator.LOOP, 2, 2);
-	    RegexCompoundExpression completeRegex = RegexCompoundExpression.create(w, RegExCompoundOperator.CONCAT,full,union,c2,loop,c2,loop);
+	    RegexOperatorExpression loop = RegexOperatorExpression.createLoop(c09,2);
+	    RegexCompoundExpression completeRegex = RegexCompoundExpression.createConcat(w,full,union,c2,loop,c2,loop);
 	    Variable<String> v1 = Variable.create(BuiltinTypes.STRING, "v1");
 		RegExBooleanExpression boolexpr = RegExBooleanExpression.create(completeRegex, v1);
-		StringBooleanExpression boolexpr2 = StringBooleanExpression.create(string,v1);
+		StringBooleanExpression boolexpr2 = StringBooleanExpression.createEquals(string,v1);
 		Expression<Boolean> expr = ExpressionUtil.and(boolexpr,boolexpr2);
 		Valuation val = new Valuation();
 		ConstraintSolver.Result result = solver.solve(expr, val);
-		System.out.println("Expression: " + expr);
 		System.out.println("result: " + result);
 		System.out.println("valuation: " + val);
-	}
-	public void testToString() {
-		Properties conf = new Properties();
-	    conf.setProperty("symbolic.dp", "Z3");
-	    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-	    ConstraintSolver solver = factory.createSolver();
-	    System.out.println("Neuer Test2");
-	    SolverContext ctx = solver.createContext();
-
-		Constant<String> hallo = Constant.create(BuiltinTypes.REGEX, "Hallo Welt");
-
-		RegexOperatorExpression welt =new RegexOperatorExpression(Constant.create(BuiltinTypes.REGEX, "!"),RegExOperator.KLEENEPLUS);
-		
-		RegexCompoundExpression hallowelt = RegexCompoundExpression.create(hallo, RegExCompoundOperator.CONCAT, welt);
-		Variable<String> v1 = Variable.create(BuiltinTypes.STRING, "v1");
-		Variable<BigInteger> i1 = Variable.create(BuiltinTypes.INTEGER, "i1");
-		Constant<BigInteger> i2 = Constant.createCasted(BuiltinTypes.INTEGER, 2);
-		//Variable<BigInteger> i2 = Variable.create(BuiltinTypes.INTEGER, "i2");
-		NumericBooleanExpression nbe1= NumericBooleanExpression.create(i1, NumericComparator.EQ,i2);
-		RegExBooleanExpression test = RegExBooleanExpression.create(hallowelt, v1);
-
-		
-		Valuation val = new Valuation();
-		Valuation val2 = new Valuation();
-		ConstraintSolver.Result result2 = solver.solve(nbe1, val2);
-        ConstraintSolver.Result result = solver.solve(test, val);
-        ctx.add(test);
-        if (ctx.isSatisfiable()!=null) {
-        	System.out.println("ctx.toString " +ctx.toString());
-        }
-        
-       System.out.println("result: " + result);
-       System.out.println("valuation: " +val);
-       System.out.println("resul2t: " + result2);
-       System.out.println("valuation2: " +val2);
-//        ContextTest test = 
-        
 	}
 }
