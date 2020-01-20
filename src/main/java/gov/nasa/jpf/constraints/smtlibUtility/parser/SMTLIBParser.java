@@ -155,7 +155,7 @@ public class SMTLIBParser {
 
     private <E> Expression<E> processArgument(final IExpr arg) throws SMTLIBParserException {
         Expression<E> resolved = null;
-         //System.out.println("In processArgument: arg instanceof " + arg);
+         System.out.println("In processArgument: arg instanceof " + arg);
         if (arg instanceof ISymbol) {
             resolved = resolveSymbol((ISymbol) arg);
         } else if (arg instanceof INumeral) {
@@ -247,7 +247,7 @@ public class SMTLIBParser {
         checkOperatorNotNull(operator);
         checkImpliesOperatorRequirements(operator, arguments);
         final ExpressionOperator newOperator = fixExpressionOperator(operator, arguments);
-        //System.out.println("new Operator: " + newOperator);
+        System.out.println("new Operator: " + newOperator);
         if(!(newOperator instanceof StringBooleanOperator ||newOperator instanceof StringIntegerOperator ||newOperator instanceof StringOperator ||
         		newOperator instanceof RegExCompoundOperator ||newOperator instanceof RegExOperator || newOperator instanceof RegExBooleanOperator)) {
         	Expression expr = arguments.poll();
@@ -344,7 +344,7 @@ public class SMTLIBParser {
 				throw new IllegalArgumentException("Unknown StringIntegerOperator: " + newOperator);
         	}
         } else if (newOperator instanceof RegExOperator) {
-        	//System.out.println("newOperator: " + newOperator);
+        	System.out.println("afanewOperator: " + newOperator);
         	switch((RegExOperator)newOperator) {
         	
 			case ALLCHAR:
@@ -382,7 +382,7 @@ public class SMTLIBParser {
 				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()];
 				tmpexpr[0]=arguments.poll();
 				tmpexpr[1]=arguments.poll();
-				//System.out.println("Concat: " + Arrays.toString(tmpexpr));
+				System.out.println("Concat: " + Arrays.toString(tmpexpr));
 					for(int i=2; i<tmpexpr.length;i++) {
 						tmpexpr[i]=arguments.poll();
 					}
@@ -464,13 +464,13 @@ public class SMTLIBParser {
     }
     private Variable resolveSymbol(final ISymbol symbol) throws SMTLIBParserExceptionInvalidMethodCall {
     	for (final Variable var : problem.variables) {
-    		//System.out.println("var: " +var.getName());
+    		System.out.println("var: " +var.getName());
             if (var.getName().equals(symbol.value())) {
                 return var;
             }
         }
         for (final Variable parameter : letContext) {
-        	//System.out.println("parameter: " +parameter);
+        	System.out.println("parameter: " +parameter);
             if (parameter.getName().equals(symbol.value())) {
                 return parameter;
             }

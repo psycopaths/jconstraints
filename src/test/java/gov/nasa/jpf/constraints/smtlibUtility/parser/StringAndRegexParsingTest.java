@@ -8,6 +8,7 @@ import gov.nasa.jpf.constraints.smtlibUtility.SMTProblem;
 
 public class StringAndRegexParsingTest {
 	public static void main(String args[]) throws IOException, SMTLIBParserException, IParser.ParserException {
+		System.out.println("hi");
 		SMTProblem problem = SMTLIBParser.parseSMTProgram("(declare-fun PCTEMP_LHS_1 () Bool)\n" + 
 				"(declare-fun PCTEMP_LHS_3 () String)\n" + 
 				"(declare-fun PCTEMP_LHS_4_idx_0 () String)\n" + 

@@ -22,7 +22,7 @@ public class StringCompoundExpression extends AbstractStringExpression {
 
 	public static StringCompoundExpression createConcat (Expression<?> ... expressions) {
 		if (expressions.length>1) {
-			//System.out.println("Expressions in StringCompoundExpression: " + Arrays.toString(expressions));
+			System.out.println("Expressions in StringCompoundExpression: " + Arrays.toString(expressions));
 			return new StringCompoundExpression(null,StringOperator.CONCAT,expressions,null,null,null,null,null);
 		}
 		throw new IllegalArgumentException();
@@ -50,7 +50,7 @@ public class StringCompoundExpression extends AbstractStringExpression {
 		this.expressions=expressions;
 		this.offset=offset;
 		this.position=position;
-		//System.out.println("expressions.size "+ expressions.length);
+		System.out.println("expressions.size "+ expressions.length);
 	}
 
 	@Override
