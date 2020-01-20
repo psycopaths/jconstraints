@@ -2,7 +2,6 @@ package gov.nasa.jpf.constraints.expressions;
 
 public interface ExpressionOperator {
     public static ExpressionOperator fromString(String str) {
-    	System.out.println("In ExpressionOperator: str= " + str);
         ExpressionOperator convertedOperator = BitvectorOperator.fromString(str);
         if (convertedOperator == null) {
             convertedOperator = LogicalOperator.fromString(str);
@@ -29,9 +28,11 @@ public interface ExpressionOperator {
         	convertedOperator = RegExCompoundOperator.fromString(str);
         }
         if (convertedOperator == null) {
+        	convertedOperator = RegExBooleanOperator.fromString(str);
+        }
+        if (convertedOperator == null) {
         	throw new UnsupportedOperationException("String " + str + " cannot be resolved to jConstraintsOperator");
         }
-        System.out.println("ConvertedOperator Class: " + convertedOperator.getClass());
         return convertedOperator;
     }
 }

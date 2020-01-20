@@ -2,7 +2,7 @@ package gov.nasa.jpf.constraints.expressions;
 
 public enum StringBooleanOperator implements ExpressionOperator {
 	CONTAINS("str.contains"),
-	EQUALS("str.="),
+	EQUALS("="),
 	PREFIXOF("str.prefixof"),
 	SUFFIXOF("str.suffixof");
 	
@@ -20,7 +20,7 @@ public enum StringBooleanOperator implements ExpressionOperator {
 	  public static StringBooleanOperator fromString(String str){
 	    switch(str){
 	      case "str.contains": return CONTAINS; 
-	      case "str.=": return EQUALS;
+	      case "=": return EQUALS;
 	      case "str.prefixof": return PREFIXOF;
 	      case "str.suffixof": return SUFFIXOF;
 	      default: return null;

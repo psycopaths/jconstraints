@@ -53,10 +53,12 @@ import org.smtlib.impl.SMTExpr.FcnExpr;
 import org.smtlib.impl.SMTExpr.Let;
 import org.smtlib.impl.SMTExpr.Symbol;
 import org.smtlib.impl.Sort;
+import org.smtlib.sexpr.Sexpr.Expr;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -102,7 +104,7 @@ public class SMTLIBParser {
 
         while (!parser.isEOD()) {
             ICommand cmd = parser.parseCommand();
-            System.out.println ("current cmd: " + cmd);
+            // System.out.println ("current cmd: " + cmd);
             if (cmd instanceof C_declare_fun) {
                 smtParser.processDeclareFun((C_declare_fun) cmd);
             } else if (cmd instanceof C_assert) {
@@ -141,7 +143,7 @@ public class SMTLIBParser {
             throw new SMTLIBParserException("Could only convert type of type Sort.Application");
         }
         final Sort.Application application = (Sort.Application) cmd.resultSort();
-        System.out.println("application.toString(): " + application.toString());
+        // System.out.println("application.toString(): " + application.toString());
         final Type<?> type = TypeMap.getType(application.toString());
         if (type == null) {
             throw new SMTLIBParserExceptionInvalidMethodCall(
@@ -153,7 +155,7 @@ public class SMTLIBParser {
 
     private <E> Expression<E> processArgument(final IExpr arg) throws SMTLIBParserException {
         Expression<E> resolved = null;
-        System.out.println("In processArgument: arg instanceof " + arg.getClass());
+         //System.out.println("In processArgument: arg instanceof " + arg);
         if (arg instanceof ISymbol) {
             resolved = resolveSymbol((ISymbol) arg);
         } else if (arg instanceof INumeral) {
@@ -174,7 +176,7 @@ public class SMTLIBParser {
 
     private Expression processExpression(final IExpr expr) throws SMTLIBParserException {
         Expression res = null;
-        System.out.println("In processExpression: " + expr.getClass());
+        // System.out.println("In processExpression: " + expr.getClass());
         if (expr instanceof FcnExpr) {
             res = processFunctionExpression((FcnExpr) expr);
         } else if (expr instanceof Let) {
@@ -182,7 +184,7 @@ public class SMTLIBParser {
         } else if (expr instanceof Symbol) {
         	res = resolveSymbol((ISymbol)expr);
         } else {
-        	System.out.println("Expr: "+ expr);
+        	// System.out.println("Expr: "+ expr);
             throw new SMTLIBParserNotSupportedException("Cannot pare the subexpression of type: " + expr.getClass());
         }
         return res;
@@ -205,15 +207,15 @@ public class SMTLIBParser {
 
     private Expression processFunctionExpression(final FcnExpr sExpr) throws SMTLIBParserException {
         final String operatorStr = sExpr.head().headSymbol().value();
-        System.out.println("In processFunctionExpression: operatorStr= " + operatorStr);
+        // System.out.println("In processFunctionExpression: operatorStr= " + operatorStr);
         final Queue<Expression> convertedArguments = new LinkedList<>();
-        System.out.println("IN processFunctionExpression: sExpr.args.size = " + sExpr.args().size());
+        // System.out.println("IN processFunctionExpression: sExpr.args.size = " + sExpr.args().size());
         for (final IExpr arg : sExpr.args()) {
-        	System.out.println("In processFunctionExpression: arg= " + arg);
+        	// System.out.println("In processFunctionExpression: arg= " + arg);
             final Expression jExpr = processArgument(arg);
             convertedArguments.add(jExpr);
         }
-        System.out.println("In processFunctionExpression: convertedArguments.size = " + convertedArguments.size());
+        // System.out.println("In processFunctionExpression: convertedArguments.size = " + convertedArguments.size());
         Expression ret = null;
         if (operatorStr.equals("not")) {
             ret = createNegation(convertedArguments);
@@ -223,7 +225,7 @@ public class SMTLIBParser {
                     ExpressionOperator.fromString(FunctionOperatorMap.getjConstraintOperatorName(
                     operatorStr));
             if (operator == null) {
-                System.out.println("sExpr: " + sExpr);
+                // System.out.println("sExpr: " + sExpr);
             }
             ret = createExpression(operator, convertedArguments);
         }
@@ -245,8 +247,9 @@ public class SMTLIBParser {
         checkOperatorNotNull(operator);
         checkImpliesOperatorRequirements(operator, arguments);
         final ExpressionOperator newOperator = fixExpressionOperator(operator, arguments);
+        //System.out.println("new Operator: " + newOperator);
         if(!(newOperator instanceof StringBooleanOperator ||newOperator instanceof StringIntegerOperator ||newOperator instanceof StringOperator ||
-        		newOperator instanceof RegExCompoundOperator ||newOperator instanceof RegExOperator)) {
+        		newOperator instanceof RegExCompoundOperator ||newOperator instanceof RegExOperator || newOperator instanceof RegExBooleanOperator)) {
         	Expression expr = arguments.poll();
         	if (arguments.peek() == null) {
         		if (newOperator == NumericOperator.MINUS && expr != null) {
@@ -291,7 +294,7 @@ public class SMTLIBParser {
 			case AT:
 				return StringCompoundExpression.createAt(arguments.poll(),arguments.poll());
 			case CONCAT:
-				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()+1];
+				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()];
 				tmpexpr[0]=arguments.poll();
 				tmpexpr[1]=arguments.poll();
 					for(int i=2; i<tmpexpr.length;i++) {
@@ -299,10 +302,10 @@ public class SMTLIBParser {
 					}
 				return StringCompoundExpression.createConcat(tmpexpr);
 			case REPLACE:
-				System.out.println("In createExpression before createRepleace size of arguments(should be 1): " + arguments.size());
+				// System.out.println("In createExpression before createRepleace size of arguments(should be 1): " + arguments.size());
 				return StringCompoundExpression.createReplace(arguments.poll(),arguments.poll(),arguments.poll());
 			case SUBSTR:
-				System.out.println("In createExpression before createSubstring size of arguments(should be 1): " + arguments.size());
+				// System.out.println("In createExpression before createSubstring size of arguments(should be 1): " + arguments.size());
 				return  StringCompoundExpression.createSubstring(arguments.poll(),arguments.poll(),arguments.poll());
 			case TOSTR:
 				return  StringCompoundExpression.createToString(arguments.poll());
@@ -312,7 +315,7 @@ public class SMTLIBParser {
         } else if (newOperator instanceof StringBooleanOperator) {
         	switch((StringBooleanOperator) newOperator) {
 			case CONTAINS:
-				System.out.println("In createExpression before createContains size of arguments(should be 0): " + arguments.size());
+				// System.out.println("In createExpression before createContains size of arguments(should be 0): " + arguments.size());
 				return StringBooleanExpression.createContains(arguments.poll(),arguments.poll());
 			case EQUALS:
 				return StringBooleanExpression.createEquals(arguments.poll(),arguments.poll());
@@ -326,7 +329,7 @@ public class SMTLIBParser {
         } else if (newOperator instanceof StringIntegerOperator) {
         	switch((StringIntegerOperator) newOperator) {
 			case INDEXOF:
-				System.out.println("IndexOf with "+arguments.size() +" Arguments");
+				// System.out.println("IndexOf with "+arguments.size() +" Arguments");
 				if(arguments.size()==0) {
 					return StringIntegerExpression.createIndexOf(arguments.poll(),arguments.poll());
 				}
@@ -341,33 +344,45 @@ public class SMTLIBParser {
 				throw new IllegalArgumentException("Unknown StringIntegerOperator: " + newOperator);
         	}
         } else if (newOperator instanceof RegExOperator) {
+        	//System.out.println("newOperator: " + newOperator);
         	switch((RegExOperator)newOperator) {
+        	
 			case ALLCHAR:
-				System.out.println("ALLCHAR should have 0 Arguments: " + arguments.size());
+				// System.out.println("ALLCHAR should have 0 Arguments: " + arguments.size());
 				return RegexOperatorExpression.createAllChar();
 			case KLEENEPLUS:
 				return RegexOperatorExpression.createKleenePlus(arguments.poll());
 			case KLEENESTAR:
 				return RegexOperatorExpression.createKleeneStar(arguments.poll());
 			case LOOP:
-				throw new UnsupportedOperationException();
+				Expression re = arguments.poll();
+				Constant lo = (Constant)arguments.poll();
+				if(arguments.peek()!=null) {
+					Constant hi = (Constant) arguments.poll();
+					return RegexOperatorExpression.createLoop(re,(int) lo.getValue(),(int) hi.getValue());
+				}
+				return RegexOperatorExpression.createLoop(re, (int)lo.getValue());
 			case NOCHAR:
 				return RegexOperatorExpression.createNoChar();
 			case OPTIONAL:
 				return RegexOperatorExpression.createOptional(arguments.poll());
 			case RANGE:
-				throw new UnsupportedOperationException();
+				Constant low = (Constant) arguments.poll();
+				Constant high = (Constant) arguments.poll();
+				return RegexOperatorExpression.createRange((char) low.getValue(), (char)high.getValue());
 			case STRTORE:
-				throw new UnsupportedOperationException();
+				Constant expr= (Constant)arguments.poll();
+				return RegexOperatorExpression.createStrToRe((String)expr.getValue());
 			default:
 				throw new UnsupportedOperationException("Unknown RegexOperator: " + newOperator);
         	}
         } else if (newOperator instanceof RegExCompoundOperator) {
         	switch((RegExCompoundOperator)newOperator) {
 			case CONCAT:
-				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()+1];
+				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()];
 				tmpexpr[0]=arguments.poll();
 				tmpexpr[1]=arguments.poll();
+				//System.out.println("Concat: " + Arrays.toString(tmpexpr));
 					for(int i=2; i<tmpexpr.length;i++) {
 						tmpexpr[i]=arguments.poll();
 					}
@@ -382,7 +397,7 @@ public class SMTLIBParser {
         }else if(newOperator instanceof RegExBooleanOperator) {
         	switch((RegExBooleanOperator) newOperator) {
 			case STRINRE:
-				RegExBooleanExpression.create(arguments.poll(),arguments.poll());
+				return RegExBooleanExpression.create(arguments.poll(),arguments.poll());
 			default:
 				throw new UnsupportedOperationException("Unknown RegexBooleanOperator: " + newOperator);       	
         	}
@@ -448,12 +463,14 @@ public class SMTLIBParser {
     	return Constant.create(BuiltinTypes.STRING, stringliteral.value());
     }
     private Variable resolveSymbol(final ISymbol symbol) throws SMTLIBParserExceptionInvalidMethodCall {
-        for (final Variable var : problem.variables) {
+    	for (final Variable var : problem.variables) {
+    		//System.out.println("var: " +var.getName());
             if (var.getName().equals(symbol.value())) {
                 return var;
             }
         }
         for (final Variable parameter : letContext) {
+        	//System.out.println("parameter: " +parameter);
             if (parameter.getName().equals(symbol.value())) {
                 return parameter;
             }
@@ -480,17 +497,20 @@ public class SMTLIBParser {
 
     private final ExpressionOperator fixExpressionOperator(final ExpressionOperator operator, final Queue<Expression> arguments) {
     	final Queue<Expression> tmp = new LinkedList<Expression>(arguments);
+    	final StringBooleanOperator newOperator;
     	if (operator.equals(NumericComparator.EQ)){
-    		System.out.println("arguments.size (should always be 2): " + arguments.size());
+    		// System.out.println("arguments.size (should always be 2): " + arguments.size());
     		Expression left = tmp.poll();
     		Expression right = tmp.poll();
-    		System.out.println("arguments should still have 2 Elements: " + arguments.size());
+    		// System.out.println("arguments should still have 2 Elements: " + arguments.size());
     		if (left instanceof StringBooleanExpression || left instanceof StringIntegerExpression ||left instanceof StringCompoundExpression||
     				right instanceof StringBooleanExpression || right instanceof StringIntegerExpression || right instanceof StringCompoundExpression) {
-    			System.out.println("new Operator returned");
-    			final StringBooleanOperator newOperator = StringBooleanOperator.EQUALS;
-    			return newOperator;
+    			newOperator = StringBooleanOperator.EQUALS;
     		}
+//    		if (left instanceof StringIntegerExpression || right instanceof StringIntegerExpression) {
+//    			newOperator = StringIntegerOperator
+//    			return newOperator;
+//    		}
     	}
     	
     	return operator;

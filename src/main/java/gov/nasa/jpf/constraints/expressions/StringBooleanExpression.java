@@ -79,7 +79,7 @@ public class StringBooleanExpression extends AbstractBoolExpression {
 
 	@Override
 	public void printMalformedExpression(Appendable a, int flags) throws IOException {
-		//throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException();
 
 	}
 

@@ -92,8 +92,9 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 
 	@Override
 	public void collectFreeVariables(Collection<? super Variable<?>> variables) {
-		throw new UnsupportedOperationException();
-		
+	    if(this.left!=null) {
+	    	this.left.collectFreeVariables(variables);
+	    }
 	}
 
 	@Override
@@ -113,10 +114,10 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 
 	@Override
 	public void print(Appendable a, int flags) throws IOException {
-		a.append('(');
-		left.print(a, flags);
-		a.append(operator.toString());
-		a.append(')');
+//		a.append('(');
+//		left.print(a, flags);
+//		a.append(operator.toString());
+//		a.append(')');
 		
 	}
 
