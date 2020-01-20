@@ -277,7 +277,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 		try {
 			left = visit(n.getLeft(),null);
 			right = visit(n.getRight(),null);
-			BoolExpr result = ctx.mkInRe((SeqExpr)right, (ReExpr)left);
+			BoolExpr result = ctx.mkInRe((SeqExpr)left, (ReExpr)right);
 			return result;
 		}
 		catch (Z3Exception ex) {
@@ -360,6 +360,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			operator= n.getOperator();
 			left = visit(n.getLeft(),null);
 			right = visit(n.getRight(),null);
+			System.out.println("left: " + left);
 			System.out.println("right: " + right);
 			switch (operator) {
 				case EQUALS: 

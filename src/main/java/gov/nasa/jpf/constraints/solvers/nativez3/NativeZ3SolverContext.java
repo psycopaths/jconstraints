@@ -90,7 +90,6 @@ public class NativeZ3SolverContext extends SolverContext {
 
   @Override
   public Result solve(Valuation val) {
-	  System.out.println("NativeZ3Solver solve: " + solver);
     logger.finer("Solving ...");
     try {
       Status status = solver.check();
@@ -107,7 +106,6 @@ public class NativeZ3SolverContext extends SolverContext {
       }
 
       Model model = solver.getModel();
-      System.out.println("Model: " + model.toString());
       try {
         if (logger.isLoggable(Level.FINE)) {
           String modelText = model.toString().replace("\n", ", ").trim();
