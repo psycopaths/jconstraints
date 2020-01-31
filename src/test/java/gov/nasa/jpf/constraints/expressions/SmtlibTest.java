@@ -41,6 +41,7 @@ public class SmtlibTest {
 					"(check-sat)");
 			Properties conf = new Properties();
 		    conf.setProperty("symbolic.dp", "z3");
+		    conf.setProperty("z3.options", "smt.string_solver=seq");
 			ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
 			ConstraintSolver solver = factory.createSolver();
 			Valuation val = new Valuation();
