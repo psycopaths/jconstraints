@@ -18,6 +18,7 @@ package gov.nasa.jpf.constraints.api;
 
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorNegation;
+import gov.nasa.jpf.constraints.expressions.BooleanExpression;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.IfThenElse;
@@ -77,6 +78,8 @@ public interface ExpressionVisitor<R, D> {
   public R visit(QuantifierExpression q, D data);
   
   public <E> R visit(FunctionExpression<E> f, D data);
+
+public <E> R visit(BooleanExpression booleanExpression, D data);
 
 
 

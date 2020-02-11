@@ -5,6 +5,8 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.AbstractStringExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorOperator;
+import gov.nasa.jpf.constraints.expressions.BooleanExpression;
+import gov.nasa.jpf.constraints.expressions.BooleanOperator;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.ExpressionOperator;
 import gov.nasa.jpf.constraints.expressions.LetExpression;
@@ -129,6 +131,7 @@ public class SMTLIBParser {
 
     public Expression processAssert(final C_assert cmd) throws SMTLIBParserException {
         final Expression res = processExpression(cmd.expr());
+//        System.out.println("In ProcessAssert: " + res + "Class: "  + res.getClass());
         problem.addAssertion(res);
         return res;
     }
@@ -155,7 +158,7 @@ public class SMTLIBParser {
 
     private <E> Expression<E> processArgument(final IExpr arg) throws SMTLIBParserException {
         Expression<E> resolved = null;
-         System.out.println("In processArgument: arg instanceof " + arg);
+//         System.out.println("In processArgument: arg instanceof " + arg);
         if (arg instanceof ISymbol) {
             resolved = resolveSymbol((ISymbol) arg);
         } else if (arg instanceof INumeral) {
@@ -176,7 +179,7 @@ public class SMTLIBParser {
 
     private Expression processExpression(final IExpr expr) throws SMTLIBParserException {
         Expression res = null;
-        // System.out.println("In processExpression: " + expr.getClass());
+//         System.out.println("In processExpression: " + expr.getClass());
         if (expr instanceof FcnExpr) {
             res = processFunctionExpression((FcnExpr) expr);
         } else if (expr instanceof Let) {
@@ -207,11 +210,11 @@ public class SMTLIBParser {
 
     private Expression processFunctionExpression(final FcnExpr sExpr) throws SMTLIBParserException {
         final String operatorStr = sExpr.head().headSymbol().value();
-        // System.out.println("In processFunctionExpression: operatorStr= " + operatorStr);
+//         System.out.println("In processFunctionExpression: operatorStr= " + operatorStr);
         final Queue<Expression> convertedArguments = new LinkedList<>();
         // System.out.println("IN processFunctionExpression: sExpr.args.size = " + sExpr.args().size());
         for (final IExpr arg : sExpr.args()) {
-        	// System.out.println("In processFunctionExpression: arg= " + arg);
+//        	 System.out.println("In processFunctionExpression: arg= " + arg);
             final Expression jExpr = processArgument(arg);
             convertedArguments.add(jExpr);
         }
@@ -227,6 +230,7 @@ public class SMTLIBParser {
             if (operator == null) {
                 // System.out.println("sExpr: " + sExpr);
             }
+//            System.out.println("Operator: " + operator + " " + operator.getClass());
             ret = createExpression(operator, convertedArguments);
         }
         return ret;
@@ -246,9 +250,10 @@ public class SMTLIBParser {
 
         checkOperatorNotNull(operator);
         checkImpliesOperatorRequirements(operator, arguments);
+//       final ExpressionOperator newOperator = operator;
         final ExpressionOperator newOperator = fixExpressionOperator(operator, arguments);
-        System.out.println("new Operator: " + newOperator);
-        if(!(newOperator instanceof StringBooleanOperator ||newOperator instanceof StringIntegerOperator ||newOperator instanceof StringOperator ||
+//        System.out.println("new Operator: " + newOperator +": " + newOperator.getClass());
+        if(!(newOperator instanceof BooleanOperator || newOperator instanceof StringBooleanOperator ||newOperator instanceof StringIntegerOperator ||newOperator instanceof StringOperator ||
         		newOperator instanceof RegExCompoundOperator ||newOperator instanceof RegExOperator || newOperator instanceof RegExBooleanOperator)) {
         	Expression expr = arguments.poll();
         	if (arguments.peek() == null) {
@@ -289,6 +294,16 @@ public class SMTLIBParser {
             } 
 	        return expr;
 		}
+        else if (newOperator instanceof BooleanOperator) {
+        	switch((BooleanOperator)newOperator) {
+			case EQ:
+				return BooleanExpression.createEquals(arguments.poll(), arguments.poll());
+			case NEQ:
+				return BooleanExpression.createNotEquals(arguments.poll(),arguments.poll());
+			default:
+				throw new IllegalArgumentException("Unknown BooleanOperator");
+        	}
+        }
         else if (newOperator instanceof StringOperator) {
         	switch((StringOperator) newOperator) {
 			case AT:
@@ -344,7 +359,7 @@ public class SMTLIBParser {
 				throw new IllegalArgumentException("Unknown StringIntegerOperator: " + newOperator);
         	}
         } else if (newOperator instanceof RegExOperator) {
-        	System.out.println("afanewOperator: " + newOperator);
+//        	System.out.println("afanewOperator: " + newOperator);
         	switch((RegExOperator)newOperator) {
         	
 			case ALLCHAR:
@@ -382,7 +397,7 @@ public class SMTLIBParser {
 				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()];
 				tmpexpr[0]=arguments.poll();
 				tmpexpr[1]=arguments.poll();
-				System.out.println("Concat: " + Arrays.toString(tmpexpr));
+//				System.out.println("Concat: " + Arrays.toString(tmpexpr));
 					for(int i=2; i<tmpexpr.length;i++) {
 						tmpexpr[i]=arguments.poll();
 					}
@@ -464,13 +479,13 @@ public class SMTLIBParser {
     }
     private Variable resolveSymbol(final ISymbol symbol) throws SMTLIBParserExceptionInvalidMethodCall {
     	for (final Variable var : problem.variables) {
-    		System.out.println("var: " +var.getName());
+//    		System.out.println("var: " +var.getName());
             if (var.getName().equals(symbol.value())) {
                 return var;
             }
         }
         for (final Variable parameter : letContext) {
-        	System.out.println("parameter: " +parameter);
+//        	System.out.println("parameter: " +parameter);
             if (parameter.getName().equals(symbol.value())) {
                 return parameter;
             }
@@ -497,22 +512,89 @@ public class SMTLIBParser {
 
     private final ExpressionOperator fixExpressionOperator(final ExpressionOperator operator, final Queue<Expression> arguments) {
     	final Queue<Expression> tmp = new LinkedList<Expression>(arguments);
-    	final StringBooleanOperator newOperator;
+    	final StringBooleanOperator newOperator=StringBooleanOperator.EQUALS;
+//    	System.out.println(operator + " EQUALS " + NumericComparator.EQ +": " + operator.equals(NumericComparator.EQ));
     	if (operator.equals(NumericComparator.EQ)){
     		// System.out.println("arguments.size (should always be 2): " + arguments.size());
     		Expression left = tmp.poll();
+//    		System.out.println("left: " + left + ": " + left.getClass());
     		Expression right = tmp.poll();
+//    		System.out.println("right: " + right + ": " + right.getClass());
     		// System.out.println("arguments should still have 2 Elements: " + arguments.size());
     		if (left instanceof StringBooleanExpression || left instanceof StringIntegerExpression ||left instanceof StringCompoundExpression||
     				right instanceof StringBooleanExpression || right instanceof StringIntegerExpression || right instanceof StringCompoundExpression) {
-    			newOperator = StringBooleanOperator.EQUALS;
+    			return newOperator;
     		}
-//    		if (left instanceof StringIntegerExpression || right instanceof StringIntegerExpression) {
-//    			newOperator = StringIntegerOperator
-//    			return newOperator;
-//    		}
-    	}
+    		if (left instanceof Variable<?> || left instanceof Constant<?>) {
+//    			System.out.println("left type: " + left.getType());
+    			if(left.getType() instanceof BuiltinTypes.StringType) {
+    				return newOperator;
+    			}
+    		}
+    		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
+//    			System.out.println("right type: " + right.getType());
+    			if(right.getType() instanceof BuiltinTypes.StringType) {
+    				return newOperator;
+    			}
+    		}
+    		if(right instanceof Negation && ((Negation) right).getNegated() instanceof StringBooleanExpression) {
+    			return newOperator;
+    		}
+    		
+       		if(left instanceof Negation && ((Negation) left).getNegated() instanceof StringBooleanExpression) {
+    			return newOperator;
+    		}
+    		if (left instanceof BooleanExpression ||  right instanceof BooleanExpression) {
+    			return BooleanOperator.EQ;
+    		}
+    		if (left instanceof Variable<?> || left instanceof Constant<?>) {
+//    			System.out.println("left type: " + left.getType());
+    			if(left.getType() instanceof BuiltinTypes.BoolType) {
+    				return BooleanOperator.EQ;
+    			}
+    		}
+    		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
+//    			System.out.println("right type: " + right.getType());
+    			if(right.getType() instanceof BuiltinTypes.BoolType) {
+    				return BooleanOperator.EQ;
+    			}
+    		}
+    		if(right instanceof Negation && ((Negation) right).getNegated() instanceof BooleanExpression) {
+    			return BooleanOperator.EQ;
+    		}
+    		
+       		if(left instanceof Negation && ((Negation) left).getNegated() instanceof BooleanExpression) {
+    			return BooleanOperator.EQ;
+    		}
+       		
+    	} 
     	
+    	if (operator.equals(NumericComparator.NE)) {
+    		Expression left = tmp.poll();
+    		Expression right = tmp.poll();
+    		if (left instanceof BooleanExpression ||  right instanceof BooleanExpression) {
+    			return BooleanOperator.NEQ;
+    		}
+    		if (left instanceof Variable<?> || left instanceof Constant<?>) {
+//    			System.out.println("left type: " + left.getType());
+    			if(left.getType() instanceof BuiltinTypes.BoolType) {
+    				return BooleanOperator.NEQ;
+    			}
+    		}
+    		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
+//    			System.out.println("right type: " + right.getType());
+    			if(right.getType() instanceof BuiltinTypes.BoolType) {
+    				return BooleanOperator.NEQ;
+    			}
+    		}
+    		if(right instanceof Negation && ((Negation) right).getNegated() instanceof BooleanExpression) {
+    			return BooleanOperator.NEQ;
+    		}
+    		
+       		if(left instanceof Negation && ((Negation) left).getNegated() instanceof BooleanExpression) {
+    			return BooleanOperator.NEQ;
+    		}
+    	}
     	return operator;
     }
     private boolean checkImpliesOperatorRequirements(final ExpressionOperator operator,

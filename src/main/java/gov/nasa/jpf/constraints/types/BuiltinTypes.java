@@ -924,8 +924,9 @@ public abstract class BuiltinTypes {
 		}
 
 		@Override
-		public String parse(String string){
-			return string;
+		public String parse(final String string){
+			String parsed = string.substring(1,string.length()-1);
+			return parsed;
 		}
 	}
 	
@@ -943,8 +944,9 @@ public abstract class BuiltinTypes {
 		}
 
 		@Override
-		public String parse(String string){
-			return string;
+		public String parse(final String string){
+			String parsed = string.substring(1,string.length()-1);
+			return parsed;
 		}
 	}
 	public static final RegExType REGEX = new RegExType();;
