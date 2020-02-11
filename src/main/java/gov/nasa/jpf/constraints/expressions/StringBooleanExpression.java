@@ -44,11 +44,56 @@ public class StringBooleanExpression extends AbstractBoolExpression {
 	
 	@Override
 	public Boolean evaluate(Valuation values) {
-		//throw new UnsupportedOperationException();
-		return null;
+		
+		switch(operator) {
+
+		case CONTAINS:
+			return evaluateContains(left,right,values);
+		case EQUALS:
+			return evaluateEquals(left,right,values);
+		case PREFIXOF:
+			return evaluatePrefixOf(left,right,values);
+		case SUFFIXOF:
+			return evaluateSuffixOf(left,right,values);
+		default:
+			throw new IllegalArgumentException();
+		
+		}
 	}
 
 
+	private Boolean evaluateSuffixOf(Expression<?> left, Expression<?> right,Valuation values) {
+		String lv = (String)left.evaluate(values);
+		String rv = (String)right.evaluate(values);
+//		System.out.println("lv: " + lv);
+//		System.out.println("rv: " + rv);
+		return lv.endsWith(rv);
+	}
+	private <L, R>Boolean evaluatePrefixOf(Expression<L> left, Expression<R> right,Valuation values) {
+		String lv = (String)left.evaluate(values);
+		String rv = (String)right.evaluate(values);
+//		System.out.println("lv: " + lv);
+//		System.out.println("rv: " + rv);
+		return lv.startsWith(rv);
+	}
+	private <L, R>Boolean evaluateContains(Expression<L> left, Expression<R> right,Valuation values) {
+		String lv = (String)left.evaluate(values);
+		String rv = (String)right.evaluate(values);
+//		System.out.println("lv: " + lv);
+//		System.out.println("rv: " + rv);
+		return lv.contains(rv);
+	}
+	
+	@SuppressWarnings("unlikely-arg-type")
+	private  <L, R> Boolean evaluateEquals(Expression<L> left, Expression<R> right,Valuation values) {
+		
+		L lv = left.evaluate(values);
+		R rv = right.evaluate(values);
+//		System.out.println("lv: " + lv);
+//		System.out.println("rv: " + rv);
+		return lv.equals(rv);
+	}
+	
 	@Override
 	public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
 		return visitor.visit(this, data);		

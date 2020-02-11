@@ -87,7 +87,70 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 	}
 	@Override
 	public String evaluate(Valuation values) {
-		throw new UnsupportedOperationException();
+		switch (operator) {
+		case ALLCHAR:
+			return evaluateAllChar(values);
+		case KLEENEPLUS:
+			return evaluateKleenePlus(values);
+		case KLEENESTAR:
+			return evaluateKleeneStar(values);
+		case LOOP:
+			return evaluateLoop(values);
+		case NOCHAR:
+			return evaluateNoChar(values);
+		case OPTIONAL:
+			return evaluateOptional(values);
+		case RANGE:
+			evaluateRange(values);
+		case STRTORE:
+			return evaluateStrToRe(values);
+		default:
+			throw new IllegalArgumentException();		
+		}	
+//		throw new UnsupportedOperationException(this.getClass().getName() + ": evaluate is not Implemented");
+	}
+
+	private String evaluateStrToRe(Valuation values) {
+		return s;
+		
+	}
+
+	private String evaluateRange(Valuation values) {
+		return "[" +ch1 + "-" +ch2 +"]";
+	}
+
+	private String evaluateOptional(Valuation values) {
+		String regex = (String) left.evaluate(values);
+		String result = "(" + regex +")?";
+		return result;
+		
+	}
+
+	private String evaluateNoChar(Valuation values) {
+		return "(^.*)";
+		
+	}
+
+	private String evaluateLoop(Valuation values) {
+		String regex = (String)left.evaluate(values);
+		return "(" + regex +"){"+low +"," +high +"}";
+	}
+
+	private String evaluateKleeneStar(Valuation values) {
+		String regex = (String)left.evaluate(values);
+		return "(" + regex +")*";
+		
+	}
+
+	private String evaluateKleenePlus(Valuation values) {
+		String regex = (String)left.evaluate(values);
+		return "(" + regex +")+";
+		
+	}
+
+	private String evaluateAllChar(Valuation values) {
+		return "(.*)";
+		
 	}
 
 	@Override

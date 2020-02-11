@@ -1,7 +1,7 @@
 package gov.nasa.jpf.constraints.expressions;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.math.BigInteger;
 import java.util.Collection;
 
 import gov.nasa.jpf.constraints.api.Expression;
@@ -22,7 +22,6 @@ public class StringCompoundExpression extends AbstractStringExpression {
 
 	public static StringCompoundExpression createConcat (Expression<?> ... expressions) {
 		if (expressions.length>1) {
-			System.out.println("Expressions in StringCompoundExpression: " + Arrays.toString(expressions));
 			return new StringCompoundExpression(null,StringOperator.CONCAT,expressions,null,null,null,null,null);
 		}
 		throw new IllegalArgumentException();
@@ -50,15 +49,60 @@ public class StringCompoundExpression extends AbstractStringExpression {
 		this.expressions=expressions;
 		this.offset=offset;
 		this.position=position;
-		System.out.println("expressions.size "+ expressions.length);
 	}
 
 	@Override
 	public String evaluate(Valuation values) {
-		// TODO Auto-generated method stub
-		return null;
+		switch (operator) {
+		case AT:
+			return evaluateAt(values);
+		case CONCAT:
+			return evaluateConcat(values);
+		case REPLACE:
+			return evaluateReplace(values);
+		case SUBSTR:
+			return evaluateSubstring(values);
+		case TOSTR:
+			return evaluateToString(values);
+		default:
+			throw new IllegalArgumentException();
+		}
 	}
 
+	private String evaluateAt(Valuation values) {
+		String string = (String)main.evaluate(values);
+		BigInteger pos = (BigInteger)position.evaluate(values);
+		return String.valueOf(string.charAt(pos.intValue()));
+	}
+	
+	private String evaluateReplace(Valuation values) {
+		String string = (String)main.evaluate(values);
+		String source = (String)src.evaluate(values);
+		String destination= (String)dst.evaluate(values);
+		return string.replace(source,destination);
+	}
+	
+	private String evaluateSubstring(Valuation values) {
+		String string = (String)main.evaluate(values);
+		BigInteger of = (BigInteger) offset.evaluate(values);
+		BigInteger len= (BigInteger) length.evaluate(values);
+		return string.substring(of.intValue(), of.intValue()+len.intValue());
+	}
+	
+	private String evaluateToString(Valuation values) {
+		BigInteger toStr = (BigInteger) main.evaluate(values);
+		String result = String.valueOf(toStr.intValue());
+		return result;
+	}
+	
+	private String evaluateConcat(Valuation values) {
+		String concatString="";
+		for(Expression<?>e : expressions) {
+			concatString+= (String)e.evaluate(values);
+		}
+		return concatString;
+	}
+	
 	@Override
 	public void collectFreeVariables(Collection<? super Variable<?>> variables) {
 		if(this.main!=null) {
@@ -121,10 +165,36 @@ public class StringCompoundExpression extends AbstractStringExpression {
 
 	@Override
 	public void print(Appendable a, int flags) throws IOException {
-		// TODO Auto-generated method stub
+		switch (operator) {
+		case AT:
+			break;
+		case CONCAT:
+			printConcat(a,flags);
+			break;
+		case REPLACE:
+			break;
+		case SUBSTR:
+			break;
+		case TOSTR:
+			break;
+		default:
+			break;
+		
+		}
 
 	}
 
+	private void printConcat(Appendable a, int flags) throws IOException {
+
+	    a.append('(');
+	    a.append(operator.toString());
+	    for(Expression<?>e : expressions) {
+	    	a.append(" ");
+	    	e.print(a,flags);
+	    }
+	    a.append(')');
+		
+	}
 	@Override
 	public void printMalformedExpression(Appendable a, int flags) throws IOException {
 		// TODO Auto-generated method stub

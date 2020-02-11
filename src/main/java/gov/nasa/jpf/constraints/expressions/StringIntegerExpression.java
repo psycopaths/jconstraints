@@ -49,10 +49,38 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 
 	@Override
 	public BigInteger evaluate(Valuation values) {
-		// TODO Auto-generated method stub
-		return null;
+
+		switch (operator) {
+			
+			case INDEXOF:
+				return evaluateIndexOf(values);
+			case LENGTH:
+				return evaluateLength(values);
+			case TOINT:
+				return evaluateToInt(values);
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 
+	private BigInteger evaluateToInt(Valuation values) {
+		String lv = (String)left.evaluate(values);
+		return BigInteger.valueOf(Integer.valueOf(lv));
+	}
+	
+	private BigInteger evaluateLength(Valuation values) {
+		String string = (String)left.evaluate(values);
+		BigInteger length = BigInteger.valueOf(string.length());
+		return length;
+	}
+	
+	private BigInteger evaluateIndexOf(Valuation values) {
+		String lv = (String) left.evaluate(values);
+		String rv = (String) right.evaluate(values);
+		BigInteger of = (BigInteger) offset.evaluate(values);
+		return BigInteger.valueOf(lv.indexOf(rv, of.intValue()));
+	}
+	
 	@Override
 	public void collectFreeVariables(Collection<? super Variable<?>> variables) {
 	    this.left.collectFreeVariables(variables);
@@ -89,8 +117,10 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 
 	@Override
 	public void print(Appendable a, int flags) throws IOException {
-		// TODO Auto-generated method stub
-		
+//	    a.append('(');
+//	    a.append(operator.toString()).append(' ');
+//	    left.print(a, flags);
+//	    a.append(')');		
 	}
 
 	@Override

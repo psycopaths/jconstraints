@@ -1,15 +1,12 @@
 package gov.nasa.jpf.constraints.expressions;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Collection;
 
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.types.BuiltinTypes;
-import gov.nasa.jpf.constraints.types.NumericType;
 
 public class RegExBooleanExpression extends AbstractBoolExpression {
 	public static RegExBooleanExpression create (Expression<?> left,Expression<?> right) {
@@ -31,8 +28,9 @@ public class RegExBooleanExpression extends AbstractBoolExpression {
 	}
 	@Override
 	public Boolean evaluate(Valuation values) {
-		//throw new UnsupportedOperationException();
-		return null;
+		String stringExpression = (String) left.evaluate(values);
+		String regexExpression = (String) right.evaluate(values);
+		return stringExpression.matches(regexExpression);
 	}
 
 
@@ -57,9 +55,8 @@ public class RegExBooleanExpression extends AbstractBoolExpression {
 
 	@Override
 	public void print(Appendable a, int flags) throws IOException {
-		a.append('(');
+		a.append("(str.in.re ");
 		right.print(a, flags);
-		a.append(" MATCHES: ");
 		left.print(a,flags);
 		a.append(')');
 

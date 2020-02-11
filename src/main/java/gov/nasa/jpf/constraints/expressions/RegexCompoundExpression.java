@@ -50,11 +50,33 @@ public class RegexCompoundExpression extends AbstractRegExExpression {
 	
 	@Override
 	public String evaluate(Valuation values) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException(this.getClass().getName() + ": evaluate is not Implemented");
-		//return null;
+		switch(operator) {
+		case CONCAT:
+			return evaluateConcat(values);
+		case INTERSECTION:
+			return evaluateIntersection(values);
+		case UNION:
+			return evaluateUnion(values);
+		default:
+			throw new IllegalArgumentException();
+		}
 	}
 
+	private String evaluateUnion(Valuation values) {
+		String lv = (String)left.evaluate(values);
+		String rv = (String)right.evaluate(values);
+		return "(" + lv + "|" + rv + ")";
+	}
+	private String evaluateIntersection(Valuation values) {
+		String lv = (String)left.evaluate(values);
+		String rv = (String)right.evaluate(values);
+		return "((?=" + lv + ")" + rv + ")";
+	}
+	private String evaluateConcat(Valuation values) {
+		String lv = (String)left.evaluate(values);
+		String rv = (String)right.evaluate(values);
+		return "(" + lv + rv + ")";
+	}
 	@Override
 	public void collectFreeVariables(Collection<? super Variable<?>> variables) {
 		// TODO Auto-generated method stub
