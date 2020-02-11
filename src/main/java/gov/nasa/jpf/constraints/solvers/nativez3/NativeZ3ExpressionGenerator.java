@@ -20,6 +20,8 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorNegation;
+import gov.nasa.jpf.constraints.expressions.BooleanExpression;
+import gov.nasa.jpf.constraints.expressions.BooleanOperator;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.Negation;
@@ -298,11 +300,9 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				return ctx.mkAt((SeqExpr)main, (IntExpr)position);
 			case CONCAT:
 				Expression<?>[]expressions = n.getExpressions();
-				System.out.println("Expressions.size " + expressions.length);
 				SeqExpr [] expr = new SeqExpr[expressions.length];
 				for(int i=0; i< expressions.length;i++) {
 					expr[i]=(SeqExpr)visit(expressions[i],null);
-					System.out.println("Expr[i] = " +expr[i]);
 				}
 				return ctx.mkConcat(expr);
 			case REPLACE:
@@ -351,7 +351,28 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			throw new RuntimeException(ex);
 		}
   	}
-  	
+  	@Override
+  	public Expr visit (BooleanExpression n,Void data) {
+  		Expr left = null, right = null;
+  		BooleanOperator operator;
+  		try {
+  			operator = n.getOperator();
+  			left = visit(n.getLeft(),null);
+  			right = visit(n.getRight(),null);
+  			BoolExpr result=ctx.mkEq(left,right);
+  			switch (operator) {
+			case EQ:
+				return result;
+			case NEQ:
+				return ctx.mkNot(result);
+			default:
+				throw new RuntimeException();
+  			}
+  		}
+  		catch (Z3Exception ex) {
+  			throw new RuntimeException(ex);
+  		}
+  	}
   	@Override
 	public Expr visit(StringBooleanExpression n, Void data) {
   		Expr left = null, right = null;
@@ -360,8 +381,6 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			operator= n.getOperator();
 			left = visit(n.getLeft(),null);
 			right = visit(n.getRight(),null);
-			System.out.println("left: " + left);
-			System.out.println("right: " + right);
 			switch (operator) {
 				case EQUALS: 
 					return ctx.mkEq(left,right);
