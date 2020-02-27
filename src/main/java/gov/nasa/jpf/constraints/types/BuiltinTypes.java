@@ -686,6 +686,12 @@ public abstract class BuiltinTypes {
 		}
 
 		@Override
+		public Double parseUnsafe(final String string) throws ImpreciseRepresentationException {
+			BigDecimal original = new BigDecimal(string);
+			return original.doubleValue();
+		}
+
+		@Override
 		public int compare(final Double left, final Double right) {
 			return left.compareTo(right);
 		}

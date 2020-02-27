@@ -39,7 +39,9 @@ public interface Type<T> {
 
 	public <O> CastOperation<? super O, ? extends T> requireCast(Type<O> fromType);
 
+	public default T parseUnsafe(String string) throws ImpreciseRepresentationException {
+		return parse(string);
+	}
+	
 	public abstract T parse(String string) throws ImpreciseRepresentationException;
-
-
 }
