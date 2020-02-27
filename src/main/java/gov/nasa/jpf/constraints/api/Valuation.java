@@ -123,6 +123,10 @@ public class Valuation extends AbstractPrintable
 		setValue(v, v.getType().parse(strVal));
 	}
 
+	public <E> void setUnsafeParsedValue(Variable<E> v, String strVal) throws ImpreciseRepresentationException {
+		setValue(v, v.getType().parseUnsafe(strVal));
+	}
+
 	public <E> void addEntry(ValuationEntry<E> e) {
 		setValue(e.getVariable(), e.getValue());
 	}
