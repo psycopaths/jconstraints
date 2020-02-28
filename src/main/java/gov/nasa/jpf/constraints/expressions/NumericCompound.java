@@ -20,6 +20,7 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.NumericType;
 import gov.nasa.jpf.constraints.types.Type;
 import gov.nasa.jpf.constraints.types.TypeContext;
@@ -134,6 +135,7 @@ public class NumericCompound<E> extends AbstractExpression<E> {
     a.append(')');
   }
 
+
   @Override
   public void printMalformedExpression(Appendable a, int flags) 
           throws IOException {
@@ -175,18 +177,49 @@ public class NumericCompound<E> extends AbstractExpression<E> {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     NumericCompound<?> other = (NumericCompound<?>) obj;
-    if(operator != other.operator)
+    if (operator != other.operator) {
       return false;
-    
+    }
+
     return left.equals(other.left) && right.equals(other.right);
   }
 
-  
+  public <F> Expression<F> as(Type<F> type) {
+    Type<E> thisType = getType();
+    if (!thisType.equals(type)) {
+      if (thisType.equals(BuiltinTypes.INTEGER) && type.equals(BuiltinTypes.DECIMAL)) {
+        if ((left instanceof Constant ||
+             left instanceof UnaryMinus && ((UnaryMinus) left).getNegated() instanceof Constant) &&
+            (right instanceof Constant ||
+             right instanceof UnaryMinus && ((UnaryMinus) right).getNegated() instanceof Constant)) {
+          Expression newLeft, newRight;
+          if (left instanceof UnaryMinus) {
+            newLeft = new UnaryMinus(new Constant(type, ((Constant) ((UnaryMinus) left).getNegated()).getValue()));
+          } else {
+            newLeft = new Constant(type, ((Constant) left).getValue());
+          }
+          if (right instanceof UnaryMinus) {
+            newRight = new UnaryMinus(new Constant(type, ((Constant) ((UnaryMinus) right).getNegated()).getValue()));
+          } else {
+            newRight = new Constant(type, ((Constant) right).getValue());
+          }
+
+
+          return new NumericCompound(newLeft, this.operator, newRight);
+        }
+      }
+      return null;
+    }
+    return (Expression<F>) this;
+  }
 }

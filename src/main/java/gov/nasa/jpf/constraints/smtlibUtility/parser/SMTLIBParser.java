@@ -230,17 +230,6 @@ public class SMTLIBParser {
             final Expression next = arguments.poll();
             Tuple<Expression, Expression> t = equalizeTypes(expr, next);
             if (operator instanceof NumericOperator) {
-
-                if (operator.equals(NumericOperator.DIV) &&
-                    (t.left instanceof Constant || t.left instanceof UnaryMinus)) {
-                    t = new Tuple<>(convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.left), t.right);
-                }
-
-                if (operator.equals(NumericOperator.DIV) &&
-                    (t.right instanceof Constant || t.right instanceof UnaryMinus)) {
-                    t = new Tuple<>(t.left, convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.right));
-                }
-
                 expr = NumericCompound.create(t.left, (NumericOperator) operator, t.right);
             } else if (operator instanceof LogicalOperator) {
                 expr = PropositionalCompound.create(t.left, (LogicalOperator) operator, t.right);
@@ -278,6 +267,14 @@ public class SMTLIBParser {
             final Expression constant = convertTypeConstOrMinusConst(left.getType(), right);
             return new Tuple(left, constant);
         } else {
+            Expression righCast = right.as(left.getType());
+            if (righCast != null) {
+                return new Tuple(left, right);
+            }
+            Expression leftCast = left.as(right.getType());
+            if (leftCast != null) {
+                return new Tuple(leftCast, right);
+            }
             throw new SMTLIBParserExceptionInvalidMethodCall(
                     "The expressions are not equal, but they are also not a constant and another BuiltIn " +
                     "expression type which might easily be type casted. left: " + left.getType() + " and right: " +
