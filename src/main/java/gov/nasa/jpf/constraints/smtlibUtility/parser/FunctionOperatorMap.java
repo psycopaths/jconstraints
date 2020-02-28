@@ -26,6 +26,7 @@ public class FunctionOperatorMap {
         typeMap.put("=", "==");
         typeMap.put("and", "&&");
         typeMap.put("or", "||");
+        typeMap.put("div", "/");
     }
 
     private static FunctionOperatorMap getInstance(){

@@ -453,6 +453,14 @@ public class SMTLIBParser {
 			final Expression constant = convertTypeConstOrMinusConst(left.getType(), right);
 			return new Tuple(left, constant);
 		} else {
+			Expression righCast = right.as(left.getType());
+			if (righCast != null) {
+				return new Tuple(left, right);
+			}
+			Expression leftCast = left.as(right.getType());
+			if (leftCast != null) {
+				return new Tuple(leftCast, right);
+			}
 			throw new SMTLIBParserExceptionInvalidMethodCall(
 					"The expressions are not equal, but they are also not a constant and another BuiltIn " +
 					"expression type which might easily be type casted. left: " + left.getType() + " and right: " +
@@ -614,5 +622,6 @@ public class SMTLIBParser {
 		}
 		return false;
 	}
+
 
 }
