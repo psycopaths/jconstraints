@@ -15,6 +15,7 @@ public class AssignmentCollector {
 
     private Map<Variable, List<Expression>> assignments;
     private Map<Variable, List<Expression>> eventuallyPrune;
+    private int insideNegation = 0;
 
     public AssignmentCollector() {
         assignments = new HashMap<>();
@@ -75,4 +76,17 @@ public class AssignmentCollector {
         }
         return toBePruned;
     }
+
+    public void enterNegation() {
+        ++this.insideNegation;
+    }
+
+    public void exitNegation() {
+        --this.insideNegation;
+    }
+
+    public boolean isNegation() {
+        return this.insideNegation > 0;
+    }
+
 }

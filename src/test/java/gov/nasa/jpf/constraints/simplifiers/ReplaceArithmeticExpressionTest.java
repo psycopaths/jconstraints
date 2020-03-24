@@ -8,6 +8,7 @@ import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
 
@@ -72,6 +73,36 @@ public class ReplaceArithmeticExpressionTest {
         assertFalse(variables.contains(x1));
         assertFalse(variables.contains(x3));
 
+    }
+
+    @Test
+    public void replacementWithNotInExpression() {
+        /*
+         * Is it always allowed to convert a not (a == b) into (a != b)?
+         * This might simplify the implementation of this test case further.
+         * TODO: Investigate negation push into the theory.
+         */
+        Constant c0 = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(0));
+        Constant c4 = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(4));
+        Constant c5 = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(5));
+        Constant c12 = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(12));
+        Constant c42 = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(42));
+        Variable y1 = Variable.create(BuiltinTypes.INTEGER, "y1");
+        Variable x1 = Variable.create(BuiltinTypes.INTEGER, "x1");
+        Variable y2 = Variable.create(BuiltinTypes.INTEGER, "y2");
+        Variable x2 = Variable.create(BuiltinTypes.INTEGER, "x2");
+
+        Expression exprEQ = NumericBooleanExpression.create(y1, NumericComparator.EQ, c5);
+        Expression lt = NumericBooleanExpression.create(x1, NumericComparator.LT, c0);
+        Expression negatedEQ = Negation.create(NumericBooleanExpression.create(x1, NumericComparator.EQ, c42));
+
+        Expression exprEQ2 = NumericBooleanExpression.create(x2, NumericComparator.EQ, c4);
+        Expression exprEQ3 = NumericBooleanExpression.create(y2, NumericComparator.EQ, c12);
+
+        Expression problem = ExpressionUtil.and(exprEQ, lt, negatedEQ, exprEQ2, exprEQ3);
+
+        Expression res = NumericSimplificationUtil.simplify(problem);
+        assertEquals(res, PropositionalCompound.create(lt, LogicalOperator.AND, negatedEQ));
     }
 
 }
