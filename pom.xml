@@ -110,6 +110,7 @@
             <groupId>gov.nasa</groupId>
             <artifactId>jconstraints</artifactId>
             <version>${jconstraints.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
