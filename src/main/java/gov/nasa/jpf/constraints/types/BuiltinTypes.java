@@ -770,7 +770,9 @@ public abstract class BuiltinTypes {
 
 		@Override
 		public BigInteger minus(final BigInteger left, final BigInteger right) {
-			return left.add(right);
+			System.out.println("left: "+ left);
+			System.out.println("right " + right);
+			return left.subtract(right);
 		}
 
 		@Override
@@ -925,8 +927,11 @@ public abstract class BuiltinTypes {
 
 		@Override
 		public String parse(final String string){
-			String parsed = string.substring(1,string.length()-1);
-			return parsed;
+			if(string.startsWith("\"") && string.endsWith("\"")) {
+				String parsed = string.substring(1,string.length()-1);
+				return parsed;
+			}
+			return string;
 		}
 	}
 	
@@ -945,8 +950,11 @@ public abstract class BuiltinTypes {
 
 		@Override
 		public String parse(final String string){
-			String parsed = string.substring(1,string.length()-1);
-			return parsed;
+			if(string.startsWith("\"") && string.endsWith("\"")) {
+				String parsed = string.substring(1,string.length()-1);
+				return parsed;
+			}
+			return string;
 		}
 	}
 	public static final RegExType REGEX = new RegExType();;
