@@ -770,8 +770,6 @@ public abstract class BuiltinTypes {
 
 		@Override
 		public BigInteger minus(final BigInteger left, final BigInteger right) {
-			System.out.println("left: "+ left);
-			System.out.println("right " + right);
 			return left.subtract(right);
 		}
 

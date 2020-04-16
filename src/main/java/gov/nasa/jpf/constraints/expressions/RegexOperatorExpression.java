@@ -53,7 +53,7 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 		return new RegexOperatorExpression(null,RegExOperator.ALLCHAR,0,0,'0','0',"");
 	}
 	public static RegexOperatorExpression createNoChar() {
-		return new RegexOperatorExpression(null,RegExOperator.NOCHAR,0,0,'0','0',"");
+		return new RegexOperatorExpression(null,RegExOperator.NOSTR,0,0,'0','0',"");
 	}
 	public Expression<?> getLeft() {
 		return left;
@@ -96,12 +96,12 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 			return evaluateKleeneStar(values);
 		case LOOP:
 			return evaluateLoop(values);
-		case NOCHAR:
+		case NOSTR:
 			return evaluateNoChar(values);
 		case OPTIONAL:
 			return evaluateOptional(values);
 		case RANGE:
-			evaluateRange(values);
+			return evaluateRange(values);
 		case STRTORE:
 			return evaluateStrToRe(values);
 		default:
@@ -116,7 +116,9 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 	}
 
 	private String evaluateRange(Valuation values) {
-		return "[" +ch1 + "-" +ch2 +"]";
+		
+		String result = "[" +ch1 + "-" +ch2 +"]";
+		return result;
 	}
 
 	private String evaluateOptional(Valuation values) {
@@ -133,7 +135,8 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 
 	private String evaluateLoop(Valuation values) {
 		String regex = (String)left.evaluate(values);
-		return "(" + regex +"){"+low +"," +high +"}";
+		String result ="(" + regex +"){"+low +"," +high +"}";
+		return result;
 	}
 
 	private String evaluateKleeneStar(Valuation values) {
@@ -176,12 +179,43 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 	}
 
 	@Override
-	public void print(Appendable a, int flags) throws IOException {
-//		a.append('(');
-//		left.print(a, flags);
-//		a.append(operator.toString());
-//		a.append(')');
-		
+	public void print(Appendable a, int flags) throws IOException {	
+		switch (operator) {
+		case ALLCHAR:
+			a.append(operator + " ");
+			break;
+		case KLEENEPLUS:
+			a.append("(");
+			left.print(a,flags);
+			a.append(") ");
+			break;
+		case KLEENESTAR:
+			a.append("(");
+			left.print(a,flags);
+			a.append(") ");
+			break;
+		case LOOP:
+			a.append("((_ " + operator+ " " + low + " " + high + ") ");
+			left.print(a,flags);
+			a.append(") ");
+			break;
+		case NOSTR:
+			a.append(operator + " ");
+			break;
+		case OPTIONAL:
+			a.append("(" + operator);
+			left.print(a,flags);
+			a.append(") ");
+			break;
+		case RANGE:
+			a.append("( " + operator + " " +ch1 + " " + ch2 + ") ");
+			break;
+		case STRTORE:
+			a.append("(" + operator + " " + s +") ");
+			break;
+		default:
+			throw new IllegalArgumentException();
+		}
 	}
 
 	@Override

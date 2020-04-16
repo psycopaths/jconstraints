@@ -167,21 +167,35 @@ public class StringCompoundExpression extends AbstractStringExpression {
 	public void print(Appendable a, int flags) throws IOException {
 		switch (operator) {
 		case AT:
+			a.append("(" + operator + " ");
+			main.print(a,flags);
+			a.append(" " + position + ") ");
 			break;
 		case CONCAT:
 			printConcat(a,flags);
 			break;
 		case REPLACE:
+			a.append("(" + operator + " ");
+			main.print(a,flags);
+			src.print(a, flags);
+			dst.print(a,flags);
+			a.append(") ");
 			break;
 		case SUBSTR:
+			a.append("(" + operator + " ");
+			main.print(a, flags);
+			offset.print(a, flags);
+			length.print(a, flags);
+			a.append(") "); 
 			break;
 		case TOSTR:
+			a.append("(" + operator + " ");
+			main.print(a,flags);
+			a.append(") ");
 			break;
 		default:
-			break;
-		
+			throw new IllegalArgumentException();
 		}
-
 	}
 
 	private void printConcat(Appendable a, int flags) throws IOException {
@@ -192,7 +206,7 @@ public class StringCompoundExpression extends AbstractStringExpression {
 	    	a.append(" ");
 	    	e.print(a,flags);
 	    }
-	    a.append(')');
+	    a.append(") ");
 		
 	}
 	@Override

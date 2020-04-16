@@ -75,12 +75,12 @@ public class RegexCompoundExpression extends AbstractRegExExpression {
 	private String evaluateConcat(Valuation values) {
 		String lv = (String)left.evaluate(values);
 		String rv = (String)right.evaluate(values);
-		return "(" + lv + rv + ")";
+		return lv + rv;
 	}
 	@Override
 	public void collectFreeVariables(Collection<? super Variable<?>> variables) {
-		// TODO Auto-generated method stub
-
+		left.collectFreeVariables(variables);
+		right.collectFreeVariables(variables);
 	}
 
 	@Override
@@ -105,12 +105,11 @@ public class RegexCompoundExpression extends AbstractRegExExpression {
 
 	@Override
 	public void print(Appendable a, int flags) throws IOException {
-		a.append('(');
-		left.print(a, flags);
-		a.append(operator.toString());
-		right.print(a,flags);
-		a.append(')');
-
+		//TODO this doesn't really work
+			a.append("(" + operator + " ");
+			left.print(a, flags);
+			right.print(a,flags);
+			a.append(") ");
 	}
 
 	@Override

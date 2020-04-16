@@ -1,4 +1,4 @@
-package gov.nasa.jpf.constraints.expressions;
+		package gov.nasa.jpf.constraints.expressions;
 
 public enum RegExOperator implements ExpressionOperator {
 
@@ -9,7 +9,7 @@ public enum RegExOperator implements ExpressionOperator {
 	OPTIONAL("re.opt"),
 	STRTORE ("str.to.re"),
 	ALLCHAR ("re.allchar"),
-	NOCHAR	("re.nochar");
+	NOSTR	("re.nostr");
 	  
 	private final String str;
 
@@ -31,7 +31,7 @@ public enum RegExOperator implements ExpressionOperator {
 	      case "re.opt": return OPTIONAL;
 	      case "str.to.re": return STRTORE;
 	      case "re.allchar": return ALLCHAR;
-	      case "re.nochar": return NOCHAR;
+	      case "re.nostr": return NOSTR;
 	      default: return null;
 	    }
 	  }

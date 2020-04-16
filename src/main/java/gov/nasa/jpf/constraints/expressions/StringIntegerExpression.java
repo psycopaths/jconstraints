@@ -117,10 +117,23 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 
 	@Override
 	public void print(Appendable a, int flags) throws IOException {
-//	    a.append('(');
-//	    a.append(operator.toString()).append(' ');
-//	    left.print(a, flags);
-//	    a.append(')');		
+	    a.append("(" + operator + " ");
+	    switch(operator) {
+		case INDEXOF:
+			left.print(a,flags);
+			right.print(a,flags);
+			offset.print(a, flags);
+			break;
+		case LENGTH:
+			left.print(a,flags);
+			break;
+		case TOINT:
+			left.print(a,flags);
+			break;
+		default:
+			throw new IllegalArgumentException();
+	    }
+	    a.append(") ");		
 	}
 
 	@Override

@@ -65,22 +65,16 @@ public class StringBooleanExpression extends AbstractBoolExpression {
 	private Boolean evaluateSuffixOf(Expression<?> left, Expression<?> right,Valuation values) {
 		String lv = (String)left.evaluate(values);
 		String rv = (String)right.evaluate(values);
-//		System.out.println("lv: " + lv);
-//		System.out.println("rv: " + rv);
 		return lv.endsWith(rv);
 	}
 	private <L, R>Boolean evaluatePrefixOf(Expression<L> left, Expression<R> right,Valuation values) {
 		String lv = (String)left.evaluate(values);
 		String rv = (String)right.evaluate(values);
-//		System.out.println("lv: " + lv);
-//		System.out.println("rv: " + rv);
 		return lv.startsWith(rv);
 	}
 	private <L, R>Boolean evaluateContains(Expression<L> left, Expression<R> right,Valuation values) {
 		String lv = (String)left.evaluate(values);
 		String rv = (String)right.evaluate(values);
-//		System.out.println("lv: " + lv);
-//		System.out.println("rv: " + rv);
 		return lv.contains(rv);
 	}
 	
@@ -89,8 +83,6 @@ public class StringBooleanExpression extends AbstractBoolExpression {
 		
 		L lv = left.evaluate(values);
 		R rv = right.evaluate(values);
-//		System.out.println("lv: " + lv);
-//		System.out.println("rv: " + rv);
 		return lv.equals(rv);
 	}
 	
@@ -119,7 +111,7 @@ public class StringBooleanExpression extends AbstractBoolExpression {
 		a.append(operator.toString());
 		left.print(a,flags);
 		right.print(a, flags);
-		a.append(")");
+		a.append(") ");
 	}
 
 	@Override

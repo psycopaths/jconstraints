@@ -22,7 +22,7 @@ public enum StringOperator implements ExpressionOperator {
 	    switch(str){
 	      case "str.++": return CONCAT; 
 	      case "str.substr": return SUBSTR;
-	      case "str.to.at": return AT;
+	      case "str.at": return AT;
 	      case "int.to.str": return TOSTR;
 	      case "str.replace": return REPLACE;
 	      default: return null;
