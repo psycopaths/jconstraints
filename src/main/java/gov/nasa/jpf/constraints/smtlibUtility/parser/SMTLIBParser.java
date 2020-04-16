@@ -59,6 +59,7 @@ import org.smtlib.sexpr.Sexpr.Expr;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -69,6 +70,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SMTLIBParser {
 
@@ -106,7 +109,6 @@ public class SMTLIBParser {
 
         while (!parser.isEOD()) {
             ICommand cmd = parser.parseCommand();
-            // System.out.println ("current cmd: " + cmd);
             if (cmd instanceof C_declare_fun) {
                 smtParser.processDeclareFun((C_declare_fun) cmd);
             } else if (cmd instanceof C_assert) {
@@ -130,8 +132,7 @@ public class SMTLIBParser {
     }
 
     public Expression processAssert(final C_assert cmd) throws SMTLIBParserException {
-        final Expression res = processExpression(cmd.expr());
-//        System.out.println("In ProcessAssert: " + res + "Class: "  + res.getClass());
+    	final Expression res = processExpression(cmd.expr());
         problem.addAssertion(res);
         return res;
     }
@@ -158,9 +159,16 @@ public class SMTLIBParser {
 
     private <E> Expression<E> processArgument(final IExpr arg) throws SMTLIBParserException {
         Expression<E> resolved = null;
-//         System.out.println("In processArgument: arg instanceof " + arg);
         if (arg instanceof ISymbol) {
-            resolved = resolveSymbol((ISymbol) arg);
+        	if(((ISymbol) arg).value().equals("re.nostr")) {
+        		resolved = createExpression(RegExOperator.NOSTR,new LinkedList<Expression>());
+        	}
+        	if(((ISymbol) arg).value().equals("re.allchar")) {
+        		resolved = createExpression(RegExOperator.ALLCHAR,new LinkedList<Expression>());
+        	}
+        	else {
+            	resolved = resolveSymbol((ISymbol) arg);
+        	}
         } else if (arg instanceof INumeral) {
             resolved = resolveNumeral((INumeral) arg);
         } else if (arg instanceof IDecimal) {
@@ -179,7 +187,6 @@ public class SMTLIBParser {
 
     private Expression processExpression(final IExpr expr) throws SMTLIBParserException {
         Expression res = null;
-//         System.out.println("In processExpression: " + expr.getClass());
         if (expr instanceof FcnExpr) {
             res = processFunctionExpression((FcnExpr) expr);
         } else if (expr instanceof Let) {
@@ -187,7 +194,6 @@ public class SMTLIBParser {
         } else if (expr instanceof Symbol) {
         	res = resolveSymbol((ISymbol)expr);
         } else {
-        	// System.out.println("Expr: "+ expr);
             throw new SMTLIBParserNotSupportedException("Cannot pare the subexpression of type: " + expr.getClass());
         }
         return res;
@@ -210,15 +216,26 @@ public class SMTLIBParser {
 
     private Expression processFunctionExpression(final FcnExpr sExpr) throws SMTLIBParserException {
         final String operatorStr = sExpr.head().headSymbol().value();
-//         System.out.println("In processFunctionExpression: operatorStr= " + operatorStr);
+
         final Queue<Expression> convertedArguments = new LinkedList<>();
-        // System.out.println("IN processFunctionExpression: sExpr.args.size = " + sExpr.args().size());
         for (final IExpr arg : sExpr.args()) {
-//        	 System.out.println("In processFunctionExpression: arg= " + arg);
             final Expression jExpr = processArgument(arg);
+            
             convertedArguments.add(jExpr);
         }
-        // System.out.println("In processFunctionExpression: convertedArguments.size = " + convertedArguments.size());
+        if(operatorStr.equals("re.loop")) {
+        	String tmp = sExpr.toString();
+        	Pattern p = Pattern.compile("[+-]?[0-9]+");
+        	Matcher m = p.matcher(tmp);
+        	SMT smt = new SMT();
+        	IExpr.IFactory efactory = smt.smtConfig.exprFactory;
+        	m.find();
+        	IExpr low = efactory.numeral(m.group());
+        	m.find();
+        	IExpr high = efactory.numeral(m.group());
+        	convertedArguments.add(processArgument(low));
+        	convertedArguments.add(processArgument(high));    	
+        }
         Expression ret = null;
         if (operatorStr.equals("not")) {
             ret = createNegation(convertedArguments);
@@ -227,10 +244,6 @@ public class SMTLIBParser {
             final ExpressionOperator operator =
                     ExpressionOperator.fromString(FunctionOperatorMap.getjConstraintOperatorName(
                     operatorStr));
-            if (operator == null) {
-                // System.out.println("sExpr: " + sExpr);
-            }
-//            System.out.println("Operator: " + operator + " " + operator.getClass());
             ret = createExpression(operator, convertedArguments);
         }
         return ret;
@@ -250,9 +263,8 @@ public class SMTLIBParser {
 
         checkOperatorNotNull(operator);
         checkImpliesOperatorRequirements(operator, arguments);
-//       final ExpressionOperator newOperator = operator;
+        
         final ExpressionOperator newOperator = fixExpressionOperator(operator, arguments);
-//        System.out.println("new Operator: " + newOperator +": " + newOperator.getClass());
         if(!(newOperator instanceof BooleanOperator || newOperator instanceof StringBooleanOperator ||newOperator instanceof StringIntegerOperator ||newOperator instanceof StringOperator ||
         		newOperator instanceof RegExCompoundOperator ||newOperator instanceof RegExOperator || newOperator instanceof RegExBooleanOperator)) {
         	Expression expr = arguments.poll();
@@ -316,11 +328,9 @@ public class SMTLIBParser {
 						tmpexpr[i]=arguments.poll();
 					}
 				return StringCompoundExpression.createConcat(tmpexpr);
-			case REPLACE:
-				// System.out.println("In createExpression before createRepleace size of arguments(should be 1): " + arguments.size());
+			case REPLACE:	
 				return StringCompoundExpression.createReplace(arguments.poll(),arguments.poll(),arguments.poll());
 			case SUBSTR:
-				// System.out.println("In createExpression before createSubstring size of arguments(should be 1): " + arguments.size());
 				return  StringCompoundExpression.createSubstring(arguments.poll(),arguments.poll(),arguments.poll());
 			case TOSTR:
 				return  StringCompoundExpression.createToString(arguments.poll());
@@ -330,7 +340,6 @@ public class SMTLIBParser {
         } else if (newOperator instanceof StringBooleanOperator) {
         	switch((StringBooleanOperator) newOperator) {
 			case CONTAINS:
-				// System.out.println("In createExpression before createContains size of arguments(should be 0): " + arguments.size());
 				return StringBooleanExpression.createContains(arguments.poll(),arguments.poll());
 			case EQUALS:
 				return StringBooleanExpression.createEquals(arguments.poll(),arguments.poll());
@@ -344,7 +353,6 @@ public class SMTLIBParser {
         } else if (newOperator instanceof StringIntegerOperator) {
         	switch((StringIntegerOperator) newOperator) {
 			case INDEXOF:
-				// System.out.println("IndexOf with "+arguments.size() +" Arguments");
 				if(arguments.size()==0) {
 					return StringIntegerExpression.createIndexOf(arguments.poll(),arguments.poll());
 				}
@@ -359,11 +367,9 @@ public class SMTLIBParser {
 				throw new IllegalArgumentException("Unknown StringIntegerOperator: " + newOperator);
         	}
         } else if (newOperator instanceof RegExOperator) {
-//        	System.out.println("afanewOperator: " + newOperator);
         	switch((RegExOperator)newOperator) {
         	
 			case ALLCHAR:
-				// System.out.println("ALLCHAR should have 0 Arguments: " + arguments.size());
 				return RegexOperatorExpression.createAllChar();
 			case KLEENEPLUS:
 				return RegexOperatorExpression.createKleenePlus(arguments.poll());
@@ -372,19 +378,26 @@ public class SMTLIBParser {
 			case LOOP:
 				Expression re = arguments.poll();
 				Constant lo = (Constant)arguments.poll();
+				BigInteger lowLoop = (BigInteger)lo.getValue();
+				
 				if(arguments.peek()!=null) {
 					Constant hi = (Constant) arguments.poll();
-					return RegexOperatorExpression.createLoop(re,(int) lo.getValue(),(int) hi.getValue());
+					BigInteger highLoop = (BigInteger)hi.getValue();
+					return RegexOperatorExpression.createLoop(re,lowLoop.intValue(),highLoop.intValue());
 				}
 				return RegexOperatorExpression.createLoop(re, (int)lo.getValue());
-			case NOCHAR:
+			case NOSTR:
 				return RegexOperatorExpression.createNoChar();
 			case OPTIONAL:
 				return RegexOperatorExpression.createOptional(arguments.poll());
 			case RANGE:
-				Constant low = (Constant) arguments.poll();
-				Constant high = (Constant) arguments.poll();
-				return RegexOperatorExpression.createRange((char) low.getValue(), (char)high.getValue());
+				Constant loR = (Constant) arguments.poll();
+				Constant hiR = (Constant) arguments.poll();
+				String l = (String)loR.getValue();
+				String h = (String)hiR.getValue();
+				char low = l.charAt(0);
+				char high = h.charAt(0);
+				return RegexOperatorExpression.createRange(low,high);
 			case STRTORE:
 				Constant expr= (Constant)arguments.poll();
 				return RegexOperatorExpression.createStrToRe((String)expr.getValue());
@@ -397,7 +410,6 @@ public class SMTLIBParser {
 				Expression<?>tmpexpr[]= new Expression<?>[arguments.size()];
 				tmpexpr[0]=arguments.poll();
 				tmpexpr[1]=arguments.poll();
-//				System.out.println("Concat: " + Arrays.toString(tmpexpr));
 					for(int i=2; i<tmpexpr.length;i++) {
 						tmpexpr[i]=arguments.poll();
 					}
@@ -478,14 +490,13 @@ public class SMTLIBParser {
     	return Constant.create(BuiltinTypes.STRING, stringliteral.value());
     }
     private Variable resolveSymbol(final ISymbol symbol) throws SMTLIBParserExceptionInvalidMethodCall {
+
     	for (final Variable var : problem.variables) {
-//    		System.out.println("var: " +var.getName());
             if (var.getName().equals(symbol.value())) {
                 return var;
             }
         }
         for (final Variable parameter : letContext) {
-//        	System.out.println("parameter: " +parameter);
             if (parameter.getName().equals(symbol.value())) {
                 return parameter;
             }
@@ -513,26 +524,20 @@ public class SMTLIBParser {
     private final ExpressionOperator fixExpressionOperator(final ExpressionOperator operator, final Queue<Expression> arguments) {
     	final Queue<Expression> tmp = new LinkedList<Expression>(arguments);
     	final StringBooleanOperator newOperator=StringBooleanOperator.EQUALS;
-//    	System.out.println(operator + " EQUALS " + NumericComparator.EQ +": " + operator.equals(NumericComparator.EQ));
-    	if (operator.equals(NumericComparator.EQ)){
-    		// System.out.println("arguments.size (should always be 2): " + arguments.size());
+  
+    	if (operator.equals(NumericComparator.EQ)){   		
     		Expression left = tmp.poll();
-//    		System.out.println("left: " + left + ": " + left.getClass());
     		Expression right = tmp.poll();
-//    		System.out.println("right: " + right + ": " + right.getClass());
-    		// System.out.println("arguments should still have 2 Elements: " + arguments.size());
     		if (left instanceof StringBooleanExpression || left instanceof StringIntegerExpression ||left instanceof StringCompoundExpression||
     				right instanceof StringBooleanExpression || right instanceof StringIntegerExpression || right instanceof StringCompoundExpression) {
     			return newOperator;
     		}
     		if (left instanceof Variable<?> || left instanceof Constant<?>) {
-//    			System.out.println("left type: " + left.getType());
     			if(left.getType() instanceof BuiltinTypes.StringType) {
     				return newOperator;
     			}
     		}
     		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
-//    			System.out.println("right type: " + right.getType());
     			if(right.getType() instanceof BuiltinTypes.StringType) {
     				return newOperator;
     			}
@@ -548,13 +553,11 @@ public class SMTLIBParser {
     			return BooleanOperator.EQ;
     		}
     		if (left instanceof Variable<?> || left instanceof Constant<?>) {
-//    			System.out.println("left type: " + left.getType());
     			if(left.getType() instanceof BuiltinTypes.BoolType) {
     				return BooleanOperator.EQ;
     			}
     		}
     		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
-//    			System.out.println("right type: " + right.getType());
     			if(right.getType() instanceof BuiltinTypes.BoolType) {
     				return BooleanOperator.EQ;
     			}
@@ -576,13 +579,11 @@ public class SMTLIBParser {
     			return BooleanOperator.NEQ;
     		}
     		if (left instanceof Variable<?> || left instanceof Constant<?>) {
-//    			System.out.println("left type: " + left.getType());
     			if(left.getType() instanceof BuiltinTypes.BoolType) {
     				return BooleanOperator.NEQ;
     			}
     		}
     		if (right instanceof Variable<?> || right instanceof Constant<?> ) {
-//    			System.out.println("right type: " + right.getType());
     			if(right.getType() instanceof BuiltinTypes.BoolType) {
     				return BooleanOperator.NEQ;
     			}
