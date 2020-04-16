@@ -106,6 +106,7 @@ public class NativeZ3SolverContext extends SolverContext {
       }
 
       Model model = solver.getModel();
+//      System.out.println("Model: " + model);
       try {
         if (logger.isLoggable(Level.FINE)) {
           String modelText = model.toString().replace("\n", ", ").trim();

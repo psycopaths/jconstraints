@@ -422,7 +422,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				return ctx.mkRange(ctx.mkString(String.valueOf(n.getCh1())),ctx.mkString(String.valueOf(n.getCh2())));
 			case ALLCHAR:
 				return ctx.mkFullRe(ctx.mkReSort(ctx.mkStringSort()));
-			case NOCHAR:
+			case NOSTR:
 				return ctx.mkEmptyRe(ctx.mkStringSort());
 			case STRTORE:
 				return ctx.mkToRe(ctx.mkString(n.getS()));
