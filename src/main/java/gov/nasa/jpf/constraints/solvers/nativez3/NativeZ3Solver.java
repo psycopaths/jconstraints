@@ -17,13 +17,6 @@ package gov.nasa.jpf.constraints.solvers.nativez3;
 
 import com.microsoft.z3.ApplyResult;
 import com.microsoft.z3.BoolExpr;
-import gov.nasa.jpf.constraints.api.ConstraintSolver;
-import gov.nasa.jpf.constraints.api.QuantifierEliminator;
-import gov.nasa.jpf.constraints.api.Expression;
-import gov.nasa.jpf.constraints.api.Valuation;
-import java.util.Collections;
-import java.util.Map;
-
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Global;
 import com.microsoft.z3.Goal;
@@ -31,9 +24,16 @@ import com.microsoft.z3.Params;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Tactic;
 import com.microsoft.z3.Z3Exception;
+import gov.nasa.jpf.constraints.api.ConstraintSolver;
+import gov.nasa.jpf.constraints.api.Expression;
+import gov.nasa.jpf.constraints.api.QuantifierEliminator;
 import gov.nasa.jpf.constraints.api.Simplifier;
+import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
+
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 

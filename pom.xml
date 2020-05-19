@@ -48,10 +48,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compiler-plugin.version>3.1</compiler-plugin.version>
-		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <z3.version>z3-trau</z3.version>
+        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+        <z3.version>4.8.7</z3.version>
         <testng.version>6.8</testng.version>
-        <jconstraints.version>0.9.3-SNAPSHOT</jconstraints.version>		
+        <jconstraints.version>0.9.7-SNAPSHOT</jconstraints.version>
     </properties>
 
 	<!--	

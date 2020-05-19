@@ -15,15 +15,11 @@
  */
 package gov.nasa.jpf.constraints.solvers.nativez3;
 
+import com.microsoft.z3.BitVecExpr;
+import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
-import com.microsoft.z3.BitVecExpr;
-import com.microsoft.z3.BoolExpr;
-import static com.microsoft.z3.enumerations.Z3_sort_kind.Z3_BOOL_SORT;
-import static com.microsoft.z3.enumerations.Z3_sort_kind.Z3_BV_SORT;
-import static com.microsoft.z3.enumerations.Z3_sort_kind.Z3_INT_SORT;
-import static com.microsoft.z3.enumerations.Z3_sort_kind.Z3_REAL_SORT;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
@@ -35,18 +31,13 @@ import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
 import gov.nasa.jpf.constraints.expressions.NumericOperator;
-import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 public class NativeZ3TojConstraintConverter {
 
