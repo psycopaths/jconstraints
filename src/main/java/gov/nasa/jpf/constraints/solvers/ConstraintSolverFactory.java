@@ -90,8 +90,9 @@ public class ConstraintSolverFactory {
 
 	public void registerProvider(String name, ConstraintSolverProvider provider) {
 		ConstraintSolverProvider prov = providers.get(name);
-		if (prov != null && prov != provider)
-			logger.log(Level.WARNING, "Overwriting constraint solver provider with name '{0}'", name);
+		if (prov != null && prov != provider) {
+			logger.log(Level.WARNING, "Overwriting constraint solver provider with name ''{0}''", name);
+		}
 		providers.put(name, provider);
 	}
 

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -95,25 +96,28 @@ public class ExtensionLoader {
 	
 	private static List<File> findExtensionJARs(Properties properties) {
 		List<File> result = new ArrayList<>();
-		
-		File userExtDir = new File(System.getProperty("user.home") + File.separator + ".jconstraints"
-				+ File.separator + "extensions");
-		
-		if(userExtDir.exists()) {
-			addJARs(userExtDir, result);
-		}
-		
+
+		File userExtDir = new File(
+				System.getProperty("user.home") + File.separator + ".jconstraints" + File.separator + "extensions");
+
 		String propExtPath = properties.getProperty("jconstraints.extension.path");
-		if(propExtPath != null) {
-			addJARsFromPath(propExtPath, result);
-		}
-		
 		String envExtPath = System.getenv("JCONSTRAINTS_EXT_PATH");
-		
-		if(envExtPath != null) {
+
+		if (propExtPath != null) {
+			LOG.log(Level.INFO, "jConstraints load extensions from: {0}", propExtPath);
+			addJARsFromPath(propExtPath, result);
+		} else if (envExtPath != null) {
+			LOG.log(Level.INFO, "jConstraints load extensions from: {0}", envExtPath);
 			addJARsFromPath(envExtPath, result);
+		} else if (userExtDir.exists()) {
+			LOG.log(Level.INFO, "jConstraints load extensions from: {0}", userExtDir.getAbsolutePath());
+			addJARs(userExtDir, result);
+		} else {
+			LOG.info("Could not load any extensions.");
 		}
-		
+
+		LOG.log(Level.INFO, "loaded jConstraints Jars: {0}", result);
+
 		return result;
 	}
 	
@@ -124,12 +128,12 @@ public class ExtensionLoader {
 		
 		int i = 0;
 		for(File jar : jars) {
-			LOG.fine("jConstraints extension JAR: " + jar.getAbsolutePath());
+			LOG.info("jConstraints extension JAR: " + jar.getAbsolutePath());
 			try {
 				URL jarUrl = jar.toURI().toURL();
 				jarUrls[i++] = jarUrl;
 			}
-			catch(MalformedURLException ex) {
+			catch (MalformedURLException ex) {
 				LOG.severe("Could not create JAR URL for file " + jar.getAbsolutePath() + ": " + ex.getMessage());
 			}
 		}
@@ -140,7 +144,7 @@ public class ExtensionLoader {
 			System.arraycopy(jarUrls, 0, trimmed, 0, i);
 			jarUrls = trimmed;
 		}
-		
+
 		return URLClassLoader.newInstance(jarUrls, ExtensionLoader.class.getClassLoader());
 	}
 	
