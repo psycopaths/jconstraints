@@ -62,17 +62,7 @@
         <antlr.version>3.5.2</antlr.version>
         <z3.version>0.9</z3.version>
         <testng.version>6.8</testng.version>
-        <
-        <
-        <
-        <
-        <
-        <
-        < HEAD
-        <jsmtlib.version>0.9.10.1</jsmtlib.version>
-        =======
         <jsmtlib.version>SNAPSHOT</jsmtlib.version>
-        >>>>>>> Add some new features to jConstraints we developed in the last months.
     </properties>
 
     <!--
@@ -118,16 +108,16 @@
                     </execution>
                 </executions>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                <version>3.0.0-M3</version>-->
-<!--                <configuration>-->
-<!--                    <parallel>methods</parallel>-->
-<!--                    <threadCount>10</threadCount>-->
-<!--                    <groups>default</groups>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <configuration>
+                    <parallel>methods</parallel>
+                    <threadCount>10</threadCount>
+                    <groups>base</groups>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

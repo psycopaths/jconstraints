@@ -35,7 +35,7 @@ import java.util.Collections;
  */
 public class ParserTest {
 
-	@Test
+	@Test(groups = {"parser", "base"})
 	public void testParser() throws RecognitionException, ImpreciseRepresentationException {
 
 		TypeContext tc = new TypeContext(true);

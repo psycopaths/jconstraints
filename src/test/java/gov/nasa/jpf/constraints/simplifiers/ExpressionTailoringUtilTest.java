@@ -34,33 +34,33 @@ public class ExpressionTailoringUtilTest {
 
     Set<Variable<?>> vars;
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void setUp(){
         vars = new HashSet<>();
         vars.add(x);
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void disjunctClausesTest(){
         Expression testInput = ExpressionUtil.and(constraintJ, x);
         assertEquals(ExpressionTailoringUtil.tailor(testInput, vars), x);
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void directJoinedTest(){
         Expression testInput = ExpressionUtil.and(assignmentXJ, constraintJ, constraintI);
         Expression expected = ExpressionUtil.and(assignmentXJ, constraintJ);
         assertEquals(ExpressionTailoringUtil.tailor(testInput, vars), expected);
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void chainedWithOverlayTest(){
         Expression testInput = ExpressionUtil.and(assignentIJ, constraintI, constraintJ, assignmentXJ);
         Expression expected = ExpressionUtil.and(assignmentXJ, assignentIJ, constraintI, constraintJ);
         assertEquals(ExpressionTailoringUtil.tailor(testInput, vars), expected);
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void debuggingWhileLoopTest(){
         Variable a = Variable.create(BuiltinTypes.BOOL, "a");
         Variable b = Variable.create(BuiltinTypes.BOOL, "b");

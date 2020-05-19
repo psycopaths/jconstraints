@@ -24,7 +24,7 @@ import static org.testng.Assert.assertEquals;
  * @author Malte Mues (@mmuesly)
  */
 public class QF_NRA_Test {
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void realParsingGen09Test() throws SMTLIBParserException, IParser.ParserException, IOException {
         final SMTProblem problem = parseResourceFile("test_inputs/gen-09.smt2");
 
@@ -52,7 +52,7 @@ public class QF_NRA_Test {
         assertEquals(((Variable) castedThirdAssertion.getRight()).getName(), "a");
     }
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void realParsingGen14Test() throws SMTLIBParserException, IParser.ParserException, IOException {
         final SMTProblem problem = parseResourceFile("test_inputs/gen-14.smt2");
         final Expression assertStmt = problem.assertions.get(0);
@@ -62,7 +62,7 @@ public class QF_NRA_Test {
         assertEquals(castedAssertStmt.getRight().getType(), BuiltinTypes.DECIMAL);
     }
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void realParsingMgc02Test() throws SMTLIBParserException, IParser.ParserException, IOException {
         final SMTProblem problem = parseResourceFile("test_inputs/mgc_02.smt2");
         assertEquals(problem.assertions.size(), 1);

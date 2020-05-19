@@ -19,7 +19,7 @@ import static gov.nasa.jpf.constraints.smtlibUtility.parser.utility.ResourcePars
 import static org.testng.Assert.assertEquals;
 
 public class QF_LRA_Test {
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void realParsingbignum_lra1Test() throws SMTLIBParserException, IParser.ParserException, IOException {
         final SMTProblem problem = parseResourceFile("test_inputs/bignum_lra1.smt2");
         final Expression assertStmt = problem.assertions.get(0);
@@ -27,7 +27,7 @@ public class QF_LRA_Test {
         assertEquals(assertStmt.getType(), BuiltinTypes.BOOL);
     }
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void realParsingCountBy2Test() throws SMTLIBParserException, IParser.ParserException, IOException {
         final SMTProblem problem = parseResourceFile("test_inputs/_count_by_2.i_3_2_2.bpl_1.smt2");
         final Expression assertStmt = problem.assertions.get(0);
@@ -36,7 +36,7 @@ public class QF_LRA_Test {
         assertEquals(assertStmt.getType(), BuiltinTypes.BOOL);
     }
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void realParsingIntersectionExampleTest() throws
             SMTLIBParserException,
             IParser.ParserException,
@@ -48,7 +48,7 @@ public class QF_LRA_Test {
         assertEquals(assertStmt.getType(), BuiltinTypes.BOOL);
     }
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void realParsingWaterTankTest() throws SMTLIBParserException, IParser.ParserException, IOException {
         final SMTProblem problem = parseResourceFile("test_inputs/water_tank-node28718.smt2");
         assertEquals(problem.getAllAssertionsAsConjunction().getClass(), Negation.class);

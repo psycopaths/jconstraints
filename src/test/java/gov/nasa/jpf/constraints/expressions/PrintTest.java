@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 public class PrintTest {
   
   Expression exprUnderTest;
-  @BeforeTest
+  @BeforeTest(alwaysRun = true)
   public void setupExpression(){
     Variable var1 = Variable.create(BuiltinTypes.SINT32, "X");
     Variable var2 = Variable.create(BuiltinTypes.SINT32, "Y");
@@ -39,7 +39,8 @@ public class PrintTest {
             new PropositionalCompound(bool1, LogicalOperator.OR, bool2);
     exprUnderTest = compound3;
   }
-  @Test
+
+  @Test(groups = {"expressions", "base"})
   public void testMalformedPrint() {
     StringBuilder builder = new StringBuilder();
     try {
@@ -50,7 +51,7 @@ public class PrintTest {
     assertTrue(result.contains("null"));
   }
 
-  @Test(expectedExceptions = {NullPointerException.class})
+  @Test(expectedExceptions = {NullPointerException.class}, groups = {"expressions", "base"})
   public void testPrint(){
     StringBuilder builder = new StringBuilder();
     try{

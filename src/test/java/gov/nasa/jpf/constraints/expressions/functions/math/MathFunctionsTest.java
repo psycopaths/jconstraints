@@ -48,50 +48,50 @@ public class MathFunctionsTest {
 		Valuation val = new Valuation();
 		val.setValue(VAR_X, x);
 		val.setValue(VAR_Y, y);
-		
+
 		return val;
 	}
-	
+
 	private static double directEval(Function<Double> func, double arg) throws Exception {
 		Method m = Math.class.getMethod(func.getName(), double.class);
-		
-		return (Double)m.invoke(null, arg);
+
+		return (Double) m.invoke(null, arg);
 	}
-	
-	@Test
+
+	@Test(groups = {"expressions", "base"})
 	public void testCos() throws Exception {
 		testMathFunction(MathFunctions.COS);
 	}
-	
-	@Test
+
+	@Test(groups = {"expressions", "base"})
 	public void testSin() throws Exception {
 		testMathFunction(MathFunctions.SIN);
 	}
-	
-	@Test
+
+	@Test(groups = {"expressions", "base"})
 	public void testTan() throws Exception {
 		testMathFunction(MathFunctions.TAN);
 	}
-	
-	@Test
+
+	@Test(groups = {"expressions", "base"})
 	public void testAcos() throws Exception {
 		testMathFunction(MathFunctions.ACOS);
 	}
-	
-	@Test
+
+	@Test(groups = {"expressions", "base"})
 	public void testAsin() throws Exception {
 		testMathFunction(MathFunctions.ASIN);
 	}
-	
-	@Test
+
+	@Test(groups = {"expressions", "base"})
 	public void testAtan() throws Exception {
 		testMathFunction(MathFunctions.ATAN);
 	}
-	
+
 	private void testMathFunction(Function<Double> function) throws Exception {
 		Expression<Double> expr = EXPR;
 		Valuation val = createValuation();
-		
+
 		double exprEval = expr.evaluate(val);
 		Expression<Double> funcExpr = new FunctionExpression<>(function, expr);
 		

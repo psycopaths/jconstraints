@@ -27,8 +27,8 @@ import org.testng.annotations.Test;
  */
 @Test
 public class FunctionAxiomsTest {
-    
-    @Test
+
+    @Test(groups = {"expressions", "base"})
     public void printAxiomsSin() {
         AsinProperties asin = new AsinProperties(10);
         for (Expression<Boolean> e : asin.getDefinition()) {
@@ -36,7 +36,7 @@ public class FunctionAxiomsTest {
         }
     }
 
-    @Test
+    @Test(groups = {"expressions", "base"})
     public void testLogExp() {
         System.out.println("max. " + Double.MAX_VALUE);
         double d = Math.log(Double.MAX_VALUE);
@@ -44,33 +44,33 @@ public class FunctionAxiomsTest {
         double max = Math.exp(d);
         System.out.println("exp of log of max. " + max);
 
-        for (int i=0; i<5; i++) {
+        for (int i = 0; i < 5; i++) {
             double x = -200.0 * (double) i;
             double e_x = Math.exp(x);
-            System.out.println("exp of "+ x + ": " + e_x);
+            System.out.println("exp of " + x + ": " + e_x);
         }
     }
-    
-    @Test
+
+    @Test(groups = {"expressions", "base"})
     public void testSqrt() {
         SqrtProperties sqrt = new SqrtProperties(4);
-        
+
         for (Expression<Boolean> e : sqrt.getDefinition()) {
             System.out.println(e);
         }
     }
-    
-    @Test
+
+    @Test(groups = {"expressions", "base"})
     public void testAtan2() {
-        System.out.println("(+1.0, +1.0) " + Math.toDegrees( Math.atan2( +1.0, +1.0)) );
-        System.out.println("(-1.0, +1.0) " + Math.toDegrees( Math.atan2( -1.0, +1.0)) );
-        System.out.println("(-1.0, -1.0) " + Math.toDegrees( Math.atan2( -1.0, -1.0)) );
-        System.out.println("(+1.0, -1.0) " + Math.toDegrees( Math.atan2( +1.0, -1.0)) );
-        
-        System.out.println("(+1.0, +1.0) " + Math.atan2( +1.0, +1.0) );
-        System.out.println("(-1.0, +1.0) " + Math.atan2( -1.0, +1.0) );
-        System.out.println("(-1.0, -1.0) " + Math.atan2( -1.0, -1.0) );
-        System.out.println("(+1.0, -1.0) " + Math.atan2( +1.0, -1.0) );
+        System.out.println("(+1.0, +1.0) " + Math.toDegrees(Math.atan2(+1.0, +1.0)));
+        System.out.println("(-1.0, +1.0) " + Math.toDegrees(Math.atan2(-1.0, +1.0)));
+        System.out.println("(-1.0, -1.0) " + Math.toDegrees(Math.atan2(-1.0, -1.0)));
+        System.out.println("(+1.0, -1.0) " + Math.toDegrees(Math.atan2(+1.0, -1.0)));
+
+        System.out.println("(+1.0, +1.0) " + Math.atan2(+1.0, +1.0));
+        System.out.println("(-1.0, +1.0) " + Math.atan2(-1.0, +1.0));
+        System.out.println("(-1.0, -1.0) " + Math.atan2(-1.0, -1.0));
+        System.out.println("(+1.0, -1.0) " + Math.atan2(+1.0, -1.0));
       
         Atan2Properties atan2 = new Atan2Properties(11, null);
         

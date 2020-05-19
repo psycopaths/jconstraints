@@ -18,7 +18,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class LetExpressionParsingTest {
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void simpleLetExampleTest() throws SMTLIBParserException, IParser.ParserException, IOException {
         final String input = "(declare-fun x () Int)\n" + "(declare-fun y () Int)\n" + "(declare-fun m () Bool)\n" +
                              "(declare-fun n () Bool)\n" + "(declare-fun z () Int)\n" +
@@ -47,7 +47,7 @@ public class LetExpressionParsingTest {
         assertEquals(letExpr.getMainValue().getClass(), PropositionalCompound.class);
     }
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void nestedLetExampleTest() throws SMTLIBParserException, IParser.ParserException, IOException {
         final String input = "(declare-fun x () Int)\n" + "(declare-fun y () Int) \n" + "(declare-fun m () Bool) \n" +
                              "(declare-fun n () Bool) \n" + "(declare-fun z () Int) \n" +
@@ -71,7 +71,7 @@ public class LetExpressionParsingTest {
         }
     }
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void underscoresInNameTest() throws SMTLIBParserException, IParser.ParserException, IOException {
         final String input =
                 "(declare-fun x_1 () Real)\n" + "(declare-fun x_1_2 () Real)\n" + "(declare-fun abc_1_xyz () Real)\n" +

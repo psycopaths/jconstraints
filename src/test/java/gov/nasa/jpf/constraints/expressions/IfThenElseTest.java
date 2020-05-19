@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 @Test
 public class IfThenElseTest {
     
-    @Test
+    @Test(groups = {"expressions", "base"})
     public void testIfThenElse() {
         
         Variable x = new Variable(BuiltinTypes.BOOL, "x");

@@ -38,27 +38,27 @@ public class ReplaceArithmeticExpressionTest {
 
     private Expression x2GuardReplacement = NumericBooleanExpression.create(NumericCompound.create(x, NumericOperator.PLUS, c1), NumericComparator.GE, c4);
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void simpleReplacementTest() {
         Expression expected = ExpressionUtil.and(xInit, guardReplaced);
 
         assertEquals(NumericSimplificationUtil.simplify(completeUpdate), expected);
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void noReplacementTest() {
         Expression anotherAssignment = NumericBooleanExpression.create(x1, NumericComparator.EQ, c5);
         Expression expected = ExpressionUtil.and(completeUpdate, anotherAssignment);
         assertEquals(NumericSimplificationUtil.simplify(expected), expected);
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void replacementInChainTest() {
         Expression expected = ExpressionUtil.and(xInit, guardReplaced, x2GuardReplacement);
         assertEquals(NumericSimplificationUtil.simplify(all), expected);
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void replacementInManipulatedChainTest() {
         Variable x3 = Variable.create(BuiltinTypes.SINT32, "x3");
         Expression extension = NumericBooleanExpression.create(x3, NumericComparator.EQ, NumericCompound.create(x2, NumericOperator.PLUS, c5));
@@ -75,7 +75,7 @@ public class ReplaceArithmeticExpressionTest {
 
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void replacementWithNotInExpression() {
         /*
          * Is it always allowed to convert a not (a == b) into (a != b)?

@@ -11,7 +11,7 @@ import static org.testng.AssertJUnit.assertFalse;
 
 public class ExpressionUtilTest {
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void mustReplaceEveryVariableTest() {
         Variable x = Variable.create(BuiltinTypes.SINT32, "x");
 

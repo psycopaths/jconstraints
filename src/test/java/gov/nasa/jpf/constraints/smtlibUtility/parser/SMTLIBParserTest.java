@@ -20,7 +20,7 @@ import static org.testng.Assert.assertEquals;
 
 public class SMTLIBParserTest {
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void parsingRoundTripPrimeConesTest() throws IOException, SMTLIBParserException, IParser.ParserException {
         final SMTProblem problem = parseResourceFile("test_inputs/prime_cone_sat_15.smt2");
 
@@ -63,7 +63,7 @@ public class SMTLIBParserTest {
     }
 
     //This test is used for driving the development and the next, that should be enabled an make pass.
-    @Test(enabled = false)
+    @Test(enabled = false, groups = {"jsmtlib", "base"})
     public void parsingRoundTripPRP718Test() throws SMTLIBParserException, IParser.ParserException, IOException {
         final SMTProblem problem = parseResourceFile("test_inputs/prp-7-18.smt2");
 

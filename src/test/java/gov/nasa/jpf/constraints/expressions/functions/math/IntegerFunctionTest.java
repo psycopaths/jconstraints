@@ -32,28 +32,9 @@ import org.testng.annotations.Test;
  *
  */
 public class IntegerFunctionTest {
-    
-    public IntegerFunctionTest() {
-    }
 
-    @Test
+    @Test(groups = {"expressions", "base"})
     public void testIntegerFunction() {
         System.out.println(MathFunctions.IABS.doEvaluate(-10));      
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @BeforeMethod
-    public void setUpMethod() throws Exception {
-    }
-
-    @AfterMethod
-    public void tearDownMethod() throws Exception {
     }
 }

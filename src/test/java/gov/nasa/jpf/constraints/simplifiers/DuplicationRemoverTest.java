@@ -25,7 +25,7 @@ public class DuplicationRemoverTest {
     Expression addition = new NumericCompound(x2, NumericOperator.PLUS, c2);
     Expression assignment = new NumericBooleanExpression(x, NumericComparator.EQ, c2);
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void simpleDuplicationTest() throws IOException {
         Expression<Boolean> longerExpression = ExpressionUtil.and(lessThanExpression, lessThanExpression, lessThanExpression, lessThanExpression);
 
@@ -36,7 +36,7 @@ public class DuplicationRemoverTest {
         assertEquals(withoutDuplication, lessThanExpression);
     }
 
-    @Test
+    @Test(groups = {"simplifiers", "base"})
     public void simpleDuplication2Test() {
         Expression<Boolean> longerExpression = ExpressionUtil.and(greaterThan, lessThanExpression);
         longerExpression = ExpressionUtil.or(longerExpression, greaterThan);
@@ -45,16 +45,18 @@ public class DuplicationRemoverTest {
         assertEquals(simplified.toString(), longerExpression.toString());
     }
 
-    @Test public void simpleDuplicationOrTest(){
+    @Test(groups = {"simplifiers", "base"})
+    public void simpleDuplicationOrTest() {
         Expression firstPart = ExpressionUtil.or(assignment, assignment);
         Expression secondPart = ExpressionUtil.and(lessThanExpression, greaterThan, lessThanExpression);
         Expression<Boolean> thirdPart = ExpressionUtil.and(new Negation(firstPart), new Negation(secondPart));
 
-        Expression expected = ExpressionUtil.and(new Negation(assignment), new Negation(ExpressionUtil.and(lessThanExpression, greaterThan)));
+        Expression expected = ExpressionUtil.and(new Negation(assignment),
+                                                 new Negation(ExpressionUtil.and(lessThanExpression, greaterThan)));
 
         Expression flat = thirdPart.accept(FlatExpressionVisitor.getInstance(), null);
         assertEquals(flat.getChildren()[0].getClass(), Negation.class);
-        assertEquals(((Negation)flat.getChildren()[0]).getNegated().getClass(), FlatBooleanExpression.class);
+        assertEquals(((Negation) flat.getChildren()[0]).getNegated().getClass(), FlatBooleanExpression.class);
 
         Expression<Boolean> first = thirdPart.accept(FlatExpressionVisitor.getInstance(), null);
         Expression second = first.accept(SimplificationVisitor.getInstance(), null);

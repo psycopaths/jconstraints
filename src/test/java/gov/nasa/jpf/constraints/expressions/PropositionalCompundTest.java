@@ -13,7 +13,7 @@ import java.util.HashSet;
 import static org.testng.Assert.assertEquals;
 
 public class PropositionalCompundTest {
-    @Test
+    @Test(groups = {"expressions", "base"})
     public void negationTest(){
         Variable a = Variable.create(BuiltinTypes.BOOL, "a");
         Variable b = Variable.create(BuiltinTypes.BOOL, "b");

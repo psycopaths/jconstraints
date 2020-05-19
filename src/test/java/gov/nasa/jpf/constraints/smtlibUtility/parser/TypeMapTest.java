@@ -7,7 +7,7 @@ import static org.testng.Assert.assertEquals;
 
 public class TypeMapTest {
 
-    @Test
+    @Test(groups = {"jsmtlib", "base"})
     public void integerMapTest(){
         assertEquals(TypeMap.getType("int"), BuiltinTypes.INTEGER);
         assertEquals(TypeMap.getType("InT"), BuiltinTypes.INTEGER);
