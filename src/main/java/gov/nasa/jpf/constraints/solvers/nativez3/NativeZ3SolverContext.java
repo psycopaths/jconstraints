@@ -24,7 +24,6 @@ import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Symbol;
 import com.microsoft.z3.Z3Exception;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import gov.nasa.jpf.constraints.api.ConstraintSolver.Result;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
@@ -46,7 +45,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class NativeZ3SolverContext extends SolverContext {
-
 	private static final Logger logger = Logger.getLogger("constraints");
 
 	private final Deque<NativeZ3ExpressionGenerator> generatorStack = new ArrayDeque<>();
@@ -201,25 +199,25 @@ public class NativeZ3SolverContext extends SolverContext {
 				final long max = model.getNumConsts();
 				final FuncDecl[] decls = model.getConstDecls();
 				try {
+					try {
+						val.putAll(parseModel(model));
+					}
+					catch (ImpreciseRepresentationException e) {
+						Valuation testVal = new Valuation();
+						testVal.putAll(val);
 						try {
-							val.putAll(parseModel(model));
-						}
-						catch (ImpreciseRepresentationException e) {
-							Valuation testVal = new Valuation();
-							testVal.putAll(val);
-							try {
-								testVal.putAll(parseModel(model, true));
-								if (validateExpressionStack(testVal)) {
-									val.putAll(testVal, true);
-								} else {
-									throw new ImpreciseRepresentationException(
-											"Cannot fix the imprecise " + "Representation");
-								}
-							}
-							catch (ImpreciseRepresentationException e2) {
-								throw new RuntimeException("Imprecise Representation");
+							testVal.putAll(parseModel(model, true));
+							if (validateExpressionStack(testVal)) {
+								val.putAll(testVal, true);
+							} else {
+								throw new ImpreciseRepresentationException(
+										"Cannot fix the imprecise " + "Representation");
 							}
 						}
+						catch (ImpreciseRepresentationException e2) {
+							throw new RuntimeException("Imprecise Representation");
+						}
+					}
 
 				}
 				finally {

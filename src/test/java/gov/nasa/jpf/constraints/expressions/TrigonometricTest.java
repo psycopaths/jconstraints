@@ -21,6 +21,7 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.exceptions.ImpreciseDoubleException;
 import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
 import gov.nasa.jpf.constraints.expressions.functions.math.MathFunctions;
 import gov.nasa.jpf.constraints.expressions.functions.math.axioms.AsinProperties;
@@ -51,24 +52,24 @@ public class TrigonometricTest {
     @Test
     public void testAtan2() {
         Properties conf = new Properties();
-        conf.setProperty("z3.timeout", "1");              
+        conf.setProperty("z3.timeout", "1");
         SolverContext ctx = createContext(conf);
 
         SqrtProperties sqrt = new SqrtProperties(15);
         Atan2Properties atan2 = new Atan2Properties(15, sqrt);
-        
+
         ctx.add(sqrt.getDefinition());
         ctx.add(atan2.getDefinition());
 
-        Variable x = new Variable(BuiltinTypes.DOUBLE, "x");
-        Variable y = new Variable(BuiltinTypes.DOUBLE, "y");
-        
-        ctx.add(new NumericBooleanExpression(new Constant<>(BuiltinTypes.DOUBLE, 0.0), 
-                NumericComparator.LT, x));
-                
-        ctx.add(new NumericBooleanExpression(new Constant<>(BuiltinTypes.DOUBLE, 0.0), 
-                NumericComparator.LT, new FunctionExpression<>(MathFunctions.ATAN2, y, x)));
-        
+        Variable<Double> x = new Variable<>(BuiltinTypes.DOUBLE, "x");
+        Variable<Double> y = new Variable<>(BuiltinTypes.DOUBLE, "y");
+
+        ctx.add(new NumericBooleanExpression(new Constant<>(BuiltinTypes.DOUBLE, 0.0), NumericComparator.LT, x));
+
+        ctx.add(new NumericBooleanExpression(new Constant<>(BuiltinTypes.DOUBLE, 0.0),
+                                             NumericComparator.LT,
+                                             new FunctionExpression<>(MathFunctions.ATAN2, y, x)));
+
         Valuation val = new Valuation();
         Result res = ctx.solve(val);
         System.out.println(res + " : " + val);
@@ -94,35 +95,48 @@ public class TrigonometricTest {
         //ctx.add(asin.getRangeBounds());
         //ctx.add(cos.getRangeBounds());
 
-        Variable head = new Variable(BuiltinTypes.DOUBLE, "head");
-        
+        Variable<Double> head = new Variable<>(BuiltinTypes.DOUBLE, "head");
+
         //(assert (<= (* 57.29577951308232 (_asin (+ 0.6130455374565814 
         // (* 0.01204238407208075 (_cos (+ 3.141592653589793 
         // (* head 0.017453292519943295)) ) )  ))) 90.0))    
-        
-        NumericCompound cosArg = new NumericCompound(new Constant<>(BuiltinTypes.DOUBLE, 3.141592653589793), 
-                NumericOperator.PLUS, new NumericCompound(new Constant<>(BuiltinTypes.DOUBLE, 0.017453292519943295), 
-                        NumericOperator.MUL, head));
 
-        NumericCompound asinArg = new NumericCompound(new Constant<>(BuiltinTypes.DOUBLE, 0.6130455374565814), 
-                NumericOperator.PLUS, new NumericCompound(new Constant<>(BuiltinTypes.DOUBLE, 0.01204238407208075), 
-                        NumericOperator.MUL, new FunctionExpression<>(MathFunctions.COS, cosArg)));
-        
-        Expression<Boolean> test = new NumericBooleanExpression(new Constant<>(BuiltinTypes.DOUBLE, 90.0), 
-                NumericComparator.GE, new NumericCompound(new Constant<>(BuiltinTypes.DOUBLE, 57.29577951308232), 
-                        NumericOperator.MUL, new FunctionExpression<>(MathFunctions.ASIN, asinArg)));
-                        
+        NumericCompound<Double> cosArg = new NumericCompound<>(new Constant<>(BuiltinTypes.DOUBLE, 3.141592653589793),
+                                                               NumericOperator.PLUS,
+                                                               new NumericCompound<>(new Constant<>(BuiltinTypes.DOUBLE,
+                                                                                                    0.017453292519943295),
+                                                                                     NumericOperator.MUL,
+                                                                                     head));
+
+        NumericCompound<Double> asinArg = new NumericCompound<>(new Constant<>(BuiltinTypes.DOUBLE, 0.6130455374565814),
+                                                                NumericOperator.PLUS,
+                                                                new NumericCompound<>(new Constant<>(BuiltinTypes.DOUBLE,
+                                                                                                     0.01204238407208075),
+                                                                                      NumericOperator.MUL,
+                                                                                      new FunctionExpression<>(
+                                                                                              MathFunctions.COS,
+                                                                                              cosArg)));
+
+        Expression<Boolean> test = new NumericBooleanExpression(new Constant<>(BuiltinTypes.DOUBLE, 90.0),
+                                                                NumericComparator.GE,
+                                                                new NumericCompound<>(new Constant<>(BuiltinTypes.DOUBLE,
+                                                                                                     57.29577951308232),
+                                                                                      NumericOperator.MUL,
+                                                                                      new FunctionExpression<>(
+                                                                                              MathFunctions.ASIN,
+                                                                                              asinArg)));
+
         ctx.add(cos.getDomainBounds(cosArg));
         ctx.add(asin.getDomainBounds(asinArg));
         ctx.add(test);
-                                    
+
         Valuation val = new Valuation();
         Result res = ctx.solve(val);
         System.out.println(res + " : " + val);
         Assert.assertEquals(Result.SAT, res);
         System.out.println(test.evaluate(val));
     }
-    
+
     @Test
     public void testCoral1() {
         //Constraint: (sin(x1) - cos(x2)) = 0.0 
@@ -134,7 +148,7 @@ public class TrigonometricTest {
 
         SinProperties sin = new SinProperties(10);
         CosProperties cos = new CosProperties(sin);
-                
+
         ctx.add(sin.getDefinition());
         ctx.add(cos.getDefinition());
 
@@ -167,7 +181,7 @@ public class TrigonometricTest {
         Assert.assertEquals(Result.SAT, res);
 
     }
-    
+
     @Test
     public void testCoral2() {
         //Constraint: (sin(x1) - cos(x2)) = 0.0 
@@ -176,15 +190,15 @@ public class TrigonometricTest {
         Properties conf = new Properties();
         //conf.setProperty("z3.timeout", "1000");              
         SolverContext ctx = createContext(conf);
-        
+
         PowProperties pow = new PowProperties();
         SinProperties sin = new SinProperties(10);
         CosProperties cos = new CosProperties(sin);
-                
+
         ctx.add(pow.getDefinition());
         ctx.add(sin.getDefinition());
         ctx.add(cos.getDefinition());
-        
+
         // && c1 == 0.017453292519943295
         Constant c1 = new Constant(BuiltinTypes.DOUBLE, 0.017453292519943295);
         Constant zero = new Constant(BuiltinTypes.DOUBLE, 0.0);
@@ -193,37 +207,52 @@ public class TrigonometricTest {
         Variable x3 = new Variable(BuiltinTypes.DOUBLE, "x3");
         Variable x4 = new Variable(BuiltinTypes.DOUBLE, "x4");
         Variable x5 = new Variable(BuiltinTypes.DOUBLE, "x5");
-        
+
         // && x5 != 0.0 
         ctx.add(new NumericBooleanExpression(x5, NumericComparator.NE, zero));
-        
-        
+
+
         // a1: pow(((x1 * sin(((c1 * x2) - (c1 * x3)))) - (0.0 * x4)), 2.0)
-        FunctionExpression pow1 = new FunctionExpression(MathFunctions.POW, 
-                new NumericCompound( 
-                        new NumericCompound(
-                            x1, NumericOperator.MUL, new FunctionExpression<>(MathFunctions.SIN,
-                                    new NumericCompound(
-                                        new NumericCompound(c1, NumericOperator.MUL, x2),
-                                        NumericOperator.MINUS,
-                                        new NumericCompound(c1, NumericOperator.MUL, x3)
-                                    ))), 
-                        NumericOperator.MINUS, 
-                        new NumericCompound(zero, NumericOperator.MUL, x4)),
-                new Constant<>(BuiltinTypes.DOUBLE, 2.0)
-        );
-        
-        // + pow((x1 * cos((((c1 * x2) - (c1 * x3)) + 0.0))), 2.0) 
-        FunctionExpression pow2 = new FunctionExpression(MathFunctions.POW, 
-                new NumericCompound(x1, NumericOperator.MUL, new FunctionExpression<>(MathFunctions.COS,
-                        new NumericCompound( 
-                                    new NumericCompound(
-                                        new NumericCompound(c1, NumericOperator.MUL, x2),
-                                        NumericOperator.MINUS,
-                                        new NumericCompound(c1, NumericOperator.MUL, x3)
-                                    ), 
-                        NumericOperator.PLUS, zero))),
-                new Constant<>(BuiltinTypes.DOUBLE, 2.0));
+        FunctionExpression pow1 = new FunctionExpression(MathFunctions.POW,
+                                                         new NumericCompound(new NumericCompound(x1,
+                                                                                                 NumericOperator.MUL,
+                                                                                                 new FunctionExpression<>(
+                                                                                                         MathFunctions.SIN,
+                                                                                                         new NumericCompound(
+                                                                                                                 new NumericCompound(
+                                                                                                                         c1,
+                                                                                                                         NumericOperator.MUL,
+                                                                                                                         x2),
+                                                                                                                 NumericOperator.MINUS,
+                                                                                                                 new NumericCompound(
+                                                                                                                         c1,
+                                                                                                                         NumericOperator.MUL,
+                                                                                                                         x3)))),
+                                                                             NumericOperator.MINUS,
+                                                                             new NumericCompound(zero,
+                                                                                                 NumericOperator.MUL,
+                                                                                                 x4)),
+                                                         new Constant<>(BuiltinTypes.DOUBLE, 2.0));
+
+        // + pow((x1 * cos((((c1 * x2) - (c1 * x3)) + 0.0))), 2.0)
+        FunctionExpression pow2 = new FunctionExpression(MathFunctions.POW,
+                                                         new NumericCompound(x1,
+                                                                             NumericOperator.MUL,
+                                                                             new FunctionExpression<>(MathFunctions.COS,
+                                                                                                      new NumericCompound(
+                                                                                                              new NumericCompound(
+                                                                                                                      new NumericCompound(
+                                                                                                                              c1,
+                                                                                                                              NumericOperator.MUL,
+                                                                                                                              x2),
+                                                                                                                      NumericOperator.MINUS,
+                                                                                                                      new NumericCompound(
+                                                                                                                              c1,
+                                                                                                                              NumericOperator.MUL,
+                                                                                                                              x3)),
+                                                                                                              NumericOperator.PLUS,
+                                                                                                              zero))),
+                                                         new Constant<>(BuiltinTypes.DOUBLE, 2.0));
 
 
         //Constraint: 0.0 == a1
@@ -238,7 +267,6 @@ public class TrigonometricTest {
         System.out.println(res + " : " + val);
         System.out.println(test.evaluate(val));
         Assert.assertEquals(Result.SAT, res);
-
     }
     
     

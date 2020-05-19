@@ -38,7 +38,6 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 public class NativeZ3Solver extends ConstraintSolver implements QuantifierEliminator, Simplifier<Boolean> {
-
 	private static final Logger logger = Logger.getLogger("constraints");
 
 	private Context ctx;
@@ -201,5 +200,4 @@ public class NativeZ3Solver extends ConstraintSolver implements QuantifierElimin
 		}
 		return result;
 	}
-
 }

@@ -111,6 +111,4 @@ public class ExpressionZ3BVTest {
 		System.out.println(parsed);
 
 	}
-
-
 }

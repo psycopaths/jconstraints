@@ -26,37 +26,38 @@
     <description>z3 plugin for jConstraints</description>
 
     <licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-		</license>
-	</licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
     <issueManagement>
         <url>https://github.com/psycopaths/jconstraints-z3/issues</url>
         <system>GitHub Issues</system>
     </issueManagement>
 
-	<scm>
-        <developerConnection>scm:git:https://github.com/psycopaths/jconstraints-z3.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+    <scm>
+        <developerConnection>scm:git:https://github.com/psycopaths/jconstraints-z3.git
+        </developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
-	<!--
-	================================= PROPERTIES ================================
-	-->
+    <!--
+    ================================= PROPERTIES ================================
+    -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compiler-plugin.version>3.1</compiler-plugin.version>
-		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <z3.version>4.7.1</z3.version>
+        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+        <z3.version>4.8.7</z3.version>
         <testng.version>6.8</testng.version>
-        <jconstraints.version>0.9.6-SNAPSHOT</jconstraints.version>
+        <jconstraints.version>0.9.7-SNAPSHOT</jconstraints.version>
     </properties>
 
-	<!--
-	================================= BUILD PLUGINS =============================
-	-->
+    <!--
+    ================================= BUILD PLUGINS =============================
+    -->
     <build>
         <plugins>
             <plugin>
@@ -93,10 +94,9 @@
             </plugin>
         </plugins>
     </build>
-
-	<!--
-	================================= DEPENDENCIES ==============================
-	-->
+    <!--
+    ================================= DEPENDENCIES ==============================
+    -->
     <dependencies>
         <dependency>
             <groupId>org.testng</groupId>
