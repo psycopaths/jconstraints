@@ -12,9 +12,6 @@
  */
 package io.github.tudoaqua.jconstraints.cvc4;
 
-import java.util.HashMap;
-import java.util.List;
-
 import edu.nyu.acsys.CVC4.Expr;
 import edu.nyu.acsys.CVC4.ExprManager;
 import edu.nyu.acsys.CVC4.Kind;
@@ -29,24 +26,19 @@ import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
 import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
-import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
-import gov.nasa.jpf.constraints.expressions.functions.math.BooleanDoubleFunction;
-import gov.nasa.jpf.constraints.types.BuiltinTypes.DoubleType;
 import gov.nasa.jpf.constraints.types.IntegerType;
 import gov.nasa.jpf.constraints.types.RealType;
 import gov.nasa.jpf.constraints.types.Type;
-import gov.nasa.jpf.constraints.util.ExpressionClassifier;
+
+import java.util.HashMap;
 
 public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Expr> {
 
-	private HashMap<String, Expr> intVars;
-
-	private HashMap<String, Expr> realVars;
-
-
 	ExprManager em = null;
+	private HashMap<String, Expr> intVars;
+	private HashMap<String, Expr> realVars;
 
 	public CVC4ExpressionGenerator(ExprManager emT) {
 		intVars = new HashMap<String, Expr>();
@@ -58,6 +50,33 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 	public Expr generateExpression(Expression<Boolean> expression) {
 		Expr expr = visit(expression);
 		return expr;
+
+	}
+
+	@Override
+	public <E> Expr visit(Variable<E> v, Expr data) {
+		Type<E> t = v.getType();
+
+
+		if (t instanceof RealType) {
+			//System.out.println("Var "+v.getName()+" Type: "+real.toString());
+			if (realVars.containsKey(v.getName())) {
+				return realVars.get(v.getName());
+			} else {
+				Expr var = em.mkVar(v.getName(), (edu.nyu.acsys.CVC4.Type) em.realType());
+				realVars.put(v.getName(), var);
+				return var;
+			}
+		} else if (t instanceof IntegerType) {
+			if (intVars.containsKey(v.getName())) {
+				return intVars.get(v.getName());
+			} else {
+				Expr var = em.mkVar(v.getName(), (edu.nyu.acsys.CVC4.Type) em.integerType());
+				intVars.put(v.getName(), var);
+				return var;
+			}
+		}
+		throw new RuntimeException("Not able to map type: " + t.toString());
 
 	}
 
@@ -110,9 +129,9 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 	  public <E> Expr visit(NumericCompound<E> n, Expr data) {
 		Expr left = visit(n.getLeft(), data);
 		Expr right = visit(n.getRight(), data);
-		Expr all=null; 
+		Expr all=null;
 		NumericOperator op = n.getOperator();
-		
+
 	    switch(op) {
 	    case PLUS:
 	    	all= em.mkExpr(Kind.PLUS, left, right);
@@ -132,45 +151,7 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 	    }
 	    return all;
 	  }
-	  
-	  @Override
-	  public <E> Expr visit(UnaryMinus<E> n, Expr data) {
-	    return visit(n.getNegated()).notExpr();
-	  }
 
-	  @Override
-	  public <E> Expr visit(Variable<E> v, Expr data) {
-		  Type<E> t = v.getType();
-
-
-		  if (t instanceof RealType) {
-			  //System.out.println("Var "+v.getName()+" Type: "+real.toString());
-			  if (realVars.containsKey(v.getName())) {
-				  return realVars.get(v.getName());
-			  } else {
-				  Expr var = em.mkVar(v.getName(), (edu.nyu.acsys.CVC4.Type) em.realType());
-				  realVars.put(v.getName(), var);
-				  return var;
-			  }
-		  } else if (t instanceof IntegerType) {
-			  if (intVars.containsKey(v.getName())) {
-				  return intVars.get(v.getName());
-			  } else {
-				  Expr var = em.mkVar(v.getName(), (edu.nyu.acsys.CVC4.Type) em.integerType());
-				  intVars.put(v.getName(), var);
-				  return var;
-			  }
-		  }
-		  throw new RuntimeException("Not able to map type: " + t.toString());
-
-	  }
-	  
-	  @Override
-	  public <E> Expr visit(FunctionExpression<E> f, Expr data) {
-		  //TO-DO
-		  return null;
-	  }
-	  
 	  @Override
 	  public Expr visit(PropositionalCompound n, Expr data) {
 		  Expr left = visit(n.getLeft(), data);
@@ -192,6 +173,17 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 		  }
 		  return all;
 	  }
+
+	@Override
+	public <E> Expr visit(UnaryMinus<E> n, Expr data) {
+		return visit(n.getNegated()).notExpr();
+	}
+
+	@Override
+	public <E> Expr visit(FunctionExpression<E> f, Expr data) {
+		//TO-DO
+		return null;
+	}
 
 	public HashMap<String, Expr> getVars() {
 		HashMap<String, Expr> ret = new HashMap<>();
