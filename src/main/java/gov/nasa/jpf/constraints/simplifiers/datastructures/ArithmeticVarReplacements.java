@@ -12,8 +12,12 @@ public class ArithmeticVarReplacements implements Function<Variable<?>, Expressi
 
     private Map<Variable, Expression> replacements;
 
-    public ArithmeticVarReplacements(Map<Variable, Expression> replacements){
+    public ArithmeticVarReplacements(Map<Variable, Expression> replacements) {
         this.replacements = new HashMap(replacements);
+    }
+
+    public void putAll(Map<Variable, Expression> addition) {
+        replacements.putAll(addition);
     }
 
     @Override

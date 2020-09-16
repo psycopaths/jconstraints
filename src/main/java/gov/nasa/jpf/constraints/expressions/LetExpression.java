@@ -4,6 +4,8 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.simplifiers.datastructures.ArithmeticVarReplacements;
+import gov.nasa.jpf.constraints.util.ExpressionUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,7 +47,8 @@ public class LetExpression extends EqualityExpression {
 
     @Override
     public Boolean evaluate(Valuation values) {
-        throw new UnsupportedOperationException("Evaluation of LetExpression is not supported yet.");
+        Expression<Boolean> flattened = this.flattenLetExpression();
+        return flattened.evaluate(values);
     }
 
     @Override
@@ -106,5 +109,9 @@ public class LetExpression extends EqualityExpression {
 
     public Expression getMainValue() {
         return mainValue;
+    }
+
+    public Expression flattenLetExpression() {
+        return ExpressionUtil.transformVars(mainValue, new ArithmeticVarReplacements(values));
     }
 }

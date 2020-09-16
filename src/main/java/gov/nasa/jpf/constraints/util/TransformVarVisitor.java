@@ -15,10 +15,11 @@
  */
 package gov.nasa.jpf.constraints.util;
 
+import com.google.common.base.Function;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
-
-import com.google.common.base.Function;
+import gov.nasa.jpf.constraints.expressions.LetExpression;
+import gov.nasa.jpf.constraints.simplifiers.datastructures.ArithmeticVarReplacements;
 
 class TransformVarVisitor extends
     DuplicatingVisitor<Function<? super Variable<?>, ? extends Expression<?>>> {
@@ -30,16 +31,25 @@ class TransformVarVisitor extends
   }
 
   /* (non-Javadoc)
-   * @see gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor#visit(gov.nasa.jpf.constraints.api.Variable, java.lang.Object)
+   * @see gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor#visit(gov.nasa.jpf.constraints.api.Variable,
+   *  java.lang.Object)
    */
   @Override
-  public <E> Expression<?> visit(Variable<E> v,
-      Function<? super Variable<?>, ? extends Expression<?>> data) {
+  public <E> Expression<?> visit(Variable<E> v, Function<? super Variable<?>, ? extends Expression<?>> data) {
     return data.apply(v);
   }
-  
-  
-  public <T> Expression<T> apply(Expression<T> expr, Function<? super Variable<?>,? extends Expression<?>> transform) {
+
+  @Override
+  public Expression<?> visit(LetExpression let, Function<? super Variable<?>, ? extends Expression<?>> data) {
+    if (data instanceof ArithmeticVarReplacements) {
+      ArithmeticVarReplacements replacements = (ArithmeticVarReplacements) data;
+      replacements.putAll(let.getParameterValues());
+      return visit(let.getMainValue(), data);
+    }
+    throw new UnsupportedOperationException("Don't know, what is expected here");
+  }
+
+  public <T> Expression<T> apply(Expression<T> expr, Function<? super Variable<?>, ? extends Expression<?>> transform) {
     return visit(expr, transform).requireAs(expr.getType());
   }
 }
