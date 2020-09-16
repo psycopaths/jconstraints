@@ -3,19 +3,17 @@ package gov.nasa.jpf.constraints.simplifiers;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
-import gov.nasa.jpf.constraints.expressions.LogicalOperator;
+import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.expressions.Negation;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.simplifiers.datastructures.AssignmentCollector;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 
-import java.util.Map;
-
 public class CollectAssignmentVisitor extends AbstractExpressionVisitor<Expression, AssignmentCollector> {
 
     @Override
-    public <E> Expression visit(NumericBooleanExpression n, AssignmentCollector data) {
+    public Expression visit(NumericBooleanExpression n, AssignmentCollector data) {
         Expression left = n.getLeft();
         Expression right = n.getRight();
 
@@ -32,6 +30,12 @@ public class CollectAssignmentVisitor extends AbstractExpressionVisitor<Expressi
         }
         defaultVisit(n, data);
         return n;
+    }
+
+    @Override
+    public Expression visit(LetExpression letExpression, AssignmentCollector data) {
+        throw new UnsupportedOperationException("The semantics of an collect assignment visitor is not yet defined");
+
     }
 
     @Override

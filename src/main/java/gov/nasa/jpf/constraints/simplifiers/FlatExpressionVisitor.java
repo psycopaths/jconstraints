@@ -1,11 +1,10 @@
 package gov.nasa.jpf.constraints.simplifiers;
 
 import gov.nasa.jpf.constraints.api.Expression;
-import gov.nasa.jpf.constraints.expressions.*;
+import gov.nasa.jpf.constraints.expressions.LetExpression;
+import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.flattenedExpression.DuplicateFlattenedExpressionVisitor;
 import gov.nasa.jpf.constraints.flattenedExpression.FlatBooleanExpression;
-
-import java.io.IOException;
 
 public class FlatExpressionVisitor<D> extends DuplicateFlattenedExpressionVisitor<D> {
 
@@ -48,12 +47,17 @@ public class FlatExpressionVisitor<D> extends DuplicateFlattenedExpressionVisito
                 if (((FlatBooleanExpression) newRight).getOperator().equals(n.getOperator())) {
                     return convertedRight.addSubexpression(newLeft);
                 } else {
-                    return new FlatBooleanExpression(n.getOperator(),newLeft, newRight);
+                    return new FlatBooleanExpression(n.getOperator(), newLeft, newRight);
                 }
-            } else{
-                return new FlatBooleanExpression(n.getOperator(),newLeft, newRight);
+            } else {
+                return new FlatBooleanExpression(n.getOperator(), newLeft, newRight);
             }
         }
+    }
+
+    @Override
+    public Expression<Boolean> visit(LetExpression letExpression, D data) {
+        throw new UnsupportedOperationException("The semantics of a Flat-Expression Visitor is not yet defined");
     }
 
 

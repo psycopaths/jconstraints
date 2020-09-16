@@ -14,6 +14,7 @@
  * specific language governing permissions and limitations under the License.
  */
 package gov.nasa.jpf.constraints.util;
+
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
@@ -23,9 +24,7 @@ import gov.nasa.jpf.constraints.expressions.Negation;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
-import gov.nasa.jpf.constraints.expressions.RegExBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
-import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionClassifierVisitor.ExpressionType;
 
 class ExpressionClassifierVisitor extends AbstractExpressionVisitor<ExpressionType, Void> {
@@ -130,17 +129,19 @@ class ExpressionClassifierVisitor extends AbstractExpressionVisitor<ExpressionTy
     else 
       return CONSTANT;
   }
-  
+
   @Override
-  public <E> ExpressionType visit(NumericBooleanExpression n, Void data) {
+  public ExpressionType visit(NumericBooleanExpression n, Void data) {
     ExpressionType lt = visit(n.getLeft());
     ExpressionType rt = visit(n.getRight());
-    
-    if(lt == NONLINEAR || rt == NONLINEAR)
+
+    if (lt == NONLINEAR || rt == NONLINEAR) {
       return NONLINEAR;
-    if(lt == LINEAR || rt == LINEAR)
+    }
+    if (lt == LINEAR || rt == LINEAR) {
       return LINEAR;
-    else 
+    } else {
       return CONSTANT;
+    }
   }
 }

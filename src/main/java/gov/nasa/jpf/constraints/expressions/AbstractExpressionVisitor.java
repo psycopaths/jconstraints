@@ -48,35 +48,35 @@ public abstract class AbstractExpressionVisitor<R,D> implements ExpressionVisito
    * @see gov.nasa.jpf.constraints.api.ExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions.NumericBooleanExpression, D)
    */
   @Override
-  public <E>
+  public
   R visit(NumericBooleanExpression n, D data) { return defaultVisit(n, data); }
   
   @Override
-  public <E>
+  public
   R visit(RegExBooleanExpression n, D data) {return defaultVisit(n,data);}
   
   @Override
-  public <E>
+  public
   R visit(StringBooleanExpression n, D data) {return defaultVisit(n,data);}
   
   @Override
-  public <E>
+  public
   R visit(StringIntegerExpression n, D data) {return defaultVisit(n,data);}
   
   @Override
-  public <E>
+  public
   R visit(StringCompoundExpression n, D data) {return defaultVisit(n,data);}
   
   @Override
-  public<E>
+  public
   R visit(RegexCompoundExpression n, D data) {return defaultVisit(n,data);}
   
   @Override
-  public<E>
+  public
   R visit(RegexOperatorExpression n, D data) {return defaultVisit(n,data);}
   
   @Override
-  public<E>
+  public
   R visit (BooleanExpression n, D data) {return defaultVisit(n,data);}
   /* (non-Javadoc)
    * @see gov.nasa.jpf.constraints.api.ExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions.CastExpression, D)
@@ -132,15 +132,19 @@ public abstract class AbstractExpressionVisitor<R,D> implements ExpressionVisito
   }
 
   /* (non-Javadoc)
-   * @see gov.nasa.jpf.constraints.api.ExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions.BitvectorNegation, java.lang.Object)
+   * @see gov.nasa.jpf.constraints.api.ExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions
+   * .BitvectorNegation, java.lang.Object)
    */
   @Override
-  public <E> R visit(
-      BitvectorNegation<E> n, D data) {
+  public <E> R visit(BitvectorNegation<E> n, D data) {
     return defaultVisit(n, data);
   }
-  
-  
+
+  @Override
+  public R visit(LetExpression let, D data) {
+    return defaultVisit(let, data);
+  }
+
   protected <E> R defaultVisit(Expression<E> expression, D data) {
     throw new UnsupportedOperationException();
   }
@@ -148,7 +152,7 @@ public abstract class AbstractExpressionVisitor<R,D> implements ExpressionVisito
   protected final R visit(Expression<?> expression, D data) {
     return expression.accept(this, data);
   }
-  
+
   protected final R visit(Expression<?> expression) {
     return visit(expression, null);
   }

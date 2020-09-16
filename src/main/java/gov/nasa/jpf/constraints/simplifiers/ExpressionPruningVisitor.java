@@ -1,11 +1,9 @@
 package gov.nasa.jpf.constraints.simplifiers;
 
 import gov.nasa.jpf.constraints.api.Expression;
-import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
-import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
-import gov.nasa.jpf.constraints.simplifiers.datastructures.AssignmentCollector;
 import gov.nasa.jpf.constraints.util.DuplicatingVisitor;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 
@@ -19,9 +17,9 @@ public class ExpressionPruningVisitor extends DuplicatingVisitor<List<Expression
         Expression left = n.getLeft().accept(this, data);
         Expression right = n.getRight().accept(this, data);
 
-        if(left.equals(ExpressionUtil.TRUE)){
+        if (left.equals(ExpressionUtil.TRUE)) {
             return right;
-        } else if(right.equals(ExpressionUtil.TRUE)) {
+        } else if (right.equals(ExpressionUtil.TRUE)) {
             return left;
         } else {
             return new PropositionalCompound(left, n.getOperator(), right);
@@ -29,8 +27,14 @@ public class ExpressionPruningVisitor extends DuplicatingVisitor<List<Expression
     }
 
     @Override
-    public <E> Expression visit(NumericBooleanExpression n, List<Expression> data) {
-        if(data.contains(n)){
+    public Expression<?> visit(LetExpression letExpression, List<Expression> data) {
+        throw new UnsupportedOperationException(
+                "The semantics of expression pruning for LetExpressions is not yet defined");
+    }
+
+    @Override
+    public Expression visit(NumericBooleanExpression n, List<Expression> data) {
+        if (data.contains(n)) {
             return ExpressionUtil.TRUE;
         }
         return n;

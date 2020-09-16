@@ -112,17 +112,19 @@ final class ExpressionSimplificationVisitor extends DuplicatingVisitor<Boolean> 
   }
 
   /* (non-Javadoc)
-   * @see gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions.NumericBooleanExpression, java.lang.Object)
+   * @see gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions
+   * .NumericBooleanExpression, java.lang.Object)
    */
   @Override
-  public <E> Expression<?> visit(NumericBooleanExpression n, Boolean data) {
+  public Expression<?> visit(NumericBooleanExpression n, Boolean data) {
     Expression<?> left = visit(n.getLeft(), false);
     Expression<?> right = visit(n.getRight(), false);
-    
+
     NumericComparator effComp = n.getComparator();
-    if(data)
+    if (data) {
       effComp = effComp.not();
-    
+    }
+
     NumericBooleanExpression res = new NumericBooleanExpression(left, effComp, right);
     return checkConstantExpression(res);
   }

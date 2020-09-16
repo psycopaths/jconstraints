@@ -22,6 +22,7 @@ import gov.nasa.jpf.constraints.expressions.BooleanExpression;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.IfThenElse;
+import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.expressions.Negation;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
@@ -38,55 +39,45 @@ import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
 
 public interface ExpressionVisitor<R, D> {
 
-  public <E> R visit(Variable<E> v, D data);
+  <E> R visit(Variable<E> v, D data);
 
-  public <E> R visit(Constant<E> c, D data);
+  <E> R visit(Constant<E> c, D data);
 
-  public R visit(Negation n, D data);
+  R visit(Negation n, D data);
 
-  public <E> R visit(NumericBooleanExpression n, D data);
+  R visit(NumericBooleanExpression n, D data);
+
+  R visit(RegExBooleanExpression n, D data);
+
+  R visit(StringBooleanExpression n, D data);
+
+  R visit(StringIntegerExpression stringIntegerExpression, D data);
+
+  R visit(StringCompoundExpression stringCompoundExpression, D data);
+
+  R visit(RegexCompoundExpression n, D data);
+
+  R visit(RegexOperatorExpression n, D data);
+
+  <F, E> R visit(CastExpression<F, E> cast, D data);
+
+  <E> R visit(NumericCompound<E> n, D data);
+
+  R visit(PropositionalCompound n, D data);
+
+  <E> R visit(IfThenElse<E> n, D data);
+
+  <E> R visit(UnaryMinus<E> n, D data);
+
+  <E> R visit(BitvectorExpression<E> bv, D data);
+
+  <E> R visit(BitvectorNegation<E> n, D data);
+
+  R visit(QuantifierExpression q, D data);
+
+  <E> R visit(FunctionExpression<E> f, D data);
+
+  R visit(BooleanExpression booleanExpression, D data);
   
-  public <E> R visit(RegExBooleanExpression n, D data);
-  
-  public <E> R visit(StringBooleanExpression n, D data);
-  
-  public <E> R visit(StringIntegerExpression stringIntegerExpression, D data);
-  
-  public <E> R visit(StringCompoundExpression stringCompoundExpression, D data);
-  
-  public <E> R visit(RegexCompoundExpression n, D data);
-  
-  public <E> R visit(RegexOperatorExpression n , D data);
-  
-  public <F, E> R visit(CastExpression<F, E> cast, D data);
-
-  public <E> R visit(NumericCompound<E> n, D data);
-
-  public  R visit(PropositionalCompound n, D data);
-
-  public <E> R visit(IfThenElse<E> n, D data);
-  
-  public <E> R visit(
-      UnaryMinus<E> n, D data);
-  
-  public <E> R visit(
-      BitvectorExpression<E> bv, D data);
-  
-  public <E> R visit(
-      BitvectorNegation<E> n, D data);
-
-  public R visit(QuantifierExpression q, D data);
-  
-  public <E> R visit(FunctionExpression<E> f, D data);
-
-public <E> R visit(BooleanExpression booleanExpression, D data);
-
-
-
-
-
-
-
-
-
+  R visit(LetExpression letExpression, D data);
 }

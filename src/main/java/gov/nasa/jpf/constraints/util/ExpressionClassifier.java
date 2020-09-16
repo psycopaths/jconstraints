@@ -16,24 +16,16 @@
 
 package gov.nasa.jpf.constraints.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import gov.nasa.jpf.constraints.api.Expression;
-import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
-import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.LogicalOperator;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
-import gov.nasa.jpf.constraints.expressions.NumericComparator;
-import gov.nasa.jpf.constraints.expressions.NumericCompound;
-import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
-import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.BuiltinTypes.BoolType;
 import gov.nasa.jpf.constraints.types.BuiltinTypes.DoubleType;
-import gov.nasa.jpf.constraints.types.Type;
-import gov.nasa.jpf.constraints.util.ExpressionUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExpressionClassifier extends AbstractExpressionVisitor<Expression<?>, List<Expression<Boolean>>> {
  
@@ -116,9 +108,9 @@ public class ExpressionClassifier extends AbstractExpressionVisitor<Expression<?
     } else
       return n;
   };
-  
+
   @Override
-  public <E> Expression<Boolean> visit(NumericBooleanExpression n, List<Expression<Boolean>> data) {
+  public Expression<Boolean> visit(NumericBooleanExpression n, List<Expression<Boolean>> data) {
     data.add(n);
     return null;
   };

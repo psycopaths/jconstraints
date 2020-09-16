@@ -4,11 +4,8 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import org.smtlib.TypeChecker;
-import org.smtlib.impl.SMTExpr;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Author: Malte Mues
+ * Author: Malte Mues (@mmuesly mail.mues@gmail.com)
  */
 public class LetExpression extends EqualityExpression {
     private final List<Variable> variables;
@@ -58,7 +55,12 @@ public class LetExpression extends EqualityExpression {
 
     @Override
     public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
-        throw new UnsupportedOperationException("Visitors are not supported on LetExpression up to now.");
+        /* TODO: This is not a universal valid implementation, I guess.
+         *
+         * One Idea to fix this, is replacing of Let expressions into a single expression and then apply
+         * the visitor without any further problems on the Let-Expression free form. Any other opinions
+         */
+        return visitor.visit(this, data);
     }
 
     @Override

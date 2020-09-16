@@ -1,6 +1,7 @@
 package gov.nasa.jpf.constraints.simplifiers;
 
 import gov.nasa.jpf.constraints.api.Expression;
+import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.flattenedExpression.DuplicateFlattenedExpressionVisitor;
 import gov.nasa.jpf.constraints.flattenedExpression.FlatBooleanExpression;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
@@ -38,14 +39,19 @@ public class SimplificationVisitor<D> extends DuplicateFlattenedExpressionVisito
                 Expression convertedChild = e.accept(this, null);
                 if(result == null){
                     result = convertedChild;
-                }else {
+                } else {
                     List<Expression<Boolean>> toCombine = new ArrayList();
                     toCombine.add(result);
                     toCombine.add(convertedChild);
-                    result = ExpressionUtil.combine(n.getOperator(),result, toCombine);
+                    result = ExpressionUtil.combine(n.getOperator(), result, toCombine);
                 }
             }
             return result;
         }
+    }
+
+    @Override
+    public Expression<Boolean> visit(LetExpression letExpression, D data) {
+        throw new UnsupportedOperationException("The semantics of simplification on a LetExpression is not defined");
     }
 }
