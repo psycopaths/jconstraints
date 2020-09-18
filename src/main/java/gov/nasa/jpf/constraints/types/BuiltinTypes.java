@@ -20,6 +20,7 @@ import gov.nasa.jpf.constraints.casts.CastOperation;
 import gov.nasa.jpf.constraints.casts.NumericCastOperation;
 import gov.nasa.jpf.constraints.exceptions.ImpreciseDoubleException;
 import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
+import org.apache.commons.math3.fraction.BigFraction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -930,23 +931,97 @@ public abstract class BuiltinTypes {
 		}
 
 		@Override
-		public String parse(final String string){
-			if(string.startsWith("\"") && string.endsWith("\"")) {
-				String parsed = string.substring(1,string.length()-1);
+		public String parse(final String string) {
+			if (string.startsWith("\"") && string.endsWith("\"")) {
+				String parsed = string.substring(1, string.length() - 1);
 				return parsed;
 			}
 			return string;
 		}
 	}
-	
-	public static final class StringType extends ConcreteType<String>{
-		StringType(){
-			super("string",String.class,"",null, new String[] {"string"},String.class);
+
+	public static final class RealType extends ConcreteRealType<BigFraction> {
+
+
+		public RealType() {
+			super("real",
+				  BigFraction.class,
+				  BigFraction.ZERO,
+				  true,
+				  null,
+				  null,
+				  null,
+				  new String[]{"real", "fraction"});
+		}
+
+		@Override
+		public int compare(BigFraction left, BigFraction right) {
+			return left.compareTo(right);
+		}
+
+		@Override
+		public BigDecimal decimalValue(BigFraction value) {
+			return value.bigDecimalValue();
+		}
+
+		@Override
+		public BigFraction plus(BigFraction left, BigFraction right) {
+			return left.add(right);
+		}
+
+		@Override
+		public BigFraction minus(BigFraction left, BigFraction right) {
+			return left.subtract(right);
+		}
+
+		@Override
+		public BigFraction mul(BigFraction left, BigFraction right) {
+			return left.multiply(right);
+		}
+
+		@Override
+		public BigFraction div(BigFraction left, BigFraction right) {
+			return left.divide(right);
+		}
+
+		@Override
+		public BigFraction mod(BigFraction left, BigFraction right) {
+			throw new UnsupportedOperationException("Remainder is not yet supported on RealValues");
+		}
+
+		@Override
+		public BigFraction negate(BigFraction num) {
+			return num.negate();
+		}
+
+		@Override
+		public BigFraction cast(final Object other) {
+			if (other instanceof BigFraction) {
+				return (BigFraction) other;
+			}
+			if (other instanceof BigInteger) {
+				return new BigFraction((BigInteger) other);
+			}
+			if (other instanceof Number) {
+				return new BigFraction(((Number) other).doubleValue());
+			}
+			throw new ClassCastException();
+		}
+
+		@Override
+		public BigFraction parse(String string) throws ImpreciseRepresentationException {
+			throw new UnsupportedOperationException("Cannot parse reals yet");
+		}
+	}
+
+	public static final class StringType extends ConcreteType<String> {
+		StringType() {
+			super("string", String.class, "", null, new String[]{"string"}, String.class);
 		}
 
 		@Override
 		public String cast(Object other) {
-			if(other instanceof String) {
+			if (other instanceof String) {
 				return (String) other;
 			}
 			throw new ClassCastException();
@@ -974,6 +1049,7 @@ public abstract class BuiltinTypes {
 	public static final SInt16Type SINT16 = new SInt16Type();
 	public static final UInt16Type UINT16 = new UInt16Type();
 	public static final SInt8Type SINT8 = new SInt8Type();
+	public static final RealType REAL = new RealType();
 
 	public static boolean isBuiltinType(final Type aType) {
 		if (aType instanceof BoolType || aType instanceof BigDecimalType || aType instanceof BigIntegerType ||
