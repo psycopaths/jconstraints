@@ -162,4 +162,12 @@ public class IfThenElse<E> extends AbstractExpression<E> {
     public Expression<E> getElse() {
         return elseExpr;
     }
+
+    public static <E> IfThenElse<E> create(Expression<Boolean> condition,
+                                           Expression<E> thenExpr,
+                                           Expression<E> elseExpr) {
+        Type<E> type = thenExpr.getType();
+        Expression<E> convertedElse = elseExpr.requireAs(type);
+        return new IfThenElse<E>(condition, thenExpr, convertedElse);
+    }
 }

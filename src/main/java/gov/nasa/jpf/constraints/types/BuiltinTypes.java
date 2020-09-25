@@ -826,7 +826,7 @@ public abstract class BuiltinTypes {
 
 	public static final class BigDecimalType extends ConcreteRealType<BigDecimal> {
 		BigDecimalType() {
-			super("decimal", BigDecimal.class, BigDecimal.ZERO, true, null, null, null, new String[]{"BigDecimal"});
+			super("decimal", BigDecimal.class, BigDecimal.ZERO, true, null, null, REAL, new String[]{"BigDecimal"});
 		}
 
 		@Override
@@ -1012,6 +1012,15 @@ public abstract class BuiltinTypes {
 		public BigFraction parse(String string) throws ImpreciseRepresentationException {
 			throw new UnsupportedOperationException("Cannot parse reals yet");
 		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		protected <O> CastOperation<? super O, ? extends BigFraction> castFrom(final Type<O> other) {
+			if (Number.class.isAssignableFrom(other.getCanonicalClass())) {
+				return (CastOperation<? super O, ? extends BigFraction>) NumericCastOperation.TO_REAL;
+			}
+			return null;
+		}
 	}
 
 	public static final class StringType extends ConcreteType<String> {
@@ -1040,6 +1049,7 @@ public abstract class BuiltinTypes {
 	public static final RegExType REGEX = new RegExType();
 	public static final StringType STRING = new StringType();
 	public static final BoolType BOOL = new BoolType();
+	public static final RealType REAL = new RealType();
 	public static final BigDecimalType DECIMAL = new BigDecimalType();
 	public static final BigIntegerType INTEGER = new BigIntegerType();
 	public static final DoubleType DOUBLE = new DoubleType();
@@ -1049,13 +1059,14 @@ public abstract class BuiltinTypes {
 	public static final SInt16Type SINT16 = new SInt16Type();
 	public static final UInt16Type UINT16 = new UInt16Type();
 	public static final SInt8Type SINT8 = new SInt8Type();
-	public static final RealType REAL = new RealType();
+
 
 	public static boolean isBuiltinType(final Type aType) {
 		if (aType instanceof BoolType || aType instanceof BigDecimalType || aType instanceof BigIntegerType ||
 			aType instanceof DoubleType || aType instanceof FloatType || aType instanceof SInt64Type ||
 			aType instanceof SInt32Type || aType instanceof SInt16Type || aType instanceof UInt16Type ||
-			aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType) {
+			aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType ||
+			aType instanceof RealType) {
 			return true;
 		} else {
 			return false;
@@ -1064,7 +1075,7 @@ public abstract class BuiltinTypes {
 
 	static final Type<?>[] BUILTIN_TYPES = new Type<?>[]
 
-			{STRING, REGEX, BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8};
+			{STRING, REGEX, BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8, REAL};
 
 	private BuiltinTypes() {
 	}

@@ -22,6 +22,7 @@ import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.types.NumericType;
 import gov.nasa.jpf.constraints.types.Type;
+import org.apache.commons.math3.fraction.BigFraction;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -163,11 +164,17 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
   private static <L,R> int compare(Expression<L> left, Expression<R> right, Valuation val) {
     L lv = left.evaluate(val);
     R rv = right.evaluate(val);
-    NumericType<L> ltype = (NumericType<L>)left.getType();
-    NumericType<R> rtype = (NumericType<R>)right.getType();
-    
+    NumericType<L> ltype = (NumericType<L>) left.getType();
+    NumericType<R> rtype = (NumericType<R>) right.getType();
+
     if (ltype.equals(rtype)) {
-        return ltype.compare(lv, (L) rv);
+      return ltype.compare(lv, (L) rv);
+    }
+
+    if (lv instanceof BigFraction && rv instanceof BigFraction) {
+      BigFraction lNum = (BigFraction) lv;
+      BigFraction rNum = (BigFraction) rv;
+      return lNum.compareTo(rNum);
     }
     
     BigDecimal lNum = ltype.decimalValue(lv);

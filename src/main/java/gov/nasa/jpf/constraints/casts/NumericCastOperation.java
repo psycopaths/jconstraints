@@ -16,6 +16,8 @@
 
 package gov.nasa.jpf.constraints.casts;
 
+import org.apache.commons.math3.fraction.BigFraction;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -81,23 +83,44 @@ public abstract class NumericCastOperation<T extends Number> implements CastOper
 	public static final NumericCastOperation<BigDecimal> TO_DECIMAL = new NumericCastOperation<BigDecimal>(BigDecimal.class) {
     @Override
     public BigDecimal cast(Number from) {
-      Class<?> clazz = from.getClass();
-      if(clazz == BigDecimal.class)
-        return (BigDecimal)from;
-      if(clazz == BigInteger.class)
-        return new BigDecimal((BigInteger)from);
-      if(clazz == Long.class)
-        return new BigDecimal(from.longValue());
-      return new BigDecimal(from.doubleValue());
-    }
+		Class<?> clazz = from.getClass();
+		if (clazz == BigDecimal.class) {
+			return (BigDecimal) from;
+		}
+		if (clazz == BigInteger.class) {
+			return new BigDecimal((BigInteger) from);
+		}
+		if (clazz == Long.class) {
+			return new BigDecimal(from.longValue());
+		}
+		return new BigDecimal(from.doubleValue());
+	}
 	};
-	
+
+	public static final NumericCastOperation<BigFraction> TO_REAL =
+			new NumericCastOperation<BigFraction>(BigFraction.class) {
+				@Override
+				public BigFraction cast(Number from) {
+					Class<?> clazz = from.getClass();
+					if (clazz == BigFraction.class) {
+						return (BigFraction) from;
+					}
+					if (clazz == BigInteger.class) {
+						return new BigFraction((BigInteger) from);
+					}
+					if (clazz == Long.class) {
+						return new BigFraction(from.longValue());
+					}
+					return new BigFraction(from.doubleValue());
+				}
+			};
+
 	public Class<Number> getFromClass() {
 		return Number.class;
 	}
-	
+
 	public Class<T> getToClass() {
 		return toClass;
 	}
-	
+
 }

@@ -160,16 +160,11 @@ public class Variable<E> extends Expression<E> {
   public void printTyped(Appendable a) throws IOException {
     print(a, DEFAULT_FLAGS | INCLUDE_VARIABLE_TYPE);
   }
-  
-  
-  
-  
-  
+
   // LEGACY API
-  
   @Deprecated
   public Variable(Class<E> clazz, String name) {
     this(ObjectConstraints.getPrimitiveType(clazz), name);
   }
-  
+
 }
