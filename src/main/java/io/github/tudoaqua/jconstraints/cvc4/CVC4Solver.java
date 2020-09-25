@@ -12,81 +12,96 @@
  */
 package io.github.tudoaqua.jconstraints.cvc4;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import edu.nyu.acsys.CVC4.Expr;
-import edu.nyu.acsys.CVC4.ExprManager;
-import edu.nyu.acsys.CVC4.SExpr;
-import edu.nyu.acsys.CVC4.SmtEngine;
+import edu.stanford.CVC4.Expr;
+import edu.stanford.CVC4.ExprManager;
+import edu.stanford.CVC4.Kind;
+import edu.stanford.CVC4.SExpr;
+import edu.stanford.CVC4.SmtEngine;
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
+import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.util.ExpressionUtil;
+import org.apache.commons.math3.fraction.BigFractionFormat;
 
-public class CVC4Solver extends ConstraintSolver{
-	
-	ExprManager em;
-	SmtEngine smt;
-	
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
+public class CVC4Solver extends ConstraintSolver {
 
-  private static void prefixPrintGetValue(SmtEngine smt, Expr e, int level) {
-    for(int i = 0; i < level; ++i) { System.out.print('-'); }
-    System.out.println("smt.getValue(" + e + ") -> " + smt.getValue(e));
+	private final ExprManager em;
+	private final SmtEngine smt;
+	private final CVC4ExpressionGenerator gen;
 
-    if(e.hasOperator()) {
-      prefixPrintGetValue(smt, e.getOperator(), level + 1);
-    }
-
-    for(int i = 0; i < e.getNumChildren(); ++i) {
-      Expr curr = e.getChild(i);
-      prefixPrintGetValue(smt, curr, level + 1);
-    }
-  }
-
-	
 	public CVC4Solver(Map<String, String> options) {
 		em = new ExprManager();
 		smt = new SmtEngine(em);
-		//smt.setLogic("QF_NRA");
+		gen = new CVC4ExpressionGenerator(em);
 
-		smt.setOption("produce-models", new SExpr(true)); // Produce Models
-		smt.setOption("output-language", new SExpr("cvc4")); // output-language
-		smt.setOption("default-dag-thresh", new SExpr(0));
+		smt.setOption("produce-models", new SExpr(true));
+		smt.setOption("output-language", new SExpr("cvc4"));
 	}
-	
-	
+
 	@Override
 	public Result solve(Expression<Boolean> f, Valuation result) {
-		CVC4ExpressionGenerator gen = new CVC4ExpressionGenerator(em);
+		gen.clearVars();
 		Expr expr = gen.generateExpression(f);
-
-		//System.out.println("Class expr: "+expr.getClass());
-		smt.assertFormula(expr);
-		Result resJC = Result.DONT_KNOW;
-		edu.nyu.acsys.CVC4.Result resCVC = smt.checkSat(em.mkConst(true));
-
-		if (resCVC.toString().equals("sat")) {
-			prefixPrintGetValue(smt, expr, 0);
+		edu.stanford.CVC4.Result resCVC = smt.checkSat(expr);
+		Result resJC = CVC4Solver.convertCVC4Res(resCVC);
+		if (resJC.equals(Result.SAT)) {
+			getModel(result, gen.getVars(), smt);
 		}
-		if (resCVC.toString().equals("sat")) {
-			resJC = Result.SAT;
-			HashMap<String, Expr> vars = gen.getVars();
-			Set<Variable<?>> jConstraintsVars = ExpressionUtil.freeVariables(f);
-			for (Variable var : jConstraintsVars) {
-				Expr cvc4Var = vars.get(var.getName());
-				Object val = smt.getValue(cvc4Var);
-				result.setValue(var, val);
-			}
-
-		} else if (resCVC.toString().equals("unsat")) {
-			resJC = Result.UNSAT;
-		}
-
 		return resJC;
 	}
 
+	@Override
+	public Result isSatisfiable(Expression<Boolean> f) {
+		edu.stanford.CVC4.Result cvc4Res = smt.checkSat(gen.generateExpression(f));
+		return CVC4Solver.convertCVC4Res(cvc4Res);
+	}
+
+	@Override
+	public SolverContext createContext() {
+		return new CVC4SolverContext();
+	}
+
+	@Override
+	public String getName() {
+		return super.getName();
+	}
+
+	public static ConstraintSolver.Result convertCVC4Res(edu.stanford.CVC4.Result res) {
+		if (res.toString().toLowerCase().equals("sat")) {
+			return Result.SAT;
+		} else if (res.toString().toLowerCase().equals("unsat")) {
+			return Result.UNSAT;
+		} else {
+			return Result.DONT_KNOW;
+		}
+	}
+
+	public static void getModel(Valuation val, HashMap<Variable, Expr> vars, SmtEngine smt) {
+		if (val != null) {
+			for (Map.Entry<Variable, Expr> entry : vars.entrySet()) {
+				Expr value = smt.getValue(entry.getValue());
+				if (value.isConst()) {
+					Kind k = value.getKind();
+					String valueString = value.toString().replace("(", "").replace(")", "").replace(" ", "");
+					if (Kind.CONST_RATIONAL.equals(k)) {
+						val.setValue(entry.getKey(), BigFractionFormat.getProperInstance().parse(valueString));
+					} else if (Kind.CONST_FLOATINGPOINT.equals(k)) {
+						val.setValue(entry.getKey(), new BigDecimal(valueString));
+					} else if (Kind.CONST_BITVECTOR.equals(k)) {
+						val.setValue(entry.getKey(), new BigInteger(valueString));
+					} else if (Kind.CONST_BOOLEAN.equals(k)) {
+						val.setValue(entry.getKey(), new Boolean(valueString).booleanValue());
+					} else {
+						throw new IllegalArgumentException("Cannot parse the variable of the model");
+					}
+				}
+			}
+		}
+	}
 }

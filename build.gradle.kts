@@ -14,7 +14,8 @@ repositories {
 dependencies {
 
     implementation("gov.nasa:jconstraints:0.9.7-SNAPSHOT")
-    implementation("io.github.tudo-aqua:cvc4-turnkey-gpl:1.7")
+    implementation("solver:CVC4-gpl:1.8.0")
+    implementation("org.apache.commons:commons-math3:3.6.1")
 
     testImplementation("org.testng:testng:7.0.0")
 }
