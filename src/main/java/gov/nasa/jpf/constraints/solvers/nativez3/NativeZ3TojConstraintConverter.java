@@ -189,7 +189,7 @@ public class NativeZ3TojConstraintConverter {
 				case Z3_BV_SORT:
 					return new Variable(BuiltinTypes.INTEGER, z3Expr.toString());
 				default:
-					throw new Exception("Unknown Sort");
+					throw new Exception("Unknown NamedSort");
 			}
 		}
 		return null;

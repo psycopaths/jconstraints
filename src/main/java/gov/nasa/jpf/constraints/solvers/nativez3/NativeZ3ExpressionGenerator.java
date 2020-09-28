@@ -42,6 +42,7 @@ import gov.nasa.jpf.constraints.expressions.BooleanOperator;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.IfThenElse;
+import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.expressions.Negation;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericComparator;
@@ -1074,6 +1075,12 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			throw new RuntimeException();
 		}
 
+	}
+
+	@Override
+	public Expr visit(LetExpression let, Void data) {
+		Expression flatLet = let.flattenLetExpression();
+		return visit(flatLet, data);
 	}
 
 	private ArithExpr ensureArith(Expr expr, Type<?> type) throws Z3Exception {
