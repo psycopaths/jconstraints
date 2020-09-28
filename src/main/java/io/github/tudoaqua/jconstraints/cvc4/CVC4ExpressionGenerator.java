@@ -26,6 +26,7 @@ import gov.nasa.jpf.constraints.expressions.BitvectorOperator;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.IfThenElse;
+import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.expressions.Negation;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericComparator;
@@ -156,17 +157,16 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 				break;
 			case XOR:
 				all = em.mkExpr(Kind.XOR, left, right);
-			case EQUIV:
-			case IMPLY:
 			default:
-				all = null;
+				throw new UnsupportedOperationException("Cannot convert operator: " + n.toString());
 		}
 		return all;
 	}
 
 	@Override
 	public <E> Expr visit(UnaryMinus<E> n, Expr data) {
-		return visit(n.getNegated()).notExpr();
+		Expr negated = visit(n.getNegated());
+		return em.mkExpr(Kind.UMINUS, negated);
 	}
 
 
@@ -222,6 +222,11 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 		return em.mkExpr(bvOperater, left, right);
 	}
 
+	@Override
+	public Expr visit(LetExpression let, Expr data) {
+		Expression e = let.flattenLetExpression();
+		return visit(e, data);
+	}
 
 	public HashMap<Variable, Expr> getVars() {
 		return new HashMap<>(vars);

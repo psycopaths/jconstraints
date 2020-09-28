@@ -22,6 +22,7 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import org.apache.commons.math3.fraction.BigFractionFormat;
 
 import java.math.BigDecimal;
@@ -90,7 +91,11 @@ public class CVC4Solver extends ConstraintSolver {
 					Kind k = value.getKind();
 					String valueString = value.toString().replace("(", "").replace(")", "").replace(" ", "");
 					if (Kind.CONST_RATIONAL.equals(k)) {
-						val.setValue(entry.getKey(), BigFractionFormat.getProperInstance().parse(valueString));
+						if (entry.getKey().getType().equals(BuiltinTypes.INTEGER)) {
+							val.setValue(entry.getKey(), new BigInteger(valueString));
+						} else {
+							val.setValue(entry.getKey(), BigFractionFormat.getProperInstance().parse(valueString));
+						}
 					} else if (Kind.CONST_FLOATINGPOINT.equals(k)) {
 						val.setValue(entry.getKey(), new BigDecimal(valueString));
 					} else if (Kind.CONST_BITVECTOR.equals(k)) {
