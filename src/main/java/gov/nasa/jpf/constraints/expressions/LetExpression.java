@@ -53,7 +53,8 @@ public class LetExpression extends EqualityExpression {
 
     @Override
     public void collectFreeVariables(Collection<? super Variable<?>> variables) {
-        throw new UnsupportedOperationException("collectFreeVariables is no supported for LetExpressions yet.");
+        Expression<Boolean> flattened = this.flattenLetExpression();
+        flattened.collectFreeVariables(variables);
     }
 
     @Override
