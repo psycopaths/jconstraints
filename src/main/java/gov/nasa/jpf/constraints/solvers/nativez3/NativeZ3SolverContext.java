@@ -30,6 +30,7 @@ import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
+import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import gov.nasa.jpf.constraints.util.TypeUtil;
 
@@ -43,6 +44,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NativeZ3SolverContext extends SolverContext {
 	private static final Logger logger = Logger.getLogger("constraints");
@@ -52,6 +55,8 @@ public class NativeZ3SolverContext extends SolverContext {
 	private final Deque<Map<String, Variable<?>>> freeVarsStack = new ArrayDeque<>();
 
 	private Solver solver;
+
+	private final Pattern bytePattern = Pattern.compile("\\\\x(\\d\\d)");
 
 	public NativeZ3SolverContext(final Solver solver, final NativeZ3ExpressionGenerator rootGenerator) {
 		this.solver = solver;
@@ -210,8 +215,7 @@ public class NativeZ3SolverContext extends SolverContext {
 							if (validateExpressionStack(testVal)) {
 								val.putAll(testVal, true);
 							} else {
-								throw new ImpreciseRepresentationException(
-										"Cannot fix the imprecise " + "Representation");
+								throw new ImpreciseRepresentationException("Cannot fix the imprecise " + "Representation");
 							}
 						}
 						catch (ImpreciseRepresentationException e2) {
@@ -285,7 +289,7 @@ public class NativeZ3SolverContext extends SolverContext {
 				} else {
 					val.setParsedValue(v, quot.toPlainString());
 				}
-			} else {
+			} else if (TypeUtil.isRealSort(v)) {
 				//Z3 might print a question mark at the end of the number, if it is an inexact
 				// representation
 				// and Z3 is aware of the inexact representation. Java cannot handle the question
@@ -297,6 +301,21 @@ public class NativeZ3SolverContext extends SolverContext {
 					val.setUnsafeParsedValue(v, tmpValue);
 				} else {
 					val.setParsedValue(v, tmpValue);
+				}
+			} else if (v.getType().equals(BuiltinTypes.STRING)) {
+				String sValue = value.replace("\"", "");
+				Matcher m = bytePattern.matcher(sValue);
+				while (m.find()) {
+					System.out.println("group is: " + m.group().replace("\\x", ""));
+					char c = (char) Integer.parseInt(m.group().replace("\\x", ""));
+					sValue = sValue.replace(m.group(), new String(new char[]{c}));
+				}
+				val.setParsedValue(v, sValue);
+			} else {
+				if (unsafe) {
+					val.setUnsafeParsedValue(v, value);
+				} else {
+					val.setParsedValue(v, value);
 				}
 			}
 		}
