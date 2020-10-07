@@ -27,6 +27,8 @@ public class CVC4SolverContext extends SolverContext {
 		em = new ExprManager();
 		ctx = new SmtEngine(em);
 		ctx.setOption("produce-models", new SExpr(true));
+		ctx.setOption("output-language", new SExpr("cvc4"));
+		ctx.setOption("strings-exp", new SExpr(true));
 		vars = new HashMap<>();
 		varsHistory = new LinkedList<>();
 		varsHistory.push(new HashMap());

@@ -43,6 +43,7 @@ public class CVC4Solver extends ConstraintSolver {
 
 		smt.setOption("produce-models", new SExpr(true));
 		smt.setOption("output-language", new SExpr("cvc4"));
+		smt.setOption("strings-exp", new SExpr(true));
 	}
 
 	@Override
@@ -99,14 +100,32 @@ public class CVC4Solver extends ConstraintSolver {
 					} else if (Kind.CONST_FLOATINGPOINT.equals(k)) {
 						val.setValue(entry.getKey(), new BigDecimal(valueString));
 					} else if (Kind.CONST_BITVECTOR.equals(k)) {
-						val.setValue(entry.getKey(), new BigInteger(valueString));
+						BigInteger bigValue = new BigInteger(valueString.replaceFirst("(?:(#b)|(0bin))", ""), 2);
+						addRightBitvectorType(entry.getKey(), bigValue, val);
 					} else if (Kind.CONST_BOOLEAN.equals(k)) {
 						val.setValue(entry.getKey(), new Boolean(valueString).booleanValue());
+					} else if (Kind.CONST_STRING.equals(k)) {
+						val.setValue(entry.getKey(), valueString.substring(1, valueString.length() - 1));
+
 					} else {
 						throw new IllegalArgumentException("Cannot parse the variable of the model");
 					}
 				}
 			}
+		}
+	}
+
+	private static void addRightBitvectorType(Variable key, BigInteger bigValue, Valuation val) {
+		if (key.getType().equals(BuiltinTypes.SINT32)) {
+			val.setValue(key, bigValue.intValue());
+		} else if (key.getType().equals(BuiltinTypes.SINT64)) {
+			val.setValue(key, bigValue.longValue());
+		} else if (key.getType().equals(BuiltinTypes.SINT8)) {
+			val.setValue(key, bigValue.byteValueExact());
+		} else if (key.getType().equals(BuiltinTypes.INTEGER)) {
+			val.setValue(key, bigValue);
+		} else {
+			throw new UnsupportedOperationException("Incomplete Type list. Missed: " + key.getType().getName());
 		}
 	}
 }

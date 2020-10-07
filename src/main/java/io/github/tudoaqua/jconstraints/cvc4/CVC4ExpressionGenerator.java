@@ -12,8 +12,15 @@
  */
 package io.github.tudoaqua.jconstraints.cvc4;
 
+import edu.stanford.CVC4.BitVector;
+import edu.stanford.CVC4.BitVectorExtract;
+import edu.stanford.CVC4.BitVectorSignExtend;
+import edu.stanford.CVC4.BitVectorZeroExtend;
+import edu.stanford.CVC4.CVC4String;
 import edu.stanford.CVC4.Expr;
 import edu.stanford.CVC4.ExprManager;
+import edu.stanford.CVC4.IntToBitVector;
+import edu.stanford.CVC4.Integer;
 import edu.stanford.CVC4.Kind;
 import edu.stanford.CVC4.Rational;
 import edu.stanford.CVC4.vectorExpr;
@@ -33,6 +40,12 @@ import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
 import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
+import gov.nasa.jpf.constraints.expressions.StringBooleanExpression;
+import gov.nasa.jpf.constraints.expressions.StringBooleanOperator;
+import gov.nasa.jpf.constraints.expressions.StringCompoundExpression;
+import gov.nasa.jpf.constraints.expressions.StringIntegerExpression;
+import gov.nasa.jpf.constraints.expressions.StringIntegerOperator;
+import gov.nasa.jpf.constraints.expressions.StringOperator;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.expressions.functions.Function;
 import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
@@ -86,8 +99,17 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 	public <E> Expr visit(Constant<E> c, Expr data) {
 		if (c.getType().equals(BuiltinTypes.BOOL)) {
 			return em.mkConst((Boolean) c.getValue());
+		} else if (c.getType().equals(BuiltinTypes.REAL)) {
+			return em.mkConst(new Rational(c.getValue().toString()));
+		} else if (c.getType().equals(BuiltinTypes.SINT32)) {
+			return em.mkConst(new BitVector(32, new Integer((java.lang.Integer) c.getValue())));
+		} else if (c.getType().equals(BuiltinTypes.INTEGER)) {
+			return em.mkConst(new Rational(c.getValue().toString()));
+		} else if (c.getType().equals(BuiltinTypes.STRING)) {
+			return em.mkConst(new CVC4String(c.getValue().toString()));
+		} else {
+			throw new UnsupportedOperationException("Cannot convert Constant");
 		}
-		return em.mkConst(new Rational(c.getValue().toString()));
 	}
 
 	@Override
@@ -100,45 +122,24 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 	public Expr visit(NumericBooleanExpression n, Expr data) {
 		Expr left = visit(n.getLeft(), data);
 		Expr right = visit(n.getRight(), data);
-		Expr all = null;
-		NumericComparator cmp = n.getComparator();
-		switch (cmp) {
-			case EQ:
-				all = em.mkExpr(Kind.EQUAL, left, right);
-				break;
-			case NE:
-				all = em.mkExpr(Kind.DISTINCT, left, right);
-				break;
-			case GE:
-				all = em.mkExpr(Kind.GEQ, left, right);
-				break;
-			case GT:
-				all = em.mkExpr(Kind.GT, left, right);
-				break;
-			case LE:
-				all = em.mkExpr(Kind.LEQ, left, right);
-				break;
-			case LT:
-				all = em.mkExpr(Kind.LT, left, right);
-				break;
-			default:
-				throw new UnsupportedOperationException("Cannot connvert NumericComparator: " + cmp.toString());
-		}
-		return all;
+
+		boolean bvTypes = isBVType(n.getLeft(), n.getRight());
+		boolean signed = isSigned(n.getLeft(), n.getRight());
+
+		Kind kComperator = convertNumericComparator(n.getComparator(), bvTypes, signed);
+
+		return em.mkExpr(kComperator, left, right);
 	}
 
 	@Override
 	public <E> Expr visit(NumericCompound<E> n, Expr data) {
 		Expr left = visit(n.getLeft(), data);
 		Expr right = visit(n.getRight(), data);
-		Expr all = null;
-		boolean bvTypes = n.getLeft().getType() instanceof ConcreteBVIntegerType ||
-						  n.getRight().getType() instanceof ConcreteBVIntegerType;
-		boolean signed = n.getLeft().getType() instanceof ConcreteBVIntegerType &&
-						 ((ConcreteBVIntegerType) n.getLeft().getType()).isSigned() ||
-						 n.getRight().getType() instanceof ConcreteBVIntegerType &&
-						 ((ConcreteBVIntegerType) n.getRight().getType()).isSigned();
-		Kind kOperator = convertOperator(n.getOperator(), bvTypes, signed);
+
+		boolean bvTypes = isBVType(n.getLeft(), n.getRight());
+		boolean signed = isSigned(n.getLeft(), n.getRight());
+
+		Kind kOperator = convertNumericOperator(n.getOperator(), bvTypes, signed);
 
 		return em.mkExpr(kOperator, left, right);
 	}
@@ -197,10 +198,36 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 
 	@Override
 	public <F, E> Expr visit(CastExpression<F, E> cast, Expr data) {
-		//FIXME: This is eventually a relaxiation of the problem. But it seems to be the way CVC4 handels cast
-		// internally.
-		if (cast.getCasted() instanceof Variable) {
-			return visit(cast.getCasted(), data);
+		if (cast.getType().equals(BuiltinTypes.SINT32) && cast.getCasted().getType().equals(BuiltinTypes.INTEGER)) {
+			Expr conversion = em.mkConst(new IntToBitVector(32));
+			return em.mkExpr(conversion, visit(cast.getCasted(), data));
+		} else if (cast.getType().equals(BuiltinTypes.SINT32) && cast.getCasted().getType().equals(BuiltinTypes.UINT16)) {
+			Expr conversion = em.mkConst(new BitVectorZeroExtend(16));
+			return em.mkExpr(conversion, visit(cast.getCasted(), data));
+		} else if (cast.getType().equals(BuiltinTypes.SINT32) && cast.getCasted().getType().equals(BuiltinTypes.SINT16)) {
+			Expr conversion = em.mkConst(new BitVectorSignExtend(16));
+			return em.mkExpr(conversion, visit(cast.getCasted(), data));
+		} else if (cast.getType().equals(BuiltinTypes.SINT32) && cast.getCasted().getType().equals(BuiltinTypes.SINT8)) {
+			Expr conversion = em.mkConst(new BitVectorSignExtend(24));
+			return em.mkExpr(conversion, visit(cast.getCasted(), data));
+		} else if (cast.getType().equals(BuiltinTypes.SINT64) && cast.getCasted().getType().equals(BuiltinTypes.SINT32)) {
+			Expr conversion = em.mkConst(new BitVectorSignExtend(32));
+			return em.mkExpr(conversion, visit(cast.getCasted(), data));
+		} else if (cast.getType().equals(BuiltinTypes.UINT16) && cast.getCasted().getType() instanceof BVIntegerType) {
+			Expr conversion = em.mkConst(new BitVectorExtract(15, 0));
+			return em.mkExpr(conversion, visit(cast.getCasted(), data));
+		} else if (cast.getType().equals(BuiltinTypes.SINT16) && cast.getCasted().getType().equals(BuiltinTypes.SINT32)) {
+			Expr conversion = em.mkConst(new BitVectorExtract(15, 0));
+			return em.mkExpr(conversion, visit(cast.getCasted(), data));
+		} else if (cast.getType().equals(BuiltinTypes.SINT8) && cast.getCasted().getType() instanceof BVIntegerType) {
+			Expr conversion = em.mkConst(new BitVectorExtract(7, 0));
+			return em.mkExpr(conversion, visit(cast.getCasted(), data));
+		} else if (cast.getType().equals(BuiltinTypes.INTEGER) && cast.getCasted().getType() instanceof BVIntegerType) {
+			return em.mkExpr(Kind.BITVECTOR_TO_NAT, visit(cast.getCasted(), data));
+		} else if (cast.getCasted() instanceof Constant) {
+			if (cast.getType().equals(BuiltinTypes.INTEGER)) {
+				return em.mkConst(new Rational(((Constant<F>) cast.getCasted()).getValue().toString()));
+			}
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -218,8 +245,8 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 	public <E> Expr visit(BitvectorExpression<E> bv, Expr data) {
 		Expr left = visit(bv.getLeft(), data);
 		Expr right = visit(bv.getRight(), data);
-		Kind bvOperater = convertBVOperator(bv.getOperator());
-		return em.mkExpr(bvOperater, left, right);
+		Kind bvOperator = convertBVOperator(bv.getOperator());
+		return em.mkExpr(bvOperator, left, right);
 	}
 
 	@Override
@@ -227,6 +254,38 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 		Expression e = let.flattenLetExpression();
 		return visit(e, data);
 	}
+
+	@Override
+	public Expr visit(StringBooleanExpression n, Expr data) {
+		vectorExpr exprs = new vectorExpr(em);
+		for (Expression child : n.getChildren()) {
+			exprs.add(visit(child, data));
+		}
+		Kind operator = convertStringBooleanOpeartor(n.getOperator());
+		return em.mkExpr(operator, exprs);
+	}
+
+	@Override
+	public Expr visit(StringIntegerExpression n, Expr data) {
+		vectorExpr exprs = new vectorExpr(em);
+		for (Expression child : n.getChildren()) {
+			exprs.add(visit(child, data));
+		}
+		Kind operator = convertStringIntegerOpeartor(n.getOperator());
+		return em.mkExpr(operator, exprs);
+	}
+
+
+	@Override
+	public Expr visit(StringCompoundExpression n, Expr data) {
+		vectorExpr exprs = new vectorExpr(em);
+		for (Expression child : n.getChildren()) {
+			exprs.add(visit(child, data));
+		}
+		Kind operator = convertStringCompundOpeator(n.getOperator());
+		return em.mkExpr(operator, exprs);
+	}
+
 
 	public HashMap<Variable, Expr> getVars() {
 		return new HashMap<>(vars);
@@ -249,11 +308,13 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 			return em.mkFloatingPointType(64 - doubleType.getSignificantBits(), doubleType.getSignificantBits());
 		} else if (type instanceof BuiltinTypes.FloatType) {
 			return em.mkFloatingPointType(32 - BuiltinTypes.FLOAT.getSignificantBits(),
-										  BuiltinTypes.FLOAT.getSignificantBits());
+																		BuiltinTypes.FLOAT.getSignificantBits());
 		} else if (type instanceof BuiltinTypes.BigIntegerType) {
 			return em.integerType();
 		} else if (type instanceof BVIntegerType) {
 			return em.mkBitVectorType(((BVIntegerType<?>) type).getNumBits());
+		} else if (type.equals(BuiltinTypes.STRING)) {
+			return em.stringType();
 		} else if (type instanceof NamedSort) {
 			if (declaredTypes.containsKey(type.getName())) {
 				return declaredTypes.get(type.getName());
@@ -268,6 +329,55 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 		}
 	}
 
+	private Kind convertStringBooleanOpeartor(StringBooleanOperator operator) {
+		switch (operator) {
+			case EQUALS:
+				return Kind.EQUAL;
+			case CONTAINS:
+				return Kind.STRING_STRCTN;
+			case PREFIXOF:
+				return Kind.STRING_PREFIX;
+			case SUFFIXOF:
+				return Kind.STRING_SUFFIX;
+			default:
+				throw new UnsupportedOperationException("Cannot convert the Operator: " + operator.toString());
+		}
+	}
+
+	private Kind convertStringIntegerOpeartor(StringIntegerOperator operator) {
+		switch (operator) {
+			case INDEXOF:
+				return Kind.STRING_STRIDOF;
+			case TOINT:
+				return Kind.STRING_STOI;
+			case LENGTH:
+				return Kind.STRING_LENGTH;
+			default:
+				throw new UnsupportedOperationException("Cannot convert the Operator: " + operator.toString());
+		}
+	}
+
+	private Kind convertStringCompundOpeator(StringOperator operator) {
+		switch (operator) {
+			case AT:
+				return Kind.STRING_CHARAT;
+			case TOSTR:
+				return Kind.STRING_ITOS;
+			case CONCAT:
+				return Kind.STRING_CONCAT;
+			case SUBSTR:
+				return Kind.STRING_SUBSTR;
+			case REPLACE:
+				return Kind.STRING_STRREPL;
+			case TOLOWERCASE:
+				return Kind.STRING_TOLOWER;
+			case TOUPPERCASE:
+				return Kind.STRING_TOUPPER;
+			default:
+				throw new UnsupportedOperationException("Cannot convert StringCompundOperator: " + operator.toString());
+		}
+	}
+
 	private Kind convertBVOperator(BitvectorOperator operator) {
 		if (BitvectorOperator.AND.equals(operator)) {
 			return Kind.BITVECTOR_AND;
@@ -279,7 +389,69 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 		throw new UnsupportedOperationException("Cannot convert BitvectorOperator: " + operator.toString() + " yet.");
 	}
 
-	private Kind convertOperator(NumericOperator operator, boolean bvTypes, boolean signed) {
+	private Kind convertNumericComparator(NumericComparator comparator, boolean byTypes, boolean signed) {
+		if (byTypes) {
+			return convertNumericComparatorBV(comparator, signed);
+		} else {
+			return convertNumericComparatorNBV(comparator);
+		}
+	}
+
+	private Kind convertNumericComparatorNBV(NumericComparator cmp) {
+		switch (cmp) {
+			case EQ:
+				return Kind.EQUAL;
+			case NE:
+				return Kind.DISTINCT;
+			case GE:
+				return Kind.GEQ;
+			case GT:
+				return Kind.GT;
+			case LE:
+				return Kind.LEQ;
+			case LT:
+				return Kind.LT;
+			default:
+				throw new UnsupportedOperationException("Cannot connvert NumericComparator: " + cmp.toString());
+		}
+	}
+
+	private Kind convertNumericComparatorBV(NumericComparator cmp, boolean signed) {
+		switch (cmp) {
+			case EQ:
+				return Kind.EQUAL;
+			case NE:
+				return Kind.DISTINCT;
+			case GE:
+				if (signed) {
+					return Kind.BITVECTOR_SGE;
+				} else {
+					return Kind.BITVECTOR_UGE;
+				}
+			case GT:
+				if (signed) {
+					return Kind.BITVECTOR_SGT;
+				} else {
+					return Kind.BITVECTOR_UGT;
+				}
+			case LE:
+				if (signed) {
+					return Kind.BITVECTOR_SLE;
+				} else {
+					return Kind.BITVECTOR_ULE;
+				}
+			case LT:
+				if (signed) {
+					return Kind.BITVECTOR_SLT;
+				} else {
+					return Kind.BITVECTOR_ULT;
+				}
+			default:
+				throw new UnsupportedOperationException("Cannot connvert NumericComparator: " + cmp.toString());
+		}
+	}
+
+	private Kind convertNumericOperator(NumericOperator operator, boolean bvTypes, boolean signed) {
 		if (bvTypes) {
 			switch (operator) {
 				case DIV:
@@ -316,5 +488,14 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 			}
 		}
 		throw new UnsupportedOperationException("Cannot convert operator: " + operator.toString());
+	}
+
+	private boolean isBVType(Expression left, Expression right) {
+		return left.getType() instanceof ConcreteBVIntegerType || right.getType() instanceof ConcreteBVIntegerType;
+	}
+
+	private boolean isSigned(Expression left, Expression right) {
+		return left.getType() instanceof ConcreteBVIntegerType && ((ConcreteBVIntegerType) left.getType()).isSigned() ||
+					 right.getType() instanceof ConcreteBVIntegerType && ((ConcreteBVIntegerType) right.getType()).isSigned();
 	}
 }
