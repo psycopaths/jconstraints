@@ -307,10 +307,10 @@ public class NativeZ3SolverContext extends SolverContext {
 				Matcher m = bytePattern.matcher(sValue);
 				while (m.find()) {
 					System.out.println("group is: " + m.group().replace("\\x", ""));
-					char c = (char) Integer.parseInt(m.group().replace("\\x", ""));
+					char c = (char) Integer.parseInt(m.group().replace("\\x", ""), 16);
 					sValue = sValue.replace(m.group(), new String(new char[]{c}));
 				}
-				val.setParsedValue(v, sValue);
+				val.setValue((Variable<String>) v, sValue);
 			} else {
 				if (unsafe) {
 					val.setUnsafeParsedValue(v, value);

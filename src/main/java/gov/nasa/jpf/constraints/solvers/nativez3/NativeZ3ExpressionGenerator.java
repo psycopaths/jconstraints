@@ -659,10 +659,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			NumericType<E> type = (NumericType<E>) n.getType();
 
 			if (type instanceof BVIntegerType) {
-				return makeBitvectorNumericCompound(n.getOperator(),
-													type.isSigned(),
-													(BitVecExpr) left,
-													(BitVecExpr) right);
+				return makeBitvectorNumericCompound(n.getOperator(), type.isSigned(), (BitVecExpr) left, (BitVecExpr) right);
 			}
 
 			return makeArithmeticNumericCompound(n.getOperator(), (ArithExpr) left, (ArithExpr) right);
@@ -1035,8 +1032,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 					left = visit(n.getLeft());
 					return ctx.mkOption((ReExpr) left);
 				case RANGE:
-					return ctx.mkRange(ctx.mkString(String.valueOf(n.getCh1())),
-									   ctx.mkString(String.valueOf(n.getCh2())));
+					return ctx.mkRange(ctx.mkString(String.valueOf(n.getCh1())), ctx.mkString(String.valueOf(n.getCh2())));
 				case ALLCHAR:
 					return ctx.mkFullRe(ctx.mkReSort(ctx.mkStringSort()));
 				case NOSTR:
@@ -1150,9 +1146,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 //	}
 //  }
 
-	private <F, T, TT extends Type<T>> Expr makeBitvectorCast(BitVecExpr castedExpr,
-															  BVIntegerType<F> from,
-															  TT to) throws Z3Exception {
+	private <F, T, TT extends Type<T>> Expr makeBitvectorCast(BitVecExpr castedExpr, BVIntegerType<F> from, TT to) throws
+			Z3Exception {
 		try {
 			if (to instanceof BVIntegerType) {
 				BVIntegerType<?> bvTo = (BVIntegerType<?>) to;
@@ -1180,9 +1175,9 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 					int bitsAvail = ft.getSignificantBits() + 1;
 					if (bitsAvail < from.getNumBits()) {
 						BigInteger mask = BigInteger.valueOf(1L)
-													.shiftLeft(from.getNumBits() - bitsAvail)
-													.subtract(BigInteger.valueOf(1))
-													.shiftLeft(bitsAvail);
+																				.shiftLeft(from.getNumBits() - bitsAvail)
+																				.subtract(BigInteger.valueOf(1))
+																				.shiftLeft(bitsAvail);
 
 						BoolExpr posCheck = null, negCheck = null;
 						BoolExpr check = null;
@@ -1347,9 +1342,9 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	}
 
 	private Expr makeBitvectorNumericCompound(NumericOperator op,
-											  boolean signed,
-											  BitVecExpr left,
-											  BitVecExpr right) throws Z3Exception {
+																						boolean signed,
+																						BitVecExpr left,
+																						BitVecExpr right) throws Z3Exception {
 		switch (op) {
 			case PLUS:
 				return ctx.mkBVAdd(left, right);

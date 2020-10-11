@@ -7,6 +7,7 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3Solver;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Properties;
@@ -16,6 +17,17 @@ import static org.testng.Assert.assertTrue;
 
 public class StringSupportTest {
 
+	private NativeZ3Solver solver;
+
+	@BeforeMethod
+	public void initialize() {
+		Properties conf = new Properties();
+		conf.setProperty("symbolic.dp", "z3");
+		conf.setProperty("z3.options", "smt.string_solver=seq");
+		ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
+		solver = (NativeZ3Solver) factory.createSolver();
+	}
+
 	@Test
 	public void strLenTest() {
 		Constant c5 = Constant.create(BuiltinTypes.SINT32, 5);
@@ -24,11 +36,6 @@ public class StringSupportTest {
 		len = CastExpression.create(len, BuiltinTypes.SINT32);
 		NumericBooleanExpression compLen = NumericBooleanExpression.create(len, NumericComparator.EQ, c5);
 
-		Properties conf = new Properties();
-		conf.setProperty("symbolic.dp", "z3");
-		conf.setProperty("z3.options", "smt.string_solver=seq");
-		ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-		NativeZ3Solver solver = (NativeZ3Solver) factory.createSolver();
 		Valuation val = new Valuation();
 		ConstraintSolver.Result res = solver.solve(compLen, val);
 		assertEquals(res, ConstraintSolver.Result.SAT);
@@ -50,10 +57,6 @@ public class StringSupportTest {
 
 		Expression finalExpr = PropositionalCompound.create(compLen, LogicalOperator.AND, strEq);
 
-		Properties conf = new Properties();
-		conf.setProperty("symbolic.dp", "z3");
-		ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-		NativeZ3Solver solver = (NativeZ3Solver) factory.createSolver();
 		Valuation val = new Valuation();
 		ConstraintSolver.Result res = solver.solve(finalExpr, val);
 		assertEquals(res, ConstraintSolver.Result.SAT);
@@ -69,14 +72,25 @@ public class StringSupportTest {
 		Constant stringExpected = Constant.create(BuiltinTypes.STRING, "c");
 		stringAt = StringBooleanExpression.createEquals(stringAt, stringExpected);
 
-		Properties conf = new Properties();
-		conf.setProperty("symbolic.dp", "z3");
-		ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-		NativeZ3Solver solver = (NativeZ3Solver) factory.createSolver();
+
 		Valuation val = new Valuation();
 		ConstraintSolver.Result res = solver.solve(stringAt, val);
 		assertEquals(res, ConstraintSolver.Result.SAT);
 		boolean equals = (boolean) stringAt.evaluate(val);
 		assertTrue(equals);
+	}
+
+	@Test
+	public void toAndFromIntEvaluationTest() {
+		Variable x = Variable.create(BuiltinTypes.STRING, "x");
+		Constant c = Constant.create(BuiltinTypes.STRING, "10");
+		Expression toInt = StringIntegerExpression.createToInt(x);
+		Expression fromInt = StringCompoundExpression.createToString(toInt);
+		StringBooleanExpression equals = StringBooleanExpression.createEquals(fromInt, c);
+
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = solver.solve(equals, val);
+		assertEquals(res, ConstraintSolver.Result.SAT);
+		assertTrue(equals.evaluate(val));
 	}
 }
