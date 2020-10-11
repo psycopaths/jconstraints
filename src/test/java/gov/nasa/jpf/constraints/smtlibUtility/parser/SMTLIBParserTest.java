@@ -62,12 +62,48 @@ public class SMTLIBParserTest {
         assertEquals(v282.getValue(), BigInteger.valueOf(282));
     }
 
-    //This test is used for driving the development and the next, that should be enabled an make pass.
-    @Test(enabled = false, groups = {"jsmtlib", "base"})
+
+    @Test(enabled = true, groups = {"jsmtlib", "base"})
     public void parsingRoundTripPRP718Test() throws SMTLIBParserException, IParser.ParserException, IOException {
         final SMTProblem problem = parseResourceFile("test_inputs/prp-7-18.smt2");
 
         assertEquals(problem.variables.size(), 17);
+        assertEquals(problem.assertions.size(), 1);
+
+    }
+
+    @Test(enabled = true, groups = {"jsmtlib", "base"})
+    public void parsingKaluza826Test() throws SMTLIBParserException, IParser.ParserException, IOException {
+        final SMTProblem problem = parseResourceFile("test_inputs/kaluza_sat_big_826.smt2");
+
+        assertEquals(problem.variables.size(), 69);
+        assertEquals(problem.assertions.size(), 71);
+
+    }
+
+    @Test(enabled = true, groups = {"jsmtlib", "base"})
+    public void parsingPisa000Test() throws SMTLIBParserException, IParser.ParserException, IOException {
+        final SMTProblem problem = parseResourceFile("test_inputs/pisa-000.smt2");
+
+        assertEquals(problem.variables.size(), 4);
+        assertEquals(problem.assertions.size(), 3);
+
+    }
+
+    @Test(enabled = false, groups = {"jsmtlib"})
+    public void parsingPisa004Test() throws SMTLIBParserException, IParser.ParserException, IOException {
+        final SMTProblem problem = parseResourceFile("test_inputs/pisa-004.smt2");
+
+        assertEquals(problem.variables.size(), 10);
+        assertEquals(problem.assertions.size(), 6);
+
+    }
+
+    @Test(enabled = false, groups = {"jsmtlib"})
+    public void parsingPyEx1Test() throws SMTLIBParserException, IParser.ParserException, IOException {
+        final SMTProblem problem = parseResourceFile("test_inputs/pyex_1.smt2");
+
+        assertEquals(problem.variables.size(), 1);
         assertEquals(problem.assertions.size(), 1);
 
     }

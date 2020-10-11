@@ -17,16 +17,16 @@ public class SMTCommandLine {
             String filename = args[0];
             System.out.println("Trying to parse filename: " + filename);
 
-            StringBuilder builder = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-                builder.append(reader.readLine());
-            }
-            SMTProblem problem = SMTLIBParser.parseSMTProgram(builder.toString());
+                String smtProgram = reader.lines().reduce((a, b) -> b.startsWith(";") ? a : a + b).get();
+                SMTProblem problem = SMTLIBParser.parseSMTProgram(smtProgram);
 
-            ConstraintSolverFactory factory = ConstraintSolverFactory.getRootFactory();
-            ConstraintSolver solver = factory.createSolver();
-            ConstraintSolver.Result result = solver.isSatisfiable(problem.getAllAssertionsAsConjunction());
-            System.out.println("The result ist: " + result.name());
+                ConstraintSolverFactory factory = ConstraintSolverFactory.getRootFactory();
+                ConstraintSolver solver = factory.createSolver();
+                ConstraintSolver.Result result = solver.isSatisfiable(problem.getAllAssertionsAsConjunction());
+                System.out.println("The result ist: " + result.name());
+            }
+
         }else{
             System.out.println("This script expects at least one filename to solve.");
         }

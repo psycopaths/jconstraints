@@ -61,6 +61,7 @@
         <guava.version>14.0.1</guava.version>
         <antlr.version>3.5.2</antlr.version>
         <z3.version>0.9</z3.version>
+        <brics.version>1.12-1</brics.version>
         <testng.version>6.8</testng.version>
         <jsmtlib.version>SNAPSHOT</jsmtlib.version>
     </properties>
@@ -153,6 +154,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>dk.brics</groupId>
+            <artifactId>automaton</artifactId>
+            <version>${brics.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

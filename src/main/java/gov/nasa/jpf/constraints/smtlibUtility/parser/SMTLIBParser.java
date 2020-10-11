@@ -8,6 +8,7 @@ import gov.nasa.jpf.constraints.expressions.BooleanExpression;
 import gov.nasa.jpf.constraints.expressions.BooleanOperator;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.ExpressionOperator;
+import gov.nasa.jpf.constraints.expressions.IfThenElse;
 import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.expressions.LogicalOperator;
 import gov.nasa.jpf.constraints.expressions.Negation;
@@ -32,6 +33,7 @@ import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.smtlibUtility.SMTProblem;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.Type;
+import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import org.smtlib.CharSequenceReader;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
@@ -46,8 +48,10 @@ import org.smtlib.command.C_assert;
 import org.smtlib.command.C_check_sat;
 import org.smtlib.command.C_declare_fun;
 import org.smtlib.command.C_exit;
+import org.smtlib.command.C_get_model;
 import org.smtlib.command.C_set_info;
 import org.smtlib.command.C_set_logic;
+import org.smtlib.command.C_set_option;
 import org.smtlib.impl.SMTExpr.FcnExpr;
 import org.smtlib.impl.SMTExpr.Let;
 import org.smtlib.impl.SMTExpr.Symbol;
@@ -110,19 +114,19 @@ public class SMTLIBParser {
             } else if (cmd instanceof C_assert) {
                 smtParser.processAssert((C_assert) cmd);
             } else if (cmd instanceof C_check_sat) {
-                //It is okay, if check_sat is the last command in the chain, but it is just ignored.
-                if (!parser.isEOD()) {
-                    cmd = parser.parseCommand();
-                    if (!(cmd instanceof C_exit)) {
-                        throw new SMTLIBParserNotSupportedException(
-                                "Check sat is only at the end of a smt problem allowed.");
-                    }
-                }
-            } else if (cmd instanceof C_set_info || cmd instanceof C_set_logic) {
-                //It is safe to ignore the info commands.
-            } else {
-                throw new SMTLIBParserNotSupportedException("Cannot pare the following command: " + cmd);
-            }
+				//It is okay, if check_sat is the last command in the chain, but it is just ignored.
+				if (!parser.isEOD()) {
+					cmd = parser.parseCommand();
+					if (!(cmd instanceof C_exit || cmd instanceof C_get_model)) {
+						throw new SMTLIBParserNotSupportedException(
+								"Check sat is only at the end of a smt problem allowed or a get_model is required.");
+					}
+				}
+			} else if (cmd instanceof C_set_info || cmd instanceof C_set_logic || cmd instanceof C_set_option) {
+				//It is safe to ignore the info commands.
+			} else {
+				throw new SMTLIBParserNotSupportedException("Cannot pare the following command: " + cmd);
+			}
         }
         return smtParser.problem;
     }
@@ -140,7 +144,7 @@ public class SMTLIBParser {
 					"in" + " the future.");
 		}
 		if (!(cmd.resultSort() instanceof Sort.Application)) {
-			throw new SMTLIBParserException("Could only convert type of type Sort.Application");
+			throw new SMTLIBParserException("Could only convert type of type NamedSort.Application");
 		}
 		final Sort.Application application = (Sort.Application) cmd.resultSort();
 
@@ -156,14 +160,7 @@ public class SMTLIBParser {
     private <E> Expression<E> processArgument(final IExpr arg) throws SMTLIBParserException {
 		Expression<E> resolved = null;
 		if (arg instanceof ISymbol) {
-			if (((ISymbol) arg).value().equals("re.nostr")) {
-				resolved = createExpression(RegExOperator.NOSTR, new LinkedList<Expression>());
-			}
-			if (((ISymbol) arg).value().equals("re.allchar")) {
-				resolved = createExpression(RegExOperator.ALLCHAR, new LinkedList<Expression>());
-			} else {
-				resolved = resolveSymbol((ISymbol) arg);
-			}
+			resolved = resolveSymbol((ISymbol) arg);
 		} else if (arg instanceof INumeral) {
 			resolved = resolveNumeral((INumeral) arg);
 		} else if (arg instanceof IDecimal) {
@@ -235,6 +232,9 @@ public class SMTLIBParser {
 		Expression ret = null;
 		if (operatorStr.equals("not")) {
 			ret = createNegation(convertedArguments);
+		} else if (operatorStr.equals("ite")) {
+			ret = createITE(convertedArguments);
+
 		} else {
 			final ExpressionOperator operator =
 					ExpressionOperator.fromString(FunctionOperatorMap.getjConstraintOperatorName(operatorStr));
@@ -248,6 +248,14 @@ public class SMTLIBParser {
 			return Negation.create(arguments.poll());
 		} else {
 			throw new SMTLIBParserException("Cannot use more than one Argument in a Negation Expr");
+		}
+	}
+
+	private IfThenElse createITE(final Queue<Expression> arguments) throws SMTLIBParserException {
+		if (arguments.size() == 3) {
+			return IfThenElse.create(arguments.poll(), arguments.poll(), arguments.poll());
+		} else {
+			throw new SMTLIBParserException("Cannot convert ite-Expr with anything else than three arguments");
 		}
 	}
 
@@ -280,17 +288,6 @@ public class SMTLIBParser {
 
 				Tuple<Expression, Expression> t = equalizeTypes(expr, next);
 				if (newOperator instanceof NumericOperator) {
-
-					if (newOperator.equals(NumericOperator.DIV) &&
-						(t.left instanceof Constant || t.left instanceof UnaryMinus)) {
-						t = new Tuple<>(convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.left), t.right);
-					}
-
-					if (newOperator.equals(NumericOperator.DIV) &&
-						(t.right instanceof Constant || t.right instanceof UnaryMinus)) {
-						t = new Tuple<>(t.left, convertTypeConstOrMinusConst(BuiltinTypes.DECIMAL, t.right));
-					}
-
 					expr = NumericCompound.create(t.left, (NumericOperator) newOperator, t.right);
 				} else if (newOperator instanceof LogicalOperator) {
 					expr = PropositionalCompound.create(t.left, (LogicalOperator) newOperator, t.right);
@@ -497,12 +494,28 @@ public class SMTLIBParser {
 		return Constant.create(BuiltinTypes.STRING, stringliteral.value());
 	}
 
-	private Variable resolveSymbol(final ISymbol symbol) throws SMTLIBParserExceptionInvalidMethodCall {
+	private Expression resolveSymbol(final ISymbol symbol) throws
+			SMTLIBParserExceptionInvalidMethodCall,
+			SMTLIBParserNotSupportedException {
+		if (symbol.value().equals("re.nostr")) {
+			return createExpression(RegExOperator.NOSTR, new LinkedList<Expression>());
+		}
+		if (symbol.value().equals("re.allchar")) {
+			return createExpression(RegExOperator.ALLCHAR, new LinkedList<Expression>());
+		}
+		if (symbol.value().equalsIgnoreCase("true")) {
+			return ExpressionUtil.TRUE;
+		}
+		if (symbol.value().equalsIgnoreCase("false")) {
+			return ExpressionUtil.FALSE;
+		}
+
 		for (final Variable var : problem.variables) {
 			if (var.getName().equals(symbol.value())) {
 				return var;
 			}
 		}
+
 		for (final Variable parameter : letContext) {
 			if (parameter.getName().equals(symbol.value())) {
 				return parameter;

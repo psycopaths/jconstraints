@@ -30,15 +30,15 @@ public abstract class BuiltinTypes {
 	public static final class SInt8Type extends ConcreteBVIntegerType<Byte> {
 		SInt8Type() {
 			super("sint8",
-				  Byte.class,
-				  Byte.valueOf((byte) 0),
-				  8,
-				  true,
-				  BigInteger.valueOf(Byte.MIN_VALUE),
-				  BigInteger.valueOf(Byte.MAX_VALUE),
-				  SINT16,
-				  new String[]{"byte"},
-				  byte.class);
+						Byte.class,
+						Byte.valueOf((byte) 0),
+						8,
+						true,
+						BigInteger.valueOf(Byte.MIN_VALUE),
+						BigInteger.valueOf(Byte.MAX_VALUE),
+						SINT16,
+						new String[]{"byte"},
+						byte.class);
 		}
 
 		@Override
@@ -142,15 +142,15 @@ public abstract class BuiltinTypes {
 	public static final class SInt16Type extends ConcreteBVIntegerType<Short> {
 		SInt16Type() {
 			super("sint16",
-				  Short.class,
-				  (short) 0,
-				  16,
-				  true,
-				  BigInteger.valueOf(Short.MIN_VALUE),
-				  BigInteger.valueOf(Short.MAX_VALUE),
-				  SINT32,
-				  new String[]{"short"},
-				  short.class);
+						Short.class,
+						(short) 0,
+						16,
+						true,
+						BigInteger.valueOf(Short.MIN_VALUE),
+						BigInteger.valueOf(Short.MAX_VALUE),
+						SINT32,
+						new String[]{"short"},
+						short.class);
 		}
 
 		@Override
@@ -241,6 +241,7 @@ public abstract class BuiltinTypes {
 			throw new ClassCastException();
 		}
 
+
 		@Override
 		@SuppressWarnings("unchecked")
 		protected <O> CastOperation<? super O, ? extends Short> castFrom(final Type<O> other) {
@@ -254,15 +255,15 @@ public abstract class BuiltinTypes {
 	public static final class UInt16Type extends ConcreteBVIntegerType<Character> {
 		UInt16Type() {
 			super("uint16",
-				  Character.class,
-				  Character.valueOf('\0'),
-				  16,
-				  false,
-				  BigInteger.valueOf(Character.MIN_VALUE),
-				  BigInteger.valueOf(Character.MAX_VALUE),
-				  SINT32,
-				  new String[]{"char"},
-				  char.class);
+						Character.class,
+						Character.valueOf('\0'),
+						16,
+						false,
+						BigInteger.valueOf(Character.MIN_VALUE),
+						BigInteger.valueOf(Character.MAX_VALUE),
+						SINT32,
+						new String[]{"char"},
+						char.class);
 		}
 
 		@Override
@@ -352,6 +353,52 @@ public abstract class BuiltinTypes {
 		}
 
 		@Override
+		protected <O> CastOperation<? super Character, ? extends O> castTo(Type<O> toType) {
+			if (toType.equals(BuiltinTypes.SINT32)) {
+				return (CastOperation<? super Character, ? extends O>) new CastOperation<Character, Integer>() {
+					@Override
+					public Class<Character> getFromClass() {
+						return Character.class;
+					}
+
+					@Override
+					public Class<Integer> getToClass() {
+						return Integer.class;
+					}
+
+					@Override
+					public Integer cast(Character from) {
+						return (int) from.charValue();
+					}
+				};
+			}
+			return null;
+		}
+
+		@Override
+		protected <O> CastOperation<? super O, ? extends Character> castFrom(Type<O> fromType) {
+			if (fromType.equals(BuiltinTypes.SINT32)) {
+				return (CastOperation<? super O, ? extends Character>) new CastOperation<Number, Character>() {
+					@Override
+					public Class<Number> getFromClass() {
+						return Number.class;
+					}
+
+					@Override
+					public Class<Character> getToClass() {
+						return Character.class;
+					}
+
+					@Override
+					public Character cast(Number from) {
+						return (char) from.intValue();
+					}
+				};
+			}
+			return null;
+		}
+
+		@Override
 		public Character parse(final String string) {
 			final BigInteger bi = new BigInteger(string);
 			return (char) bi.intValue();
@@ -361,15 +408,15 @@ public abstract class BuiltinTypes {
 	public static final class SInt32Type extends ConcreteBVIntegerType<Integer> {
 		SInt32Type() {
 			super("sint32",
-				  Integer.class,
-				  0,
-				  32,
-				  true,
-				  BigInteger.valueOf(Integer.MIN_VALUE),
-				  BigInteger.valueOf(Integer.MAX_VALUE),
-				  SINT64,
-				  new String[]{"int"},
-				  int.class);
+						Integer.class,
+						0,
+						32,
+						true,
+						BigInteger.valueOf(Integer.MIN_VALUE),
+						BigInteger.valueOf(Integer.MAX_VALUE),
+						SINT64,
+						new String[]{"int"},
+						int.class);
 		}
 
 		@Override
@@ -473,15 +520,15 @@ public abstract class BuiltinTypes {
 	public static final class SInt64Type extends ConcreteBVIntegerType<Long> {
 		SInt64Type() {
 			super("sint64",
-				  Long.class,
-				  0L,
-				  64,
-				  true,
-				  BigInteger.valueOf(Long.MIN_VALUE),
-				  BigInteger.valueOf(Long.MAX_VALUE),
-				  INTEGER,
-				  new String[]{"long"},
-				  long.class);
+						Long.class,
+						0L,
+						64,
+						true,
+						BigInteger.valueOf(Long.MIN_VALUE),
+						BigInteger.valueOf(Long.MAX_VALUE),
+						INTEGER,
+						new String[]{"long"},
+						long.class);
 		}
 
 		@Override
@@ -585,15 +632,15 @@ public abstract class BuiltinTypes {
 	public static final class FloatType extends ConcreteFloatingPointType<Float> {
 		FloatType() {
 			super("float",
-				  Float.class,
-				  0.0f,
-				  true,
-				  23,
-				  BigDecimal.valueOf(-Float.MAX_VALUE),
-				  BigDecimal.valueOf(Float.MAX_VALUE),
-				  DOUBLE,
-				  new String[]{"float32"},
-				  float.class);
+						Float.class,
+						0.0f,
+						true,
+						23,
+						BigDecimal.valueOf(-Float.MAX_VALUE),
+						BigDecimal.valueOf(Float.MAX_VALUE),
+						DOUBLE,
+						new String[]{"float32"},
+						float.class);
 		}
 
 		@Override
@@ -663,15 +710,15 @@ public abstract class BuiltinTypes {
 	public static final class DoubleType extends ConcreteFloatingPointType<Double> {
 		DoubleType() {
 			super("double",
-				  Double.class,
-				  0.0,
-				  true,
-				  52,
-				  BigDecimal.valueOf(-Double.MAX_VALUE),
-				  BigDecimal.valueOf(Double.MAX_VALUE),
-				  DECIMAL,
-				  new String[]{"float64"},
-				  double.class);
+						Double.class,
+						0.0,
+						true,
+						52,
+						BigDecimal.valueOf(-Double.MAX_VALUE),
+						BigDecimal.valueOf(Double.MAX_VALUE),
+						DECIMAL,
+						new String[]{"float64"},
+						double.class);
 		}
 
 		@Override
@@ -944,14 +991,7 @@ public abstract class BuiltinTypes {
 
 
 		public RealType() {
-			super("real",
-				  BigFraction.class,
-				  BigFraction.ZERO,
-				  true,
-				  null,
-				  null,
-				  null,
-				  new String[]{"real", "fraction"});
+			super("real", BigFraction.class, BigFraction.ZERO, true, null, null, null, new String[]{"real", "fraction"});
 		}
 
 		@Override
@@ -1063,10 +1103,10 @@ public abstract class BuiltinTypes {
 
 	public static boolean isBuiltinType(final Type aType) {
 		if (aType instanceof BoolType || aType instanceof BigDecimalType || aType instanceof BigIntegerType ||
-			aType instanceof DoubleType || aType instanceof FloatType || aType instanceof SInt64Type ||
-			aType instanceof SInt32Type || aType instanceof SInt16Type || aType instanceof UInt16Type ||
-			aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType ||
-			aType instanceof RealType) {
+				aType instanceof DoubleType || aType instanceof FloatType || aType instanceof SInt64Type ||
+				aType instanceof SInt32Type || aType instanceof SInt16Type || aType instanceof UInt16Type ||
+				aType instanceof SInt8Type || aType instanceof RegExType || aType instanceof StringType ||
+				aType instanceof RealType) {
 			return true;
 		} else {
 			return false;
