@@ -6,6 +6,9 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.*;
 import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import gov.nasa.jpf.constraints.types.Type;
+
+import java.math.BigInteger;
 
 public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
@@ -17,7 +20,10 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
     }
 
     public void transform(Expression<?> e) {
+        ctx.open("assert");
         defaultVisit(e, null);
+        ctx.close();
+        ctx.flush();
     }
 
     @Override
@@ -31,6 +37,14 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
         if (BuiltinTypes.SINT32.equals(c.getType())) {
             Integer i = (Integer) c.getValue();
             ctx.append("#x" + String.format("%1$08x", i));
+        }
+        else if (BuiltinTypes.INTEGER.equals(c.getType())) {
+            BigInteger i = (BigInteger) c.getValue();
+            ctx.append(i.toString());
+        }
+        else if (BuiltinTypes.STRING.equals(c.getType())) {
+            String s = (String) c.getValue();
+            ctx.append("\"" + s + "\"");
         }
         else {
             throw new IllegalArgumentException("Unsupported const type: " + c.getType());
@@ -48,24 +62,31 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
     @Override
     public Void visit(NumericBooleanExpression n, Void v) {
-        ctx.open( numComp( n.getComparator() ) );
+        ctx.open( numComp( n.getComparator(), n.getLeft().getType() ) );
         visit(n.getLeft(), v);
         visit(n.getRight(), v);
         ctx.close();
         return null;
     }
 
-    private String numComp(NumericComparator nc) {
+    private String numComp(NumericComparator nc, Type<?> t) {
         switch (nc) {
             case EQ: return "=";
             case NE: return "!=";
-            case GE: return "bvsge";
-            case LE: return "bvsle";
-            case GT: return "bvsgt";
-            case LT: return "bvslt";
+            case GE: return bvType(t) ? "bvsge" : ">=";
+            case LE: return bvType(t) ? "bvsle" : "<=";
+            case GT: return bvType(t) ? "bvsgt" : ">";
+            case LT: return bvType(t) ? "bvslt" : "<";
             default:
                 throw new IllegalArgumentException("Unsupported: " + nc);
         }
+    }
+
+    private boolean bvType(Type<?> t) {
+        return BuiltinTypes.SINT8.equals(t) ||
+                BuiltinTypes.SINT16.equals(t) ||
+                BuiltinTypes.SINT32.equals(t) ||
+                BuiltinTypes.SINT64.equals(t);
     }
 
     @Override
@@ -88,7 +109,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
     private String stringComp(StringBooleanOperator op) {
         switch (op) {
-            case EQUALS: return "=";
+            case EQUALS:   return "=";
             case CONTAINS: return "str.contains";
             case PREFIXOF: return "str.prefixof";
             case SUFFIXOF: return "str.suffixof";
@@ -101,7 +122,10 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
     public Void visit(StringIntegerExpression n, Void v) {
         ctx.open(stringIntOp( n.getOperator()));
         visit(n.getLeft(), v);
-        visit(n.getRight(), v);
+        if (StringIntegerOperator.INDEXOF.equals(n.getOperator())) {
+            visit(n.getRight(), v);
+            visit(n.getOffset(), v);
+        }
         ctx.close();
         return null;
     }
@@ -143,20 +167,20 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
     @Override
     public <E> Void visit(NumericCompound<E> n, Void v) {
-        ctx.open( numOp( n.getOperator() ));
+        ctx.open( numOp( n.getOperator(), n.getType()));
         visit(n.getLeft(), v);
         visit(n.getRight(), v);
         ctx.close();
         return null;
     }
 
-    private String numOp(NumericOperator op) {
+    private String numOp(NumericOperator op, Type t) {
         switch (op) {
-            case DIV: return "bvdiv";
-            case MINUS: return "bvsub";
-            case MUL: return "bvmul";
-            case PLUS: return "bvadd";
-            case REM: return "bvrem";
+            case DIV:   return bvType(t) ? "bvdiv" : "/";
+            case MINUS: return bvType(t) ? "bvsub" : "-";
+            case MUL:   return bvType(t) ? "bvmul" : "*";
+            case PLUS:  return bvType(t) ? "bvadd" : "+";
+            case REM:   return bvType(t) ? "bvrem" : "rem";
             default:
                 throw new IllegalArgumentException("Unsupported: " + op);
         }
@@ -233,9 +257,21 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
     }
 
     @Override
-    public Void visit(BooleanExpression booleanExpression, Void data) {
-        throw new UnsupportedOperationException("not implemented yet.");
-        //return null;
+    public Void visit(BooleanExpression n, Void v) {
+        ctx.open( boolOp(n.getOperator()));
+        visit(n.getLeft(), v);
+        visit(n.getRight(), v);
+        ctx.close();
+        return null;
+    }
+
+    private String boolOp(BooleanOperator op) {
+        switch (op) {
+            case EQ: return "=";
+            case NEQ: return "!=";
+            default:
+                throw new IllegalArgumentException("Unsupported: " + op);
+        }
     }
 
     @Override

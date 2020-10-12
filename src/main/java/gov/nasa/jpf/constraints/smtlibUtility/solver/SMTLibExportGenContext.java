@@ -41,6 +41,7 @@ public class SMTLibExportGenContext {
                 out.println( "(declare-const " + v.getName() + " " + type(v) + ")");
                 defined.add(v);
             }
+            pending.clear();
         }
 
     }
@@ -68,7 +69,6 @@ public class SMTLibExportGenContext {
 
     void append(String s) {
         statementBuffer.append(" " + s);
-        flushIfAppropriate();
     }
 
     void open(String s) {
@@ -79,7 +79,6 @@ public class SMTLibExportGenContext {
     void close() {
         statementBuffer.append(")");
         statementLevel--;
-        flushIfAppropriate();
     }
 
     void push() {
@@ -101,12 +100,10 @@ public class SMTLibExportGenContext {
         out.println("(check-sat)");
     }
 
-    private void flushIfAppropriate() {
-        if (statementLevel == 0) {
-            this.varContext.flush();
-            out.println("(assert " + statementBuffer.toString() + ")");
-            statementBuffer = new StringBuilder();
-        }
+    public void flush() {
+        this.varContext.flush();
+        out.println(statementBuffer.toString());
+        statementBuffer = new StringBuilder();
     }
 
     private String type(Variable v) {
@@ -114,6 +111,12 @@ public class SMTLibExportGenContext {
             return "Bool";
         } else if (BuiltinTypes.SINT32.equals(v.getType())) {
             return "(_ BitVec 32)";
+        }
+        else if (BuiltinTypes.STRING.equals(v.getType())) {
+            return "String";
+        }
+        else if (BuiltinTypes.INTEGER.equals(v.getType())) {
+            return "Int";
         }
         throw new IllegalArgumentException("Unsupported type: " + v.getType());
     }
