@@ -8,6 +8,7 @@ import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 
+@Deprecated() // This is completely subsumed by PropositionalCompound
 public class BooleanExpression extends AbstractBoolExpression {
 
 	private final Expression<?> left;

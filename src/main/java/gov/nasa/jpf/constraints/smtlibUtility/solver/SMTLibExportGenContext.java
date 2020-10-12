@@ -31,6 +31,11 @@ public class SMTLibExportGenContext {
             }
         }
 
+        private void addLocal(Variable var) {
+            defined.add(var);
+            out.println(" (" + var.getName() + " " + type(var) + ")");
+        }
+
         private void flush() {
             for (Variable v: pending) {
                 out.println( "(declare-const " + v.getName() + " " + type(v) + ")");
@@ -57,6 +62,9 @@ public class SMTLibExportGenContext {
         statementBuffer.append(" " + var.getName());
     }
 
+    void appendLocalVarDecl(Variable v) {
+        varContext.addLocal(v);
+    }
 
     void append(String s) {
         statementBuffer.append(" " + s);
