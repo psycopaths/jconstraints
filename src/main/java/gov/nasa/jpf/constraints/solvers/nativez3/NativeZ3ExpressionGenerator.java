@@ -1033,6 +1033,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 					return ctx.mkOption((ReExpr) left);
 				case RANGE:
 					return ctx.mkRange(ctx.mkString(String.valueOf(n.getCh1())), ctx.mkString(String.valueOf(n.getCh2())));
+				case ALL:
 				case ALLCHAR:
 					return ctx.mkFullRe(ctx.mkReSort(ctx.mkStringSort()));
 				case NOSTR:
