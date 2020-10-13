@@ -275,9 +275,20 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
     }
 
     @Override
-    public Void visit(LetExpression letExpression, Void data) {
-        throw new UnsupportedOperationException("not implemented yet.");
-        //return null;
+    public Void visit(LetExpression n, Void v) {
+        ctx.open("let");
+        ctx.open("");
+        for (Variable<?> var : n.getParameters()) {
+            ctx.registerLocalSymbol(var);
+            ctx.open(var.getName());
+            //TODO: can this be null?
+            visit(n.getParameterValues().get(var), v);
+            ctx.close();
+        }
+        ctx.close();
+        visit(n.getMainValue(), v);
+        ctx.close();
+        return null;
     }
 
     @Override

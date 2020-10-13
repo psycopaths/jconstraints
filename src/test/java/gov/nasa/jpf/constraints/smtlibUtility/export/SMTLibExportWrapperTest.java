@@ -115,4 +115,20 @@ public class SMTLibExportWrapperTest {
         ConstraintSolver.Result res = ctx.isSatisfiable();
         Assert.assertEquals(ConstraintSolver.Result.DONT_KNOW, res);
     }
+
+    @Test(groups = {"jsmtlib", "base"})
+    public void testSMTLibLetExport() {
+        Variable x = Variable.create(BuiltinTypes.SINT32, "x");
+        Constant c = Constant.create(BuiltinTypes.SINT32, 5);
+        Expression<Boolean> expr = NumericBooleanExpression.create(x, NumericComparator.GT, c);
+        Constant c4 = Constant.create(BuiltinTypes.SINT32, 4);
+        LetExpression letExpr = LetExpression.create(x, c4, expr);
+
+        DontKnowSolver back = new DontKnowSolver();
+        SMTLibExportWrapper se = new SMTLibExportWrapper( back, System.out );
+        SolverContext ctx = se.createContext();
+
+        ctx.push();
+        ctx.isSatisfiable(letExpr);
+    }
 }

@@ -33,7 +33,6 @@ public class SMTLibExportGenContext {
 
         private void addLocal(Variable var) {
             defined.add(var);
-            out.println(" (" + var.getName() + " " + type(var) + ")");
         }
 
         private void flush() {
@@ -64,6 +63,11 @@ public class SMTLibExportGenContext {
     }
 
     void appendLocalVarDecl(Variable v) {
+        varContext.addLocal(v);
+        statementBuffer.append(" (" + v.getName() + " " + type(v) + ")");
+    }
+
+    void registerLocalSymbol(Variable v) {
         varContext.addLocal(v);
     }
 
