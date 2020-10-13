@@ -111,6 +111,7 @@ public class SMTLibExportGenContext {
     }
 
     private String type(Variable v) {
+        //TODO: add missing data types
         if (BuiltinTypes.BOOL.equals(v.getType())) {
             return "Bool";
         } else if (BuiltinTypes.SINT32.equals(v.getType())) {

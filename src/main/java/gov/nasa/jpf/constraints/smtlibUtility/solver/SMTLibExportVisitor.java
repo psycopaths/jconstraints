@@ -34,6 +34,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
     @Override
     public <E> Void visit(Constant<E> c, Void v) {
+        //TODO: add missing data types
         if (BuiltinTypes.SINT32.equals(c.getType())) {
             Integer i = (Integer) c.getValue();
             ctx.append("#x" + String.format("%1$08x", i));
@@ -160,9 +161,10 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
     @Override
     public <F, E> Void visit(CastExpression<F, E> cast, Void v) {
-        throw new UnsupportedOperationException("casting is not supported by SMTLib support currently");
+        //TODO: implement support for cast expressions
         //visit(cast.getCasted(), v);
         //return null;
+        throw new UnsupportedOperationException("casting is not supported by SMTLib support currently");
     }
 
     @Override
@@ -176,11 +178,11 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
     private String numOp(NumericOperator op, Type t) {
         switch (op) {
-            case DIV:   return bvType(t) ? "bvdiv" : "/";
+            case DIV:   return bvType(t) ? "bvdiv" : (BuiltinTypes.REAL.equals(t) ? "/" : "div");
             case MINUS: return bvType(t) ? "bvsub" : "-";
             case MUL:   return bvType(t) ? "bvmul" : "*";
             case PLUS:  return bvType(t) ? "bvadd" : "+";
-            case REM:   return bvType(t) ? "bvrem" : "rem";
+            case REM:   return bvType(t) ? "bvsrem" : "rem";
             default:
                 throw new IllegalArgumentException("Unsupported: " + op);
         }
@@ -226,14 +228,31 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
     }
 
     @Override
-    public <E> Void visit(BitvectorExpression<E> bv, Void data) {
-        throw new UnsupportedOperationException("not implemented yet.");
+    public <E> Void visit(BitvectorExpression<E> n, Void v) {
+        ctx.open( bvOp((n.getOperator())));
+        visit(n.getLeft(), v);
+        visit(n.getRight(), v);
+        ctx.close();
         //return null;
+    }
+
+    private String bvOp(BitvectorOperator op) {
+        // FIXME: not sure semantics of right shifts are translated correctly
+        switch (op) {
+            case AND:     return "bvand";
+            case OR:      return "bvor";
+            case XOR:     return "bvxor";
+            case SHIFTL:  return "bvshl";
+            case SHIFTR:  return "bvashr";
+            case SHIFTUR: return "bvlshr";
+            default:
+                throw new IllegalArgumentException("Unsupported: " + op);
+        }
     }
 
     @Override
     public <E> Void visit(BitvectorNegation<E> n, Void v) {
-        ctx.open("bvneg");
+        ctx.open("bvnot");
         visit(n.getNegated(), v);
         ctx.close();
         return null;
@@ -241,6 +260,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
     @Override
     public Void visit(QuantifierExpression q, Void v) {
+        //TODO: this is untested!
         ctx.open("" + q.getQuantifier() );
         for (Variable<?> var : q.getBoundVariables()) {
             ctx.appendLocalVarDecl(var);
@@ -253,6 +273,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
     @Override
     public <E> Void visit(FunctionExpression<E> f, Void data) {
         throw new UnsupportedOperationException("not implemented yet.");
+        //TODO: implement support for function expressions
         //return null;
     }
 
@@ -281,7 +302,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
         for (Variable<?> var : n.getParameters()) {
             ctx.registerLocalSymbol(var);
             ctx.open(var.getName());
-            //TODO: can this be null?
+            //FIXME: can this be null?
             visit(n.getParameterValues().get(var), v);
             ctx.close();
         }
