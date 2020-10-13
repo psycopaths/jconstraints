@@ -233,7 +233,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
         visit(n.getLeft(), v);
         visit(n.getRight(), v);
         ctx.close();
-        //return null;
+        return null;
     }
 
     private String bvOp(BitvectorOperator op) {
