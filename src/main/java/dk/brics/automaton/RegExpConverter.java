@@ -14,7 +14,8 @@ public class RegExpConverter extends RegExp {
 	}
 
 	public static AbstractRegExExpression toSMTExpression(String pattern) {
-		RegExpConverter conv = new RegExpConverter(pattern.replace("\\d", "[0-9]"));
+		RegExpConverter conv =
+				new RegExpConverter(pattern.replace("\\d", "[0-9]").replace("\\p{javaWhitespace}", "[ \\t\\n\\x0B\\f\\r]"));
 		return convert(conv);
 	}
 
