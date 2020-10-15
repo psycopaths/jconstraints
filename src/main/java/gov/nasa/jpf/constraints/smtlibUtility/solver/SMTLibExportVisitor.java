@@ -72,6 +72,8 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 		} else if (BuiltinTypes.STRING.equals(c.getType())) {
 			String s = (String) c.getValue();
 			ctx.append("\"" + s + "\"");
+		} else if (BuiltinTypes.BOOL.equals(c.getType())) {
+			ctx.append(c.getValue().toString());
 		} else {
 			throw new IllegalArgumentException("Unsupported const type: " + c.getType());
 		}
@@ -264,9 +266,38 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
 	@Override
 	public Void visit(RegexOperatorExpression n, Void data) {
-		ctx.open(regexOp(n.getOperator()));
-		for (Expression child : n.getChildren()) {
-			visit(child, data);
+		String operator = regexOp(n.getOperator());
+		ctx.open(operator);
+		switch (n.getOperator()) {
+			case KLEENESTAR:
+				visit(n.getLeft(), data);
+				break;
+			case KLEENEPLUS:
+				visit(n.getLeft(), data);
+				break;
+			case LOOP:
+				throw new UnsupportedOperationException("");
+			case RANGE:
+				ctx.append("\"" + n.getCh1() + "\"");
+				ctx.append("\"" + n.getCh2() + "\"");
+				break;
+			case OPTIONAL:
+				visit(n.getLeft(), data);
+				break;
+			case STRTORE:
+				ctx.append("\"" + n.getS() + "\"");
+				break;
+			case ALLCHAR:
+				break;
+			case ALL:
+				throw new UnsupportedOperationException();
+			case COMPLEMENT:
+				visit(n.getLeft(), data);
+				break;
+			case NOSTR:
+				break;
+			default:
+				throw new UnsupportedOperationException();
 		}
 		ctx.close();
 		return null;
@@ -277,7 +308,18 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 		//TODO: implement support for cast expressions
 		//visit(cast.getCasted(), v);
 		//return null;
-		throw new UnsupportedOperationException("casting is not supported by SMTLib support currently");
+		if (BuiltinTypes.INTEGER.equals(cast.getCasted().getType()) && BuiltinTypes.SINT32.equals(cast.getType())) {
+			ctx.open("nat2bv");
+			visit(cast.getCasted());
+			ctx.close();
+		} else if (BuiltinTypes.SINT32.equals(cast.getCasted().getType()) && BuiltinTypes.INTEGER.equals(cast.getType())) {
+			ctx.open("bv2nat");
+			visit(cast.getCasted());
+			ctx.close();
+		} else {
+			throw new UnsupportedOperationException("casting is not supported by SMTLib support currently");
+		}
+		return null;
 	}
 
 	@Override
