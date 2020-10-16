@@ -64,20 +64,20 @@ public class BitvectorExpression<E>
     E rv = right.evaluate(values);
     BVIntegerType<E> type = (BVIntegerType<E>)getType();
     switch(op) {
-    case AND:
-      return type.and(lv, rv);
-    case OR:
-      return type.or(lv, rv);
-    case XOR:
-      return type.xor(lv, rv);
-    case SHIFTL:
-      return type.shiftLeft(lv, rv);
-    case SHIFTR:
-      return type.shiftRight(lv, rv);
-    case SHIFTUR:
-      return type.shiftRightUnsigned(lv, rv);
-    default:
-      throw new IllegalStateException("Unknown bitvector operator " + op);
+      case AND:
+        return type.and(lv, rv);
+      case OR:
+        return type.or(lv, rv);
+      case XOR:
+        return type.xor(lv, rv);
+      case SHIFTL:
+        return type.shiftLeft(lv, rv);
+      case SHIFTR:
+        return type.shiftRight(lv, rv);
+      case SHIFTUR:
+        return type.shiftRightUnsigned(lv, rv);
+      default:
+        throw new IllegalStateException("Unknown bitvector operator " + op);
     }
   }
 

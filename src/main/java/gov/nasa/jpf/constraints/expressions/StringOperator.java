@@ -5,7 +5,6 @@ public enum StringOperator implements ExpressionOperator {
 	SUBSTR("str.substr"),
 	AT("str.at"),
 	TOSTR("int.to.str"),
-	FROMSTR("str.from_int"),
 	REPLACE("str.replace"),
 	TOLOWERCASE("str.lower"),
 	TOUPPERCASE("str.upper");

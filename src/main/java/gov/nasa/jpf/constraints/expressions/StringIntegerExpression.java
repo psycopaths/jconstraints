@@ -4,7 +4,6 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.types.BuiltinTypes;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -32,10 +31,7 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 	}
 
 	public static StringIntegerExpression createIndexOf(Expression<?> left, Expression<?> right) {
-		return new StringIntegerExpression(left,
-																			 StringIntegerOperator.INDEXOF,
-																			 right,
-																			 Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(0)));
+		return new StringIntegerExpression(left, StringIntegerOperator.INDEXOF, right, null);
 	}
 
 	public Expression<?> getRight() {
@@ -89,7 +85,7 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 	private BigInteger evaluateIndexOf(Valuation values) {
 		String lv = (String) left.evaluate(values);
 		String rv = (String) right.evaluate(values);
-		BigInteger of = (BigInteger) offset.evaluate(values);
+		BigInteger of = offset != null ? (BigInteger) offset.evaluate(values) : BigInteger.ZERO;
 		return BigInteger.valueOf(lv.indexOf(rv, of.intValue()));
 	}
 
@@ -118,7 +114,7 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 		return new StringIntegerExpression(left.duplicate(newChildren),
 																			 operator,
 																			 right.duplicate(newChildren),
-																			 offset.duplicate(newChildren));
+																			 offset != null ? offset.duplicate(newChildren) : null);
 	}
 
 	public Expression<?> getLeft() {
@@ -140,7 +136,9 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 			case INDEXOF:
 				left.print(a, flags);
 				right.print(a, flags);
-				offset.print(a, flags);
+				if (offset != null) {
+					offset.print(a, flags);
+				}
 				break;
 			case LENGTH:
 				left.print(a, flags);

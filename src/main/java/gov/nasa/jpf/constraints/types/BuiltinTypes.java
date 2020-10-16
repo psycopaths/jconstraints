@@ -372,12 +372,30 @@ public abstract class BuiltinTypes {
 					}
 				};
 			}
+			if (toType.equals(BuiltinTypes.SINT8)) {
+				return (CastOperation<? super Character, ? extends O>) new CastOperation<Character, Byte>() {
+					@Override
+					public Class<Character> getFromClass() {
+						return Character.class;
+					}
+
+					@Override
+					public Class<Byte> getToClass() {
+						return Byte.class;
+					}
+
+					@Override
+					public Byte cast(Character from) {
+						return (byte) from.charValue();
+					}
+				};
+			}
 			return null;
 		}
 
 		@Override
 		protected <O> CastOperation<? super O, ? extends Character> castFrom(Type<O> fromType) {
-			if (fromType.equals(BuiltinTypes.SINT32)) {
+			if (fromType.equals(BuiltinTypes.SINT32) || fromType.equals(BuiltinTypes.SINT8)) {
 				return (CastOperation<? super O, ? extends Character>) new CastOperation<Number, Character>() {
 					@Override
 					public Class<Number> getFromClass() {
