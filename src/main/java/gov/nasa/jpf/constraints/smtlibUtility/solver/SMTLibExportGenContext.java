@@ -111,6 +111,7 @@ public class SMTLibExportGenContext {
 
 	public void solve() {
 		out.println("(check-sat)");
+		out.flush();
 	}
 
 	public void flush() {
