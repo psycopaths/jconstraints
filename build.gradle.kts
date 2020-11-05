@@ -1,4 +1,3 @@
-
 plugins {
     `java-library`
     id("com.github.hierynomus.license") version "0.15.0"
