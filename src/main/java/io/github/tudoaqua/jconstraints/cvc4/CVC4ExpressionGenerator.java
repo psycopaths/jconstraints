@@ -22,6 +22,7 @@ import edu.stanford.CVC4.Expr;
 import edu.stanford.CVC4.ExprManager;
 import edu.stanford.CVC4.FloatingPoint;
 import edu.stanford.CVC4.FloatingPointSize;
+import edu.stanford.CVC4.FloatingPointToFPFloatingPoint;
 import edu.stanford.CVC4.FloatingPointToFPSignedBitVector;
 import edu.stanford.CVC4.FloatingPointToSBV;
 import edu.stanford.CVC4.IntToBitVector;
@@ -128,19 +129,29 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
     } else if (c.getType().equals(BuiltinTypes.INTEGER)) {
       return em.mkConst(new Rational(c.getValue().toString()));
     } else if (c.getType().equals(BuiltinTypes.DOUBLE)) {
-      BigFraction bf = new BigFraction((Double) c.getValue());
-      if ((Double) c.getValue() == 0.0) {
+      double value = (Double) c.getValue();
+      if (value == 0.0) {
         return em.mkConst(FloatingPoint.makeZero(doubleSize, true));
       }
-      Rational r = new Rational(bf.getNumerator(), bf.getDenominator());
-      return em.mkConst(new FloatingPoint(doubleSize, RoundingMode.roundNearestTiesToEven, r));
+      long longValue = Double.doubleToLongBits(value);
+      String bitvector = Long.toBinaryString(longValue);
+      for (int i = 0; i < Long.numberOfLeadingZeros(longValue); ++i) {
+        bitvector = "0" + bitvector;
+      }
+      BitVector r = new BitVector(bitvector);
+      return em.mkConst(new FloatingPoint(doubleSize.exponent(), doubleSize.significand(), r));
     } else if (c.getType().equals(BuiltinTypes.FLOAT)) {
-      BigFraction bf = new BigFraction((Float) c.getValue());
-      if ((Float) c.getValue() == 0.0) {
+      float value = (Float) c.getValue();
+      if (value == 0.0f) {
         return em.mkConst(FloatingPoint.makeZero(floatSize, true));
       }
-      Rational r = new Rational(bf.getNumerator(), bf.getDenominator());
-      return em.mkConst(new FloatingPoint(floatSize, RoundingMode.roundNearestTiesToEven, r));
+      int intValue = Float.floatToIntBits(value);
+      String bitvector = Integer.toBinaryString(intValue);
+      for (int i = 0; i < Integer.numberOfLeadingZeros(intValue); ++i) {
+        bitvector = "0" + bitvector;
+      }
+      BitVector r = new BitVector(bitvector);
+      return em.mkConst(new FloatingPoint(floatSize.exponent(), floatSize.significand(), r));
     } else if (c.getType().equals(BuiltinTypes.STRING)) {
       return em.mkConst(new CVC4String(c.getValue().toString()));
     } else {
@@ -164,6 +175,12 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
     boolean signed = isSigned(n.getLeft(), n.getRight());
 
     Kind kComperator = convertNumericComparator(n.getComparator(), bvTypes, fpTypes, signed);
+    if (fpTypes) {
+      if (kComperator == null && n.getComparator().equals(NumericComparator.NE)) {
+        Expr equals = em.mkExpr(Kind.FLOATINGPOINT_EQ, left, right);
+        return em.mkExpr(Kind.NOT, equals);
+      }
+    }
 
     return em.mkExpr(kComperator, left, right);
   }
@@ -299,16 +316,30 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
       return em.mkExpr(Kind.TO_REAL, visit(cast.getCasted(), data));
     } else if (cast.getType().equals(BuiltinTypes.DOUBLE)
         && (cast.getCasted().getType().equals(BuiltinTypes.SINT32)
-            || cast.getCasted().getType().equals(BuiltinTypes.SINT64))) {
+        || cast.getCasted().getType().equals(BuiltinTypes.SINT64))) {
       Expr toCast = visit(cast.getCasted(), data);
       Expr op =
           em.mkConst(
               new FloatingPointToFPSignedBitVector(
                   doubleSize.exponent(), doubleSize.significand()));
       return em.mkExpr(op, defaultRoundingMode, toCast);
+    } else if (cast.getType().equals(BuiltinTypes.DOUBLE)
+        && (cast.getCasted().getType().equals(BuiltinTypes.FLOAT))) {
+      Expr toCast = visit(cast.getCasted(), data);
+      Expr op =
+          em.mkConst(
+              new FloatingPointToFPFloatingPoint(doubleSize.exponent(), doubleSize.significand()));
+      return em.mkExpr(op, defaultRoundingMode, toCast);
+    } else if (cast.getType().equals(BuiltinTypes.FLOAT)
+        && (cast.getCasted().getType().equals(BuiltinTypes.DOUBLE))) {
+      Expr toCast = visit(cast.getCasted(), data);
+      Expr op =
+          em.mkConst(
+              new FloatingPointToFPFloatingPoint(floatSize.exponent(), floatSize.significand()));
+      return em.mkExpr(op, defaultRoundingMode, toCast);
     } else if (cast.getType().equals(BuiltinTypes.FLOAT)
         && (cast.getCasted().getType().equals(BuiltinTypes.SINT32)
-            || cast.getCasted().getType().equals(BuiltinTypes.SINT64))) {
+        || cast.getCasted().getType().equals(BuiltinTypes.SINT64))) {
       Expr toCast = visit(cast.getCasted(), data);
       Expr op =
           em.mkConst(
@@ -544,15 +575,23 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
   }
 
   private Kind convertBVOperator(BitvectorOperator operator) {
-    if (BitvectorOperator.AND.equals(operator)) {
-      return Kind.BITVECTOR_AND;
-    } else if (BitvectorOperator.OR.equals(operator)) {
-      return Kind.BITVECTOR_OR;
-    } else if (BitvectorOperator.XOR.equals(operator)) {
-      return Kind.BITVECTOR_XOR;
+    switch (operator) {
+      case AND:
+        return Kind.BITVECTOR_AND;
+      case OR:
+        return Kind.BITVECTOR_OR;
+      case XOR:
+        return Kind.BITVECTOR_XOR;
+      case SHIFTL:
+        return Kind.BITVECTOR_SHL;
+      case SHIFTR:
+        return Kind.BITVECTOR_LSHR;
+      case SHIFTUR:
+        return Kind.BITVECTOR_ASHR;
+      default:
+        throw new UnsupportedOperationException(
+            "Cannot convert BitvectorOperator: " + operator.toString() + " yet.");
     }
-    throw new UnsupportedOperationException(
-        "Cannot convert BitvectorOperator: " + operator.toString() + " yet.");
   }
 
   private Kind convertNumericComparator(
@@ -571,7 +610,7 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
       case EQ:
         return Kind.FLOATINGPOINT_EQ;
       case NE:
-        return Kind.FLOATINGPOINT_NEG;
+        return null;
       case LT:
         return Kind.FLOATINGPOINT_LT;
       case LE:

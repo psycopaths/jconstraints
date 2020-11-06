@@ -2,6 +2,8 @@ package io.github.tudoaqua.jconstraints.cvc4.expressions;
 
 import static gov.nasa.jpf.constraints.expressions.NumericComparator.EQ;
 import static gov.nasa.jpf.constraints.expressions.NumericComparator.GT;
+import static gov.nasa.jpf.constraints.expressions.NumericComparator.NE;
+import static gov.nasa.jpf.constraints.expressions.NumericOperator.PLUS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -60,7 +62,7 @@ public class NumericFPTest {
     Constant c00 = Constant.create(BuiltinTypes.DOUBLE, 0.0);
     Variable x1 = Variable.create(BuiltinTypes.DOUBLE, "x");
 
-    NumericCompound doublePlus = NumericCompound.create(x1, NumericOperator.PLUS, c10);
+    NumericCompound doublePlus = NumericCompound.create(x1, PLUS, c10);
     NumericBooleanExpression gtDouble = NumericBooleanExpression.create(doublePlus, GT, c00);
     NumericBooleanExpression gtSINT32 =
         NumericBooleanExpression.create(
@@ -83,7 +85,7 @@ public class NumericFPTest {
     Constant c1 = Constant.create(BuiltinTypes.SINT32, 1);
     Variable x1 = Variable.create(BuiltinTypes.SINT32, "x");
 
-    NumericCompound plus = NumericCompound.create(x1, NumericOperator.PLUS, c1);
+    NumericCompound plus = NumericCompound.create(x1, PLUS, c1);
     NumericBooleanExpression eqDouble =
         NumericBooleanExpression.create(CastExpression.create(plus, BuiltinTypes.DOUBLE), EQ, c10);
 
@@ -131,7 +133,7 @@ public class NumericFPTest {
     Constant c00 = Constant.create(BuiltinTypes.FLOAT, 0.0f);
     Variable x1 = Variable.create(BuiltinTypes.FLOAT, "x");
 
-    NumericCompound doublePlus = NumericCompound.create(x1, NumericOperator.PLUS, c10);
+    NumericCompound doublePlus = NumericCompound.create(x1, PLUS, c10);
     NumericBooleanExpression gtDouble = NumericBooleanExpression.create(doublePlus, GT, c00);
     NumericBooleanExpression gtSINT32 =
         NumericBooleanExpression.create(
@@ -154,7 +156,7 @@ public class NumericFPTest {
     Constant c1 = Constant.create(BuiltinTypes.SINT32, 1);
     Variable x1 = Variable.create(BuiltinTypes.SINT32, "x");
 
-    NumericCompound plus = NumericCompound.create(x1, NumericOperator.PLUS, c1);
+    NumericCompound plus = NumericCompound.create(x1, PLUS, c1);
     NumericBooleanExpression eqDouble =
         NumericBooleanExpression.create(CastExpression.create(plus, BuiltinTypes.FLOAT), EQ, c10);
 
@@ -181,7 +183,7 @@ public class NumericFPTest {
     Constant c1 = Constant.create(BuiltinTypes.SINT64, 1l);
     Variable x1 = Variable.create(BuiltinTypes.SINT64, "x");
 
-    NumericCompound plus = NumericCompound.create(x1, NumericOperator.PLUS, c1);
+    NumericCompound plus = NumericCompound.create(x1, PLUS, c1);
     NumericBooleanExpression eqDouble =
         NumericBooleanExpression.create(CastExpression.create(plus, BuiltinTypes.DOUBLE), EQ, c10);
 
@@ -198,7 +200,7 @@ public class NumericFPTest {
     Constant c00 = Constant.create(BuiltinTypes.DOUBLE, 0.0);
     Variable x1 = Variable.create(BuiltinTypes.DOUBLE, "x");
 
-    NumericCompound doublePlus = NumericCompound.create(x1, NumericOperator.PLUS, c10);
+    NumericCompound doublePlus = NumericCompound.create(x1, PLUS, c10);
     NumericBooleanExpression gtDouble = NumericBooleanExpression.create(doublePlus, GT, c00);
     NumericBooleanExpression gtSINT32 =
         NumericBooleanExpression.create(
@@ -221,7 +223,7 @@ public class NumericFPTest {
     Constant c1 = Constant.create(BuiltinTypes.SINT64, 1l);
     Variable x1 = Variable.create(BuiltinTypes.SINT64, "x");
 
-    NumericCompound plus = NumericCompound.create(x1, NumericOperator.PLUS, c1);
+    NumericCompound plus = NumericCompound.create(x1, PLUS, c1);
     NumericBooleanExpression eqDouble =
         NumericBooleanExpression.create(CastExpression.create(plus, BuiltinTypes.FLOAT), EQ, c10);
 
@@ -238,7 +240,7 @@ public class NumericFPTest {
     Constant c00 = Constant.create(BuiltinTypes.FLOAT, 0.0f);
     Variable x1 = Variable.create(BuiltinTypes.FLOAT, "x");
 
-    NumericCompound doublePlus = NumericCompound.create(x1, NumericOperator.PLUS, c10);
+    NumericCompound doublePlus = NumericCompound.create(x1, PLUS, c10);
     NumericBooleanExpression gtDouble = NumericBooleanExpression.create(doublePlus, GT, c00);
     NumericBooleanExpression gtSINT32 =
         NumericBooleanExpression.create(
@@ -253,5 +255,98 @@ public class NumericFPTest {
     res = cvc4.solve(gtSINT32, val);
     assertEquals(res, ConstraintSolver.Result.SAT);
     assertTrue(gtSINT32.evaluate(val));
+  }
+
+  @Test
+  public void notEqualsTest() {
+    Variable x1 = Variable.create(BuiltinTypes.DOUBLE, "x");
+    Variable x2 = Variable.create(BuiltinTypes.DOUBLE, "y");
+    NumericBooleanExpression neExpr = NumericBooleanExpression.create(x1, NE, x2);
+
+    Valuation val = new Valuation();
+    ConstraintSolver.Result res = cvc4.solve(neExpr, val);
+    assertEquals(res, ConstraintSolver.Result.SAT);
+    assertTrue(neExpr.evaluate(val));
+  }
+
+  @Test
+  public void castDoubleToFloatTest() {
+    Variable x1 = Variable.create(BuiltinTypes.DOUBLE, "x");
+    Variable x2 = Variable.create(BuiltinTypes.FLOAT, "y");
+    NumericBooleanExpression neExpr =
+        NumericBooleanExpression.create(CastExpression.create(x1, BuiltinTypes.FLOAT), NE, x2);
+
+    Valuation val = new Valuation();
+    ConstraintSolver.Result res = cvc4.solve(neExpr, val);
+    assertEquals(res, ConstraintSolver.Result.SAT);
+    assertTrue(neExpr.evaluate(val));
+  }
+
+  @Test
+  public void castFloatToDoubleTest() {
+    Variable x1 = Variable.create(BuiltinTypes.FLOAT, "x");
+    Variable x2 = Variable.create(BuiltinTypes.DOUBLE, "y");
+    NumericBooleanExpression neExpr =
+        NumericBooleanExpression.create(CastExpression.create(x1, BuiltinTypes.DOUBLE), NE, x2);
+
+    Valuation val = new Valuation();
+    ConstraintSolver.Result res = cvc4.solve(neExpr, val);
+    assertEquals(res, ConstraintSolver.Result.SAT);
+    assertTrue(neExpr.evaluate(val));
+  }
+
+  @Test
+  public void FlaotSubtest() {
+    Variable x1 = Variable.create(BuiltinTypes.FLOAT, "x");
+    Constant c1 = Constant.create(BuiltinTypes.FLOAT, 119.0f);
+    Constant c00 = Constant.create(BuiltinTypes.DOUBLE, 0.0);
+    NumericBooleanExpression neExpr =
+        NumericBooleanExpression.create(
+            CastExpression.create(
+                NumericCompound.create(x1, NumericOperator.MINUS, c1), BuiltinTypes.DOUBLE),
+            EQ,
+            c00);
+
+    Valuation val = new Valuation();
+    ConstraintSolver.Result res = cvc4.solve(neExpr, val);
+    assertEquals(res, ConstraintSolver.Result.SAT);
+    assertTrue(neExpr.evaluate(val));
+  }
+
+  @Test
+  public void floatConstTest() {
+    Variable x1 = Variable.create(BuiltinTypes.FLOAT, "x");
+    Constant c1 = Constant.create(BuiltinTypes.FLOAT, 119.0f);
+    NumericBooleanExpression expr = NumericBooleanExpression.create(x1, EQ, c1);
+
+    Valuation val = new Valuation();
+    ConstraintSolver.Result res = cvc4.solve(expr, val);
+    assertEquals(res, ConstraintSolver.Result.SAT);
+    assertTrue(expr.evaluate(val));
+  }
+
+  @Test
+  public void doubleConstTest() {
+    Variable x1 = Variable.create(BuiltinTypes.DOUBLE, "x");
+    Constant c1 = Constant.create(BuiltinTypes.DOUBLE, 119.0);
+    NumericBooleanExpression expr = NumericBooleanExpression.create(x1, EQ, c1);
+
+    Valuation val = new Valuation();
+    ConstraintSolver.Result res = cvc4.solve(expr, val);
+    assertEquals(res, ConstraintSolver.Result.SAT);
+    assertTrue(expr.evaluate(val));
+  }
+
+  @Test
+  public void floatEqualsTest() {
+    Variable x1 = Variable.create(BuiltinTypes.FLOAT, "x");
+    Variable c1 = Variable.create(BuiltinTypes.FLOAT, "y");
+    NumericBooleanExpression expr =
+        NumericBooleanExpression.create(x1, EQ, NumericCompound.create(x1, PLUS, c1));
+
+    Valuation val = new Valuation();
+    ConstraintSolver.Result res = cvc4.solve(expr, val);
+    assertEquals(res, ConstraintSolver.Result.SAT);
+    assertTrue(expr.evaluate(val));
   }
 }

@@ -24,7 +24,6 @@ import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,19 +80,13 @@ public class CVC4Solver extends ConstraintSolver {
               String mattisse = m.group(3);
               String exponent = m.group(2);
               String sign = m.group(1);
-              int offset = entry.getKey().getType().equals(BuiltinTypes.DOUBLE) ? 1023 : 127;
-              BigInteger mValue = new BigInteger(mattisse, 2);
-              Integer eValue = Integer.parseInt(exponent, 2);
-              // The exponent in CVC4's fp representaiton 10^e while BigDecimal interprets
-              // 10^-1*e...
-              BigDecimal res = new BigDecimal(mValue, (eValue - offset) * -1);
-              if (sign.equals("1")) {
-                res = res.multiply(new BigDecimal(-1));
-              }
+
               if (entry.getKey().getType().equals(BuiltinTypes.DOUBLE)) {
-                val.setValue(entry.getKey(), res.doubleValue());
+                long res = Long.parseUnsignedLong(sign + exponent + mattisse, 2);
+                val.setValue(entry.getKey(), Double.longBitsToDouble(res));
               } else if (entry.getKey().getType().equals(BuiltinTypes.FLOAT)) {
-                val.setValue(entry.getKey(), res.floatValue());
+                int res = Integer.parseUnsignedInt(sign + exponent + mattisse, 2);
+                val.setValue(entry.getKey(), Float.intBitsToFloat(res));
               } else {
                 throw new IllegalArgumentException(
                     "Don't know this floating point type: " + entry.getKey().getType().getName());
