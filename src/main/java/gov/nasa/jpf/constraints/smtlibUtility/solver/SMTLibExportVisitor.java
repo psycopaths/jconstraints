@@ -36,11 +36,9 @@ import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
 import gov.nasa.jpf.constraints.types.BVIntegerType;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.Type;
-
 import java.math.BigInteger;
 
 public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
-
 
 	private final SMTLibExportGenContext ctx;
 
@@ -63,7 +61,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
 	@Override
 	public <E> Void visit(Constant<E> c, Void v) {
-		//TODO: add missing data types
+		// TODO: add missing data types
 		if (BuiltinTypes.SINT32.equals(c.getType())) {
 			Integer i = (Integer) c.getValue();
 			ctx.append("#x" + String.format("%1$08x", i));
@@ -124,8 +122,11 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 	}
 
 	private boolean bvType(Type<?> t) {
-		return BuiltinTypes.SINT8.equals(t) || BuiltinTypes.SINT16.equals(t) || BuiltinTypes.SINT32.equals(t) ||
-					 BuiltinTypes.SINT64.equals(t) || BuiltinTypes.UINT16.equals(t);
+		return BuiltinTypes.SINT8.equals(t)
+				|| BuiltinTypes.SINT16.equals(t)
+				|| BuiltinTypes.SINT32.equals(t)
+				|| BuiltinTypes.SINT64.equals(t)
+				|| BuiltinTypes.UINT16.equals(t);
 	}
 
 	@Override
@@ -245,7 +246,6 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 		}
 	}
 
-
 	private String regexOp(RegExOperator op) {
 		switch (op) {
 			case KLEENESTAR:
@@ -314,27 +314,31 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
 	@Override
 	public <F, E> Void visit(CastExpression<F, E> cast, Void v) {
-		//TODO: implement support for cast expressions
-		//visit(cast.getCasted(), v);
-		//return null;
-		if (BuiltinTypes.INTEGER.equals(cast.getCasted().getType()) && BuiltinTypes.SINT32.equals(cast.getType())) {
+		if (BuiltinTypes.INTEGER.equals(cast.getCasted().getType())
+				&& BuiltinTypes.SINT32.equals(cast.getType())) {
 			return castIntegerSINTX(cast, 32);
-		} else if (BuiltinTypes.INTEGER.equals(cast.getCasted().getType()) && BuiltinTypes.SINT8.equals(cast.getType())) {
+		} else if (BuiltinTypes.INTEGER.equals(cast.getCasted().getType())
+				&& BuiltinTypes.SINT8.equals(cast.getType())) {
 			return castIntegerSINTX(cast, 8);
-		} else if (BuiltinTypes.SINT32.equals(cast.getCasted().getType()) && BuiltinTypes.INTEGER.equals(cast.getType())) {
+		} else if (BuiltinTypes.SINT32.equals(cast.getCasted().getType())
+				&& BuiltinTypes.INTEGER.equals(cast.getType())) {
 			return castSINTXInteger(cast);
-		} else if (BuiltinTypes.SINT8.equals(cast.getCasted().getType()) && BuiltinTypes.SINT32.equals(cast.getType())) {
+		} else if (BuiltinTypes.SINT8.equals(cast.getCasted().getType())
+				&& BuiltinTypes.SINT32.equals(cast.getType())) {
 			return castSignExtend(cast, 24);
-		} else if (BuiltinTypes.SINT8.equals(cast.getCasted().getType()) && BuiltinTypes.UINT16.equals(cast.getType())) {
+		} else if (BuiltinTypes.SINT8.equals(cast.getCasted().getType())
+				&& BuiltinTypes.UINT16.equals(cast.getType())) {
 			// This is a byte to char cast in the jConstraints semantic:
 			// https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.1.4
 			return castSignExtend(cast, 8);
-		} else if (BuiltinTypes.UINT16.equals(cast.getCasted().getType()) && BuiltinTypes.SINT32.equals(cast.getType())) {
+		} else if (BuiltinTypes.UINT16.equals(cast.getCasted().getType())
+				&& BuiltinTypes.SINT32.equals(cast.getType())) {
 			// This is a char to byte cast in the jConstraints semantic:
 			// https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.1.2
 			return castZeroExtend(cast, 16);
 		} else {
-			throw new UnsupportedOperationException("casting is not supported by SMTLib support currently");
+			throw new UnsupportedOperationException(
+					"casting is not supported by SMTLib support currently");
 		}
 	}
 
@@ -350,7 +354,9 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 	private String numOp(NumericOperator op, Type t) {
 		switch (op) {
 			case DIV:
-				return bvType(t) ? (isSigned(t) ? "bvsdiv" : "bvudiv") : (BuiltinTypes.REAL.equals(t) ? "/" : "div");
+				return bvType(t)
+						? (isSigned(t) ? "bvsdiv" : "bvudiv")
+						: (BuiltinTypes.REAL.equals(t) ? "/" : "div");
 			case MINUS:
 				return bvType(t) ? "bvsub" : "-";
 			case MUL:
@@ -458,7 +464,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 
 	@Override
 	public Void visit(QuantifierExpression q, Void v) {
-		//TODO: this is untested!
+		// TODO: this is untested!
 		ctx.open("" + q.getQuantifier());
 		for (Variable<?> var : q.getBoundVariables()) {
 			ctx.appendLocalVarDecl(var);
@@ -471,8 +477,8 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 	@Override
 	public <E> Void visit(FunctionExpression<E> f, Void data) {
 		throw new UnsupportedOperationException("not implemented yet.");
-		//TODO: implement support for function expressions
-		//return null;
+		// TODO: implement support for function expressions
+		// return null;
 	}
 
 	@Override
@@ -503,7 +509,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 		for (Variable<?> var : n.getParameters()) {
 			ctx.registerLocalSymbol(var);
 			ctx.open(var.getName());
-			//FIXME: can this be null?
+			// FIXME: can this be null?
 			visit(n.getParameterValues().get(var), v);
 			ctx.close();
 		}
@@ -519,9 +525,8 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 		return null;
 	}
 
-
 	/* Below this line should only be private casting methods
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 	private Void castIntegerSINTX(CastExpression cast, int bits) {
 		ctx.open("ite");
 		ctx.open("<");
@@ -571,5 +576,4 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
 		ctx.close();
 		return null;
 	}
-
 }
