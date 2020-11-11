@@ -14,158 +14,163 @@
  CONDITIONS OF ANY KIND, either express or implied. See the License for the
  specific language governing permissions and limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+  <artifactId>jconstraints</artifactId>
 
-    <!--
-    ================================= PROJECT INFO ==============================
-    -->
-    <groupId>gov.nasa</groupId>
-    <artifactId>jconstraints</artifactId>
-    <version>0.9.7-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <name>jConstraints</name>
-    <url>https://github.com/tudo-aqua/jconstraints</url>
-    <description>A library for modeling expressions and for interacting with constraint solvers
-    </description>
+  <!--
+  ================================= PROJECT INFO ==============================
+  -->
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <fork>true</fork>
+          <maxmem>512m</maxmem>
+          <meminitial>128m</meminitial>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>${compiler-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <id>make-assembly</id>
+            <phase>package</phase>
+          </execution>
+        </executions>
+        <version>3.1.1</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>${maven-release-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <artifactId>antlr3-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>antlr</goal>
+            </goals>
+          </execution>
+        </executions>
+        <groupId>org.antlr</groupId>
+        <version>${antlr.version}</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <groups>base</groups>
+          <parallel>methods</parallel>
+          <threadCount>10</threadCount>
+        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>3.0.0-M3</version>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <artifactId>guava</artifactId>
+      <groupId>com.google.guava</groupId>
+      <version>${guava.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>antlr-runtime</artifactId>
+      <groupId>org.antlr</groupId>
+      <version>${antlr.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>smtlib</artifactId>
+      <groupId>org</groupId>
+      <version>${jsmtlib.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>commons-math3</artifactId>
+      <groupId>org.apache.commons</groupId>
+      <version>3.6.1</version>
+    </dependency>
+    <dependency>
+      <artifactId>commons-cli</artifactId>
+      <groupId>commons-cli</groupId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <artifactId>automaton</artifactId>
+      <groupId>dk.brics</groupId>
+      <version>${brics.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>testng</artifactId>
+      <groupId>org.testng</groupId>
+      <scope>test</scope>
+      <version>${testng.version}</version>
+    </dependency>
+  </dependencies>
+  <description>A library for modeling expressions and for interacting with constraint solvers
+  </description>
+  <groupId>gov.nasa</groupId>
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/psycopaths/jconstraints/issues</url>
+  </issueManagement>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  <modelVersion>4.0.0</modelVersion>
 
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
+  <name>jConstraints</name>
 
-    <issueManagement>
-        <url>https://github.com/psycopaths/jconstraints/issues</url>
-        <system>GitHub Issues</system>
-    </issueManagement>
+  <packaging>jar</packaging>
 
-    <scm>
-        <developerConnection>scm:git:https://github.com/psycopaths/jconstraints.git
-        </developerConnection>
-        <tag>HEAD</tag>
-    </scm>
+  <properties>
+    <antlr.version>3.5.2</antlr.version>
+    <brics.version>1.12-1</brics.version>
+    <compiler-plugin.version>3.1</compiler-plugin.version>
+    <guava.version>14.0.1</guava.version>
+    <jsmtlib.version>SNAPSHOT</jsmtlib.version>
+    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <testng.version>6.8</testng.version>
+    <z3.version>0.9</z3.version>
+  </properties>
 
 
-    <!--
-    ================================= PROPERTIES ================================
-    -->
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <compiler-plugin.version>3.1</compiler-plugin.version>
-        <guava.version>14.0.1</guava.version>
-        <antlr.version>3.5.2</antlr.version>
-        <z3.version>0.9</z3.version>
-        <brics.version>1.12-1</brics.version>
-        <testng.version>6.8</testng.version>
-        <jsmtlib.version>SNAPSHOT</jsmtlib.version>
-    </properties>
+  <!--
+  ================================= PROPERTIES ================================
+  -->
+  <scm>
+    <developerConnection>scm:git:https://github.com/psycopaths/jconstraints.git
+    </developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
-    <!--
-    ================================= BUILD PLUGINS =============================
-    -->
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compiler-plugin.version}</version>
-                <configuration>
-                    <fork>true</fork>
-                    <meminitial>128m</meminitial>
-                    <maxmem>512m</maxmem>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>${maven-release-plugin.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr3-maven-plugin</artifactId>
-                <version>${antlr.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>antlr</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <configuration>
-                    <parallel>methods</parallel>
-                    <threadCount>10</threadCount>
-                    <groups>base</groups>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <!--
+  ================================= BUILD PLUGINS =============================
+  -->
+  <url>https://github.com/tudo-aqua/jconstraints</url>
 
-    <!--
-    ================================= DEPENDENCIES ==============================
-    -->
-    <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr-runtime</artifactId>
-            <version>${antlr.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org</groupId>
-            <artifactId>smtlib</artifactId>
-            <version>${jsmtlib.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>dk.brics</groupId>
-            <artifactId>automaton</artifactId>
-            <version>${brics.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <!--
+  ================================= DEPENDENCIES ==============================
+  -->
+  <version>0.9.7-SNAPSHOT</version>
 
 </project>
