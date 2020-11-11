@@ -1,18 +1,20 @@
 package gov.nasa.jpf.constraints.simplifiers;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import static org.testng.Assert.assertEquals;
+
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.expressions.*;
+import gov.nasa.jpf.constraints.expressions.Constant;
+import gov.nasa.jpf.constraints.expressions.Negation;
+import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
+import gov.nasa.jpf.constraints.expressions.NumericComparator;
+import gov.nasa.jpf.constraints.expressions.NumericCompound;
+import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.flattenedExpression.FlatBooleanExpression;
-import gov.nasa.jpf.constraints.flattenedExpression.FlattenedExpressionVisitior;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
-import org.testng.annotations.Test;
-
 import java.io.IOException;
-
-import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Test;
 
 public class DuplicationRemoverTest {
 

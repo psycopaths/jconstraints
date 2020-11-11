@@ -21,6 +21,7 @@ import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.util.AbstractPrintable;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,10 +34,10 @@ import java.util.Set;
  * valuation of a number of variables (identified by names).
  */
 public class Valuation extends AbstractPrintable
-		implements Iterable<ValuationEntry<?>>, Function<Variable<?>, Expression<?>> {
+		implements Iterable<ValuationEntry<?>>, Function<Variable<?>, Expression<?>>, Serializable {
 
-	private Map<Variable<?>, ValuationEntry<?>> entries = new HashMap<Variable<?>, ValuationEntry<?>>();
-
+	private Map<Variable<?>, ValuationEntry<?>> entries =
+			new HashMap<Variable<?>, ValuationEntry<?>>();
 
 	@SuppressWarnings("unchecked")
 	public <E> ValuationEntry<E> getEntry(Variable<E> var) {

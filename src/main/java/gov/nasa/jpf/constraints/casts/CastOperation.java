@@ -16,7 +16,10 @@
 
 package gov.nasa.jpf.constraints.casts;
 
-public interface CastOperation<F, T> {
+import java.io.Serializable;
+
+public interface CastOperation<F, T> extends Serializable {
+
 	public Class<F> getFromClass();
 	public Class<T> getToClass();
 	

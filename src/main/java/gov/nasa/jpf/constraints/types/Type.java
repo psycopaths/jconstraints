@@ -18,30 +18,35 @@ package gov.nasa.jpf.constraints.types;
 
 import gov.nasa.jpf.constraints.casts.CastOperation;
 import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
+import java.io.Serializable;
 
-public interface Type<T> {
+public interface Type<T> extends Serializable {
 
-	public String getName();
+  public String getName();
 
-	public String[] getOtherNames();
+  public String[] getOtherNames();
 
-	public Class<T> getCanonicalClass();
+  public Class<T> getCanonicalClass();
 
-	public Class<?>[] getOtherClasses();
+  public Class<?>[] getOtherClasses();
 
-	public T cast(Object other);
+  public T cast(Object other);
 
-	public T getDefaultValue();
+  public T getDefaultValue();
 
-	public Type<?> getSuperType();
+  public Type<?> getSuperType();
 
-	public <O> CastOperation<? super O, ? extends T> cast(Type<O> fromType);
+  public <O> CastOperation<? super O, ? extends T> cast(Type<O> fromType);
 
-	public <O> CastOperation<? super O, ? extends T> requireCast(Type<O> fromType);
+  public <O> CastOperation<? super O, ? extends T> requireCast(Type<O> fromType);
 
-	public default T parseUnsafe(String string) throws ImpreciseRepresentationException {
-		return parse(string);
-	}
-	
-	public abstract T parse(String string) throws ImpreciseRepresentationException;
+  public default T parseUnsafe(String string) throws ImpreciseRepresentationException {
+    return parse(string);
+  }
+
+  public abstract T parse(String string) throws ImpreciseRepresentationException;
+
+  public default boolean equals(Type other) {
+    return this.getClass().isInstance(other);
+  }
 }

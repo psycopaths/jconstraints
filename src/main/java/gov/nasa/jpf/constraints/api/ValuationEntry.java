@@ -17,28 +17,10 @@
 package gov.nasa.jpf.constraints.api;
 
 import gov.nasa.jpf.constraints.expressions.Constant;
-
+import java.io.Serializable;
 import java.util.Map;
 
-public class ValuationEntry<E> implements Cloneable {
-  
-  @Deprecated
-  @SuppressWarnings("rawtypes")
-  private class EntryWrapper implements Map.Entry<Variable, Object> {
-    @Override
-    public Variable getKey() {
-      return variable;
-    }
-    @Override
-    public Object getValue() {
-      return value;
-    }
-    @Override
-    public Object setValue(Object value) {
-      throw new UnsupportedOperationException();
-    }
-  }
-  
+public class ValuationEntry<E> implements Cloneable, Serializable {
 
   public static <E> ValuationEntry<E> create(Variable<E> variable, E value) {
     return new ValuationEntry<E>(variable, value);
@@ -118,4 +100,23 @@ public class ValuationEntry<E> implements Cloneable {
   
   
 
+  @Deprecated
+  @SuppressWarnings("rawtypes")
+  private class EntryWrapper implements Map.Entry<Variable, Object>, Serializable {
+
+    @Override
+    public Variable getKey() {
+      return variable;
+    }
+
+    @Override
+    public Object getValue() {
+      return value;
+    }
+
+    @Override
+    public Object setValue(Object value) {
+      throw new UnsupportedOperationException();
+    }
+  }
 }
