@@ -6,8 +6,6 @@ import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.expressions.LogicalOperator;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.Type;
-import sun.rmi.runtime.Log;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
