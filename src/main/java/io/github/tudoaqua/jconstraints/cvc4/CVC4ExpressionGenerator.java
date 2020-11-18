@@ -155,7 +155,8 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
     } else if (c.getType().equals(BuiltinTypes.STRING)) {
       return em.mkConst(new CVC4String(c.getValue().toString()));
     } else {
-      throw new UnsupportedOperationException("Cannot convert Constant");
+      throw new UnsupportedOperationException(
+          "Cannot convert Constant: " + c.getType() + "with value: " + c.getValue());
     }
   }
 
