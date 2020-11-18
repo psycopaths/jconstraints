@@ -22,14 +22,14 @@ public class StringExpressionTest {
     intConst = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(4));
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void strLengthTest() {
     String expected = "(declare-const x String)\n(assert (str.len x))\n";
     StringIntegerExpression expr = StringIntegerExpression.createLength(var);
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void strToIntTest() {
     // TODO: This is the Z3 Syntax. QF_S say, this should be str.to_int
     String expected = "(declare-const x String)\n(assert (str.to.int x))\n";
@@ -37,35 +37,35 @@ public class StringExpressionTest {
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void strIndexOf1Test() {
     String expected = "(declare-const x String)\n(assert (str.indexof x \"TEST\" 4))\n";
     StringIntegerExpression expr = StringIntegerExpression.createIndexOf(var, constant, intConst);
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void strIndexOf2Test() {
     String expected = "(declare-const x String)\n(assert (str.indexof x \"TEST\"))\n";
     StringIntegerExpression expr = StringIntegerExpression.createIndexOf(var, constant);
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void concatTest() {
     String expected = "(declare-const x String)\n(assert (str.++ x \"TEST\"))\n";
     StringCompoundExpression expr = StringCompoundExpression.createConcat(var, constant);
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void atTest() {
     String expected = "(declare-const x String)\n(assert (str.at x 4))\n";
     StringCompoundExpression expr = StringCompoundExpression.createAt(var, intConst);
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void substrTest() {
     String expected = "(declare-const x String)\n(assert (str.substr x 4 4))\n";
     StringCompoundExpression expr =
@@ -73,7 +73,7 @@ public class StringExpressionTest {
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void replaceTest() {
     String expected = "(declare-const x String)\n(assert (str.replace x \"TEST\" \"FOO\"))\n";
     StringCompoundExpression expr =
@@ -82,21 +82,21 @@ public class StringExpressionTest {
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void lowerTest() {
     String expected = "(declare-const x String)\n(assert (str.lower x))\n";
     StringCompoundExpression expr = StringCompoundExpression.createToLower(var);
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void upperTest() {
     String expected = "(declare-const x String)\n(assert (str.upper x))\n";
     StringCompoundExpression expr = StringCompoundExpression.createToUpper(var);
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void toStringTest() {
     // TODO: This is the Z3 Syntax. QF_S say, this should be str.from_int
     String expected = "(assert (int.to.str 4))\n";
@@ -104,28 +104,28 @@ public class StringExpressionTest {
     Util.runTest(expr, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void strEqualsTest() {
     String expected = "(declare-const x String)\n(assert (= x \"TEST\"))\n";
     StringBooleanExpression strBool = StringBooleanExpression.createEquals(var, constant);
     Util.runTest(strBool, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void strContainsTest() {
     String expected = "(declare-const x String)\n(assert (str.contains x \"TEST\"))\n";
     StringBooleanExpression strBool = StringBooleanExpression.createContains(var, constant);
     Util.runTest(strBool, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void strPrefixOfTest() {
     String expected = "(declare-const x String)\n(assert (str.prefixof x \"TEST\"))\n";
     StringBooleanExpression strBool = StringBooleanExpression.createPrefixOf(var, constant);
     Util.runTest(strBool, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void strSuffixOfTest() {
     String expected = "(declare-const x String)\n(assert (str.suffixof x \"TEST\"))\n";
     StringBooleanExpression strBool = StringBooleanExpression.createSuffixOf(var, constant);

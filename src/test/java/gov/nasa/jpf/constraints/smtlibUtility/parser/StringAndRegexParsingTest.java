@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.smtlib.IParser;
 
 public class StringAndRegexParsingTest {
+
+  //FIXME: This has to go or be modeled as unit test case
   public static void main(String args[])
       throws IOException, SMTLIBParserException, IParser.ParserException {
     System.out.println("hi");

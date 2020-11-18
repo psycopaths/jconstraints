@@ -18,9 +18,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.testng.annotations.Test;
 
-public class TypeEquivalyTest {
+public class TypeEquivalenceTest {
 
-  @Test
+  @Test(groups = {"basic", "types"})
   public void booleanTypeTest() throws IOException, ClassNotFoundException {
     Constant<Boolean> c0 = Constant.create(new BoolType(), true);
     Type t = c0.getType();
@@ -53,7 +53,7 @@ public class TypeEquivalyTest {
     return (Expression) read;
   }
 
-  @Test
+  @Test(groups = {"basic", "types"})
   public void booleanType2Test() throws IOException, ClassNotFoundException {
     Variable a = Variable.create(BuiltinTypes.BOOL, "a");
     Variable b = Variable.create(BuiltinTypes.BOOL, "b");
@@ -69,7 +69,7 @@ public class TypeEquivalyTest {
     assertTrue(t instanceof BuiltinTypes.BoolType);
   }
 
-  @Test
+  @Test(groups = {"basic", "types"})
   public void booleanVarType2Test() throws IOException, ClassNotFoundException {
     Variable a = Variable.create(BuiltinTypes.BOOL, "a");
 

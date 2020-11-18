@@ -25,7 +25,7 @@ public class CastExpressionTest {
     se = (new SMTLibExportWrapper(new DontKnowSolver(), ps)).createContext();
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void castSINT32IntegerTest() {
     String expected =
         "(declare-const X (_ BitVec 32))\n"
@@ -37,7 +37,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void castIntegerSINT32Test() {
     String expected =
         "(declare-const X Int)\n"
@@ -49,7 +49,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void castIntegerSINT8Test() {
     String expected =
         "(declare-const X Int)\n(assert (ite (< X 0) (bvneg ((_ nat2bv 8) X)) ((_ nat2bv 8) X)))\n";
@@ -60,7 +60,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void castSINT8SINT32Test() {
     String expected = "(declare-const X (_ BitVec 8))\n(assert ((_ sign_extend 24) X))\n";
     CastExpression expr =
@@ -70,7 +70,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void castSINT8UINT16Test() {
     String expected = "(declare-const X (_ BitVec 8))\n(assert ((_ sign_extend 8) X))\n";
     CastExpression expr =
@@ -80,7 +80,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void castUINT16SINT32Test() {
     String expected = "(declare-const X (_ BitVec 16))\n(assert ((_ zero_extend 16) X))\n";
     CastExpression expr =

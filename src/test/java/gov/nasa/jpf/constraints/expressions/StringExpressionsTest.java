@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 public class StringExpressionsTest {
 
-  @Test
+  @Test(groups = {"basic", "string-expressions"})
   public void toLowerEvaluationTest() {
     Variable var = Variable.create(BuiltinTypes.STRING, "x");
     Constant cU = Constant.create(BuiltinTypes.STRING, "UpperCase");
@@ -31,7 +31,7 @@ public class StringExpressionsTest {
     assertFalse(complete.evaluate(val));
   }
 
-  @Test
+  @Test(groups = {"basic", "string-expressions"})
   public void toAndFromIntEvaluationTest() {
     Variable x = Variable.create(BuiltinTypes.STRING, "x");
     Constant c = Constant.create(BuiltinTypes.STRING, "C");
@@ -44,7 +44,7 @@ public class StringExpressionsTest {
     assertTrue(equals.evaluate(val));
   }
 
-  @Test
+  @Test(groups = {"basic", "string-expressions"})
   public void equalsTestSpecialChars() {
     Variable x = Variable.create(BuiltinTypes.STRING, "_string1");
     Constant c = Constant.create(BuiltinTypes.STRING, "W\f49-44-44");

@@ -17,13 +17,13 @@ public class LetExpressionTest {
   Constant c4 = Constant.create(BuiltinTypes.SINT32, 4);
   LetExpression letExpr = LetExpression.create(x, c4, expr);
 
-  @Test
+  @Test(groups = {"expressions", "base"})
   public void LetExpressionAcceptsVisitorTest() {
     LetExpressionVisitor visitor = new LetExpressionVisitor();
     assertEquals(letExpr.accept(visitor, false), letExpr);
   }
 
-  @Test
+  @Test(groups = {"expressions", "base"})
   public void LetExpressionEvaluation1Test() {
     Valuation val1 = new Valuation();
     val1.setValue(x, 6);
@@ -39,13 +39,13 @@ public class LetExpressionTest {
     assertFalse(letExpr.evaluate(val3));
   }
 
-  @Test
+  @Test(groups = {"expressions", "base"})
   public void flattenLetExpression1Test() {
     Expression expectedOutcome = NumericBooleanExpression.create(c4, NumericComparator.GT, c);
     assertEquals(letExpr.flattenLetExpression(), expectedOutcome);
   }
 
-  @Test
+  @Test(groups = {"expressions", "base"})
   public void flattenLetExpression2Test() {
     Variable x1 = Variable.create(BuiltinTypes.SINT32, "x1");
     Variable x2 = Variable.create(BuiltinTypes.SINT32, "x2");

@@ -36,7 +36,7 @@ public class BitvectorExpressionTest {
     se = (new SMTLibExportWrapper(new DontKnowSolver(), ps)).createContext();
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void BVAndTest() {
     String expected = "(declare-const X (_ BitVec 32))\n(assert (bvand X #x00000000))\n";
 
@@ -46,7 +46,7 @@ public class BitvectorExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void BVOrTest() {
     String expected = "(declare-const X (_ BitVec 32))\n(assert (bvor X #x00000000))\n";
 
@@ -56,7 +56,7 @@ public class BitvectorExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void BVXorTest() {
     String expected = "(declare-const X (_ BitVec 32))\n(assert (bvxor X #x00000000))\n";
 
@@ -66,7 +66,7 @@ public class BitvectorExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void BVShiftLTest() {
     String expected = "(declare-const X (_ BitVec 32))\n(assert (bvshl X #x00000000))\n";
 
@@ -76,7 +76,7 @@ public class BitvectorExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void BVShiftRTest() {
     String expected = "(declare-const X (_ BitVec 32))\n(assert (bvashr X #x00000000))\n";
 
@@ -86,7 +86,7 @@ public class BitvectorExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void BVShiftURTest() {
     String expected = "(declare-const X (_ BitVec 32))\n(assert (bvlshr X #x00000000))\n";
 
@@ -96,7 +96,7 @@ public class BitvectorExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void BVNegationTest() {
     String expected = "(declare-const X (_ BitVec 32))\n(assert (bvnot X))\n";
 
@@ -106,7 +106,7 @@ public class BitvectorExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void BVUnaryMinusTest() {
     String expected = "(declare-const X (_ BitVec 32))\n(assert (bvneg X))\n";
 

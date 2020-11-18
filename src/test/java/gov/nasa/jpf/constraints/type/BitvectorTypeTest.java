@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 public class BitvectorTypeTest {
 
-  @Test
+  @Test(groups = {"basic", "types"})
   public void firstTest() throws ImpreciseRepresentationException {
     Variable x = Variable.create(BuiltinTypes.SINT32, "x");
     NumericCompound computation1 =

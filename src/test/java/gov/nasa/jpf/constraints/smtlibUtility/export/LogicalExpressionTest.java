@@ -36,7 +36,7 @@ public class LogicalExpressionTest {
     se = (new SMTLibExportWrapper(new DontKnowSolver(), ps)).createContext();
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void PropositionalCompoundAndTest() {
     String expected =
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (and x y))\n";
@@ -45,7 +45,7 @@ public class LogicalExpressionTest {
     assertEquals(baos.toString(), expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void PropositionalCompoundOrTest() {
     String expected =
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (or x y))\n";
@@ -54,7 +54,7 @@ public class LogicalExpressionTest {
     assertEquals(baos.toString(), expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void PropositionalCompoundImplyTest() {
     String expected =
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (=> x y))\n";
@@ -63,7 +63,7 @@ public class LogicalExpressionTest {
     assertEquals(baos.toString(), expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void PropositionalCompoundEquivalentTest() {
     String expected =
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (= x y))\n";
@@ -72,7 +72,7 @@ public class LogicalExpressionTest {
     assertEquals(baos.toString(), expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void PropositionalXORAndTest() {
     String expected =
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (xor x y))\n";
@@ -81,7 +81,7 @@ public class LogicalExpressionTest {
     assertEquals(baos.toString(), expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void NegationTest() {
     String expected = "(declare-const x Bool)\n" + "(assert (not x))\n";
     Negation expr = Negation.create(var1);
@@ -89,7 +89,7 @@ public class LogicalExpressionTest {
     assertEquals(baos.toString(), expected);
   }
 
-  @Test
+  @Test(groups = {"basic", "smt-export"})
   public void ifThenElseTest() {
     String expected =
         "(declare-const x Bool)\n"
