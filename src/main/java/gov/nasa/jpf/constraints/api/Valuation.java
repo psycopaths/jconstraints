@@ -17,6 +17,7 @@
 package gov.nasa.jpf.constraints.api;
 
 import com.google.common.base.Function;
+import gov.nasa.jpf.constraints.exceptions.EvaluationException;
 import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.util.AbstractPrintable;
 
@@ -46,9 +47,15 @@ public class Valuation extends AbstractPrintable
 
 	public <E> E getValue(Variable<E> var) {
 		ValuationEntry<E> entry = getEntry(var);
-      if (entry == null) {
-        return var.getType().getDefaultValue();
-      }
+		if (entry == null) {
+			for (ValuationEntry e : entries.values()) {
+				Variable entryVar = e.getVariable();
+				if (entryVar.getName().equals(var.getName()) && entryVar.getType().equals(var.getType())) {
+					return (E) e.getValue();
+				}
+			}
+			throw new EvaluationException("Valuation has no value for: " + var.getName());
+		}
 		return entry.getValue();
 	}
 

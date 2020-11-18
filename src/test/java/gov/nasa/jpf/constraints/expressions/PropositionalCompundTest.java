@@ -1,7 +1,9 @@
 package gov.nasa.jpf.constraints.expressions;
 
 import gov.nasa.jpf.constraints.api.Expression;
+import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.exceptions.EvaluationException;
 import gov.nasa.jpf.constraints.simplifiers.TailoringVisitor;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.DuplicatingVisitor;
@@ -29,5 +31,16 @@ public class PropositionalCompundTest {
 
         Expression duplicated = secondNegation.accept(TailoringVisitor.getInstance(), vars);
         assertEquals(duplicated, secondNegation);
+    }
+
+    @Test(
+        groups = {"expressions", "base"},
+        expectedExceptions = EvaluationException.class)
+    public void emptyValuationThrowsError() {
+        Variable a = Variable.create(BuiltinTypes.BOOL, "a");
+        Variable b = Variable.create(BuiltinTypes.BOOL, "b");
+
+        PropositionalCompound pc = PropositionalCompound.create(a, LogicalOperator.EQUIV, b);
+        pc.evaluate(new Valuation());
     }
 }
