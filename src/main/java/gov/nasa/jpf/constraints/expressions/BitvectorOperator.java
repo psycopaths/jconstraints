@@ -17,42 +17,45 @@
 package gov.nasa.jpf.constraints.expressions;
 
 public enum BitvectorOperator implements ExpressionOperator {
+  AND("&"),
+  OR("|"),
+  XOR("^"),
+  SHIFTL("<<"),
+  SHIFTR(">>"),
+  SHIFTUR(">>>");
 
-	AND("&"), OR("|"), XOR("^"), SHIFTL("<<"), SHIFTR(">>"), SHIFTUR(">>>");
+  private final String str;
 
+  private BitvectorOperator(String str) {
+    this.str = str;
+  }
 
-	private final String str;
+  public String toString() {
+    return str;
+  }
 
-	private BitvectorOperator(String str) {
-		this.str = str;
-	}
-
-	public String toString() {
-		return str;
-	}
-
-	public static BitvectorOperator fromString(String str) {
-		switch (str) {
-			case "&":
-			case "bvand":
-				return AND;
-			case "|":
-			case "bvor":
-				return OR;
-			case "^":
-			case "bvxor":
-				return XOR;
-			case "<<":
-			case "bvshl":
-				return SHIFTL;
-			case ">>":
-			case "bvashr":
-				return SHIFTR;
-			case ">>>":
-			case "bvlshr":
-				return SHIFTUR;
-			default:
-				return null;
-		}
-	}
+  public static BitvectorOperator fromString(String str) {
+    switch (str) {
+      case "&":
+      case "bvand":
+        return AND;
+      case "|":
+      case "bvor":
+        return OR;
+      case "^":
+      case "bvxor":
+        return XOR;
+      case "<<":
+      case "bvshl":
+        return SHIFTL;
+      case ">>":
+      case "bvashr":
+        return SHIFTR;
+      case ">>>":
+      case "bvlshr":
+        return SHIFTUR;
+      default:
+        return null;
+    }
+  }
 }

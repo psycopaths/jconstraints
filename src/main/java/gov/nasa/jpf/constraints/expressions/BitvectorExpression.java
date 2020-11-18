@@ -1,16 +1,16 @@
 /*
- * Copyright (C) 2015, United States Government, as represented by the 
+ * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
  *
- * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
- * platform is licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may obtain a 
- * copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 
@@ -23,35 +23,32 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.types.BVIntegerType;
 import gov.nasa.jpf.constraints.types.Type;
 import gov.nasa.jpf.constraints.types.TypeContext;
-
 import java.io.IOException;
 import java.util.Collection;
 
-public class BitvectorExpression<E>
-    extends AbstractExpression<E> {
-  
+public class BitvectorExpression<E> extends AbstractExpression<E> {
 
-  public static Expression<?> createCompatible(Expression<?> left,
-      BitvectorOperator op, Expression<?> right, TypeContext types) {
+  public static Expression<?> createCompatible(
+      Expression<?> left, BitvectorOperator op, Expression<?> right, TypeContext types) {
     Type<?> lt = left.getType(), rt = right.getType();
     Type<?> superType = types.mostSpecificSupertype(left.getType(), right.getType());
-    if(!(superType instanceof BVIntegerType))
-      throw new IllegalArgumentException();
+    if (!(superType instanceof BVIntegerType)) throw new IllegalArgumentException();
     Expression<?> l = (superType.equals(lt)) ? left : CastExpression.create(left, superType);
     Expression<?> r = (superType.equals(rt)) ? right : CastExpression.create(right, superType);
     return create(l, op, r);
   }
-  
-  public static <E> BitvectorExpression<E> create(Expression<E> left, BitvectorOperator op, Expression<?> right) {
-    BVIntegerType<E> type = (BVIntegerType<E>)left.getType();
+
+  public static <E> BitvectorExpression<E> create(
+      Expression<E> left, BitvectorOperator op, Expression<?> right) {
+    BVIntegerType<E> type = (BVIntegerType<E>) left.getType();
     Expression<E> r = right.requireAs(type);
     return new BitvectorExpression<E>(left, op, r);
   }
-  
+
   private final BitvectorOperator op;
   private final Expression<E> left;
   private final Expression<E> right;
-  
+
   public BitvectorExpression(Expression<E> left, BitvectorOperator op, Expression<E> right) {
     this.op = op;
     this.left = left;
@@ -62,8 +59,8 @@ public class BitvectorExpression<E>
   public E evaluate(Valuation values) {
     E lv = left.evaluate(values);
     E rv = right.evaluate(values);
-    BVIntegerType<E> type = (BVIntegerType<E>)getType();
-    switch(op) {
+    BVIntegerType<E> type = (BVIntegerType<E>) getType();
+    switch (op) {
       case AND:
         return type.and(lv, rv);
       case OR:
@@ -96,15 +93,15 @@ public class BitvectorExpression<E>
   public Type<E> getType() {
     return left.getType();
   }
-  
+
   public BitvectorOperator getOperator() {
     return op;
   }
-  
+
   public Expression<E> getLeft() {
     return left;
   }
-  
+
   public Expression<E> getRight() {
     return right;
   }
@@ -112,16 +109,15 @@ public class BitvectorExpression<E>
   @Override
   @SuppressWarnings("unchecked")
   public Expression<E>[] getChildren() {
-    return new Expression[]{left, right};
+    return new Expression[] {left, right};
   }
 
   @Override
   public Expression<?> duplicate(Expression<?>[] newChildren) {
     assert newChildren.length == 2;
-    
-    if(identical(newChildren, left, right))
-      return this;
-    
+
+    if (identical(newChildren, left, right)) return this;
+
     return BitvectorExpression.create(newChildren[0], this.op, newChildren[1]);
   }
 
@@ -135,18 +131,17 @@ public class BitvectorExpression<E>
   }
 
   @Override
-  public void printMalformedExpression(Appendable a, int flags) 
-          throws IOException {
+  public void printMalformedExpression(Appendable a, int flags) throws IOException {
     a.append('(');
-    if(left == null){
+    if (left == null) {
       a.append("null");
-    }else{
+    } else {
       left.printMalformedExpression(a, flags);
     }
     a.append(' ').append(op.toString()).append(' ');
-    if(right == null){
+    if (right == null) {
       a.append("null");
-    }else{
+    } else {
       right.printMalformedExpression(a, flags);
     }
     a.append(')');
@@ -170,28 +165,17 @@ public class BitvectorExpression<E>
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     BitvectorExpression<?> other = (BitvectorExpression<?>) obj;
     if (left == null) {
-      if (other.left != null)
-        return false;
-    } else if (!left.equals(other.left))
-      return false;
-    if (op != other.op)
-      return false;
+      if (other.left != null) return false;
+    } else if (!left.equals(other.left)) return false;
+    if (op != other.op) return false;
     if (right == null) {
-      if (other.right != null)
-        return false;
-    } else if (!right.equals(other.right))
-      return false;
+      if (other.right != null) return false;
+    } else if (!right.equals(other.right)) return false;
     return true;
   }
-
-  
-
 }

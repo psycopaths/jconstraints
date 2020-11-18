@@ -1,16 +1,16 @@
 /*
- * Copyright (C) 2015, United States Government, as represented by the 
+ * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
  *
- * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
- * platform is licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may obtain a 
- * copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 
@@ -22,38 +22,35 @@ import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.types.NumericType;
 import gov.nasa.jpf.constraints.types.Type;
-import org.apache.commons.math3.fraction.BigFraction;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collection;
+import org.apache.commons.math3.fraction.BigFraction;
 
-/**
- * comparison between numbers
- */
+/** comparison between numbers */
 public class NumericBooleanExpression extends AbstractBoolExpression {
 
-
-  public static NumericBooleanExpression create(Expression<?> left, NumericComparator operator, Expression<?> right) {
+  public static NumericBooleanExpression create(
+      Expression<?> left, NumericComparator operator, Expression<?> right) {
     return new NumericBooleanExpression(left, operator, right);
   }
-  
+
   private final Expression<?> left;
   private final NumericComparator operator;
   private final Expression<?> right;
 
-  public NumericBooleanExpression(Expression<?> left, NumericComparator operator, Expression<?> right) {
+  public NumericBooleanExpression(
+      Expression<?> left, NumericComparator operator, Expression<?> right) {
     this.left = left;
     this.operator = operator;
     this.right = right;
   }
 
-  @Override  
+  @Override
   public Boolean evaluate(Valuation values) {
     int res = compare(left, right, values);
     return operator.eval(res);
   }
-
 
   @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
@@ -63,7 +60,7 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
 
   @Override
   public boolean equals(Object obj) {
-    if(this == obj) {
+    if (this == obj) {
       return true;
     }
     if (obj == null) {
@@ -73,10 +70,8 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
       return false;
     }
     final NumericBooleanExpression other = (NumericBooleanExpression) obj;
-    if(this.operator != other.operator)
-      return false;
-    if(!this.left.equals(other.left))
-      return false;
+    if (this.operator != other.operator) return false;
+    if (!this.left.equals(other.left)) return false;
     return this.right.equals(other.right);
   }
 
@@ -88,40 +83,32 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
     hash = 43 * hash + this.right.hashCode();
     return hash;
   }
-  
-  /**
-   * @return the left
-   */
+
+  /** @return the left */
   public Expression<?> getLeft() {
     return this.left;
   }
 
-  /**
-   * @return the comparator
-   */
+  /** @return the comparator */
   public NumericComparator getComparator() {
     return this.operator;
   }
 
-  /**
-   * @return the right
-   */
+  /** @return the right */
   public Expression<?> getRight() {
     return this.right;
   }
 
   @Override
   public Expression<?>[] getChildren() {
-    return new Expression[]{left, right};
+    return new Expression[] {left, right};
   }
 
   @Override
-  public Expression<Boolean> duplicate(
-      Expression<?>[] newChildren) {
+  public Expression<Boolean> duplicate(Expression<?>[] newChildren) {
     assert newChildren.length == 2;
     Expression<?> newLeft = newChildren[0], newRight = newChildren[1];
-    if(left == newLeft && right == newRight)
-      return this;
+    if (left == newLeft && right == newRight) return this;
     return new NumericBooleanExpression(newLeft, operator, newRight);
   }
 
@@ -135,18 +122,17 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
   }
 
   @Override
-    public void printMalformedExpression(Appendable a, int flags) 
-          throws IOException {
+  public void printMalformedExpression(Appendable a, int flags) throws IOException {
     a.append('(');
-    if(left == null){
+    if (left == null) {
       a.append("null");
-    }else{
+    } else {
       left.printMalformedExpression(a, flags);
     }
     a.append(' ').append(operator.toString()).append(' ');
-    if(right == null){
+    if (right == null) {
       a.append("null");
-    }else{
+    } else {
       right.printMalformedExpression(a, flags);
     }
     a.append(')');
@@ -161,7 +147,7 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
     return left.getType();
   }
 
-  private static <L,R> int compare(Expression<L> left, Expression<R> right, Valuation val) {
+  private static <L, R> int compare(Expression<L> left, Expression<R> right, Valuation val) {
     L lv = left.evaluate(val);
     R rv = right.evaluate(val);
     NumericType<L> ltype = (NumericType<L>) left.getType();
@@ -176,10 +162,9 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
       BigFraction rNum = (BigFraction) rv;
       return lNum.compareTo(rNum);
     }
-    
+
     BigDecimal lNum = ltype.decimalValue(lv);
     BigDecimal rNum = rtype.decimalValue(rv);
     return lNum.compareTo(rNum);
   }
-
 }

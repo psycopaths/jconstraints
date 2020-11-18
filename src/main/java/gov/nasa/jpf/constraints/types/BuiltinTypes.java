@@ -45,6 +45,7 @@ public abstract class BuiltinTypes implements Serializable {
         STRING, REGEX, BOOL, DECIMAL, INTEGER, DOUBLE, FLOAT, SINT64, SINT32, SINT16, UINT16, SINT8,
         REAL
       };
+
   private BuiltinTypes() {}
 
   public static boolean isBuiltinType(final Type aType) {
@@ -1029,7 +1030,8 @@ public abstract class BuiltinTypes implements Serializable {
   }
 
   public static final class BoolType extends ConcreteType<Boolean> {
-    BoolType() {
+
+    public BoolType() {
       super("bool", Boolean.class, false, null, new String[] {"boolean"}, boolean.class);
     }
 

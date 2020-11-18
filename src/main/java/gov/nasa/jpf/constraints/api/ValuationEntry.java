@@ -1,16 +1,16 @@
 /*
- * Copyright (C) 2015, United States Government, as represented by the 
+ * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
  *
- * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
- * platform is licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may obtain a 
- * copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 
@@ -22,31 +22,30 @@ import java.util.Map;
 
 public class ValuationEntry<E> implements Cloneable, Serializable {
 
-  public static <E> ValuationEntry<E> create(Variable<E> variable, E value) {
-    return new ValuationEntry<E>(variable, value);
-  }
-  
-  
   private final Variable<E> variable;
   private E value;
-  
+
   public ValuationEntry(Variable<E> variable, E value) {
     this.variable = variable;
     this.value = value;
   }
-  
+
+  public static <E> ValuationEntry<E> create(Variable<E> variable, E value) {
+    return new ValuationEntry<E>(variable, value);
+  }
+
   public Variable<E> getVariable() {
     return variable;
   }
-  
+
   public E getValue() {
     return value;
   }
-  
+
   public void setValue(E value) {
     this.value = value;
   }
-  
+
   @Override
   public ValuationEntry<E> clone() {
     return new ValuationEntry<E>(variable, value);
@@ -57,7 +56,7 @@ public class ValuationEntry<E> implements Cloneable, Serializable {
   }
 
   @SuppressWarnings("rawtypes")
-  public Map.Entry<Variable,Object> toEntry() {
+  public Map.Entry<Variable, Object> toEntry() {
     return new EntryWrapper();
   }
 
@@ -78,27 +77,32 @@ public class ValuationEntry<E> implements Cloneable, Serializable {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     ValuationEntry<?> other = (ValuationEntry<?>) obj;
     if (value == null) {
-      if (other.value != null)
+      if (other.value != null) {
         return false;
-    } else if (!value.equals(other.value))
+      }
+    } else if (!value.equals(other.value)) {
       return false;
+    }
     if (variable == null) {
-      if (other.variable != null)
+      if (other.variable != null) {
         return false;
-    } else if (!variable.equals(other.variable))
+      }
+    } else if (!variable.equals(other.variable)) {
       return false;
+    }
     return true;
   }
-  
-  
 
   @Deprecated
   @SuppressWarnings("rawtypes")

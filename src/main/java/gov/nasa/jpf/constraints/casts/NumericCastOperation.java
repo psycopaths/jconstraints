@@ -16,115 +16,119 @@
 
 package gov.nasa.jpf.constraints.casts;
 
-import org.apache.commons.math3.fraction.BigFraction;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import org.apache.commons.math3.fraction.BigFraction;
 
 public abstract class NumericCastOperation<T extends Number> implements CastOperation<Number, T> {
 
-	private final Class<T> toClass;
+  private final Class<T> toClass;
 
-	public NumericCastOperation(Class<T> toClass) {
-		this.toClass = toClass;
-	}
+  public NumericCastOperation(Class<T> toClass) {
+    this.toClass = toClass;
+  }
 
-	public static final NumericCastOperation<Byte> TO_SINT8 = new NumericCastOperation<Byte>(Byte.class) {
-		@Override
-		public Byte cast(Number from) {
-			return from.byteValue();
-		}
-	};
-	public static final NumericCastOperation<Short> TO_SINT16 = new NumericCastOperation<Short>(Short.class) {
-		@Override
-		public Short cast(Number from) {
-			return from.shortValue();
-		}
-	};
-	public static final NumericCastOperation<Integer> TO_SINT32 = new NumericCastOperation<Integer>(Integer.class) {
-		@Override
-		public Integer cast(Number from) {
-			return from.intValue();
-		}
-	};
-	public static final NumericCastOperation<Long> TO_SINT64 = new NumericCastOperation<Long>(Long.class) {
-		@Override
-		public Long cast(Number from) {
-			return from.longValue();
-		}
-	};
-	public static final NumericCastOperation<Float> TO_FLOAT = new NumericCastOperation<Float>(Float.class) {
-		@Override
-		public Float cast(Number from) {
-			return from.floatValue();
-		}
-	};
-	public static final NumericCastOperation<Double> TO_DOUBLE = new NumericCastOperation<Double>(Double.class) {
-		@Override
-		public Double cast(Number from) {
-			return from.doubleValue();
-		}
-	};
+  public static final NumericCastOperation<Byte> TO_SINT8 =
+      new NumericCastOperation<Byte>(Byte.class) {
+        @Override
+        public Byte cast(Number from) {
+          return from.byteValue();
+        }
+      };
+  public static final NumericCastOperation<Short> TO_SINT16 =
+      new NumericCastOperation<Short>(Short.class) {
+        @Override
+        public Short cast(Number from) {
+          return from.shortValue();
+        }
+      };
+  public static final NumericCastOperation<Integer> TO_SINT32 =
+      new NumericCastOperation<Integer>(Integer.class) {
+        @Override
+        public Integer cast(Number from) {
+          return from.intValue();
+        }
+      };
+  public static final NumericCastOperation<Long> TO_SINT64 =
+      new NumericCastOperation<Long>(Long.class) {
+        @Override
+        public Long cast(Number from) {
+          return from.longValue();
+        }
+      };
+  public static final NumericCastOperation<Float> TO_FLOAT =
+      new NumericCastOperation<Float>(Float.class) {
+        @Override
+        public Float cast(Number from) {
+          return from.floatValue();
+        }
+      };
+  public static final NumericCastOperation<Double> TO_DOUBLE =
+      new NumericCastOperation<Double>(Double.class) {
+        @Override
+        public Double cast(Number from) {
+          return from.doubleValue();
+        }
+      };
 
-	public static final NumericCastOperation<BigInteger> TO_INTEGER =
-			new NumericCastOperation<BigInteger>(BigInteger.class) {
-				@Override
-				public BigInteger cast(Number from) {
-					Class<?> clazz = from.getClass();
-					if (clazz == BigInteger.class) {
-						return (BigInteger) from;
-					}
-					if (clazz == BigDecimal.class) {
-						return ((BigDecimal) from).toBigInteger();
-					} else if (clazz == Double.class || clazz == Float.class) {
-						return BigDecimal.valueOf(from.doubleValue()).toBigInteger();
-					}
-					return BigInteger.valueOf(from.longValue());
-				}
-			};
+  public static final NumericCastOperation<BigInteger> TO_INTEGER =
+      new NumericCastOperation<BigInteger>(BigInteger.class) {
+        @Override
+        public BigInteger cast(Number from) {
+          Class<?> clazz = from.getClass();
+          if (clazz == BigInteger.class) {
+            return (BigInteger) from;
+          }
+          if (clazz == BigDecimal.class) {
+            return ((BigDecimal) from).toBigInteger();
+          } else if (clazz == Double.class || clazz == Float.class) {
+            return BigDecimal.valueOf(from.doubleValue()).toBigInteger();
+          }
+          return BigInteger.valueOf(from.longValue());
+        }
+      };
 
-	public static final NumericCastOperation<BigDecimal> TO_DECIMAL =
-			new NumericCastOperation<BigDecimal>(BigDecimal.class) {
-				@Override
-				public BigDecimal cast(Number from) {
-					Class<?> clazz = from.getClass();
-					if (clazz == BigDecimal.class) {
-						return (BigDecimal) from;
-					}
-					if (clazz == BigInteger.class) {
-						return new BigDecimal((BigInteger) from);
-					}
-					if (clazz == Long.class) {
-						return new BigDecimal(from.longValue());
-					}
-					return new BigDecimal(from.doubleValue());
-				}
-			};
+  public static final NumericCastOperation<BigDecimal> TO_DECIMAL =
+      new NumericCastOperation<BigDecimal>(BigDecimal.class) {
+        @Override
+        public BigDecimal cast(Number from) {
+          Class<?> clazz = from.getClass();
+          if (clazz == BigDecimal.class) {
+            return (BigDecimal) from;
+          }
+          if (clazz == BigInteger.class) {
+            return new BigDecimal((BigInteger) from);
+          }
+          if (clazz == Long.class) {
+            return new BigDecimal(from.longValue());
+          }
+          return new BigDecimal(from.doubleValue());
+        }
+      };
 
-	public static final NumericCastOperation<BigFraction> TO_REAL =
-			new NumericCastOperation<BigFraction>(BigFraction.class) {
-				@Override
-				public BigFraction cast(Number from) {
-					Class<?> clazz = from.getClass();
-					if (clazz == BigFraction.class) {
-						return (BigFraction) from;
-					}
-					if (clazz == BigInteger.class) {
-						return new BigFraction((BigInteger) from);
-					}
-					if (clazz == Long.class) {
-						return new BigFraction(from.longValue());
-					}
-					return new BigFraction(from.doubleValue());
-				}
-			};
+  public static final NumericCastOperation<BigFraction> TO_REAL =
+      new NumericCastOperation<BigFraction>(BigFraction.class) {
+        @Override
+        public BigFraction cast(Number from) {
+          Class<?> clazz = from.getClass();
+          if (clazz == BigFraction.class) {
+            return (BigFraction) from;
+          }
+          if (clazz == BigInteger.class) {
+            return new BigFraction((BigInteger) from);
+          }
+          if (clazz == Long.class) {
+            return new BigFraction(from.longValue());
+          }
+          return new BigFraction(from.doubleValue());
+        }
+      };
 
-	public Class<Number> getFromClass() {
-		return Number.class;
-	}
+  public Class<Number> getFromClass() {
+    return Number.class;
+  }
 
-	public Class<T> getToClass() {
-		return toClass;
-	}
-
+  public Class<T> getToClass() {
+    return toClass;
+  }
 }

@@ -8,13 +8,11 @@ package gov.nasa.jpf.constraints.api;
 
 /**
  * Interface for Simplifiers
- * 
+ *
  * @author falk
- * 
  * @param <T> Expression Types
  */
 public interface Simplifier<T> {
-   
+
   public Expression<T> simplify(Expression<T> expr);
-  
 }

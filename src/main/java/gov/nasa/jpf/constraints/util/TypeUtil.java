@@ -20,19 +20,13 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.IntegerType;
 import gov.nasa.jpf.constraints.types.RealType;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-
-/**
- * static helpers for dealing with types
- */
+/** static helpers for dealing with types */
 public class TypeUtil {
 
-  /**
-   * real number value
-   */
+  /** real number value */
   public static class Real {
     public final BigInteger num;
     public final BigInteger den;
@@ -71,8 +65,8 @@ public class TypeUtil {
     public BigDecimal getDecimalValue() {
       return new BigDecimal(num).divide(new BigDecimal(den)).pow(pow.intValue());
     }
-  };
-
+  }
+  ;
 
   public static boolean isBoolSort(Expression<?> expression) {
     return expression.getType().equals(BuiltinTypes.BOOL);

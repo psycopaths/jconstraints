@@ -90,7 +90,8 @@ public class SMTLibExportGenContext {
     statementLevel--;
     if (statementLevel < 0) {
       throw new IllegalStateException(
-          "More brackets closed than opened. statementLevel >= 0 must be invariant in this Program.");
+          "More brackets closed than opened. statementLevel >= 0 must be invariant in this"
+              + " Program.");
     }
   }
 

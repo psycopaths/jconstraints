@@ -1,16 +1,16 @@
 /*
- * Copyright (C) 2015, United States Government, as represented by the 
+ * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
  *
- * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment 
- * platform is licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may obtain a 
- * copy of the License at http://www.apache.org/licenses/LICENSE-2.0. 
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 package gov.nasa.jpf.constraints.api;
@@ -18,11 +18,9 @@ package gov.nasa.jpf.constraints.api;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * This class is legacy API and should not be used.
- */
+/** This class is legacy API and should not be used. */
 @Deprecated
-@SuppressWarnings({"rawtypes","unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class MinMax {
 
   private Integer intMin = Integer.MAX_VALUE;
@@ -45,7 +43,7 @@ public class MinMax {
 
   /**
    * copy constructor
-   * 
+   *
    * @param orig
    */
   public MinMax(MinMax orig) {
@@ -67,148 +65,102 @@ public class MinMax {
     this.configVarMin.putAll(other.configVarMin);
   }
 
-  /**
-   * @return the intMin
-   */
+  /** @return the intMin */
   public Integer getIntMin() {
     return intMin;
   }
 
-  /**
-   * @param intMin
-   *          the intMin to set
-   */
+  /** @param intMin the intMin to set */
   public void setIntMin(Integer intMin) {
     this.intMin = intMin;
   }
 
-  /**
-   * @return the intMax
-   */
+  /** @return the intMax */
   public Integer getIntMax() {
     return intMax;
   }
 
-  /**
-   * @param intMax
-   *          the intMax to set
-   */
+  /** @param intMax the intMax to set */
   public void setIntMax(Integer intMax) {
     this.intMax = intMax;
   }
 
-  /**
-   * @return the doubleMin
-   */
+  /** @return the doubleMin */
   public Double getDoubleMin() {
     return doubleMin;
   }
 
-  /**
-   * @param doubleMin
-   *          the doubleMin to set
-   */
+  /** @param doubleMin the doubleMin to set */
   public void setDoubleMin(Double doubleMin) {
     this.doubleMin = doubleMin;
   }
 
-  /**
-   * @return the doubleMax
-   */
+  /** @return the doubleMax */
   public Double getDoubleMax() {
     return doubleMax;
   }
 
-  /**
-   * @param doubleMax
-   *          the doubleMax to set
-   */
+  /** @param doubleMax the doubleMax to set */
   public void setDoubleMax(Double doubleMax) {
     this.doubleMax = doubleMax;
   }
 
-  /**
-   * @return the varMin
-   */
+  /** @return the varMin */
   public Object getVarMin(Variable var) {
     return varMin.get(var.getName());
   }
 
-  /**
-   * @param varMin
-   *          the varMin to set
-   */
+  /** @param varMin the varMin to set */
   public void setVarMin(Variable var, Object varMin) {
     this.varMin.put(var.getName(), varMin);
   }
 
-  /**
-   * @return the varMax
-   */
+  /** @return the varMax */
   public Object getVarMax(Variable var) {
     return varMax.get(var.getName());
   }
 
-  /**
-   * @param varMax
-   *          the varMax to set
-   */
+  /** @param varMax the varMax to set */
   public void setVarMax(Variable var, Object varMax) {
     this.varMax.put(var.getName(), varMax);
   }
 
-  /**
-   * @param set
-   *          var min as a string
-   */
+  /** @param set var min as a string */
   public void setVarMinAsString(String var, String varMin) {
     this.configVarMin.put(var, varMin);
   }
 
-  /**
-   * @param set
-   *          var max as a string
-   */
+  /** @param set var max as a string */
   public void setVarMaxAsString(String var, String varMax) {
     this.configVarMax.put(var, varMax);
   }
 
-  /**
-   * @return the varMin
-   */
+  /** @return the varMin */
   public Object getMin(String name) {
     return varMin.get(name);
   }
 
-  /**
-   * @param varMin
-   *          the varMin to set
-   */
+  /** @param varMin the varMin to set */
   public void setMin(String name, Object varMin) {
-    //logger.fine("Setting min " + name + " " + varMin);
+    // logger.fine("Setting min " + name + " " + varMin);
     this.varMin.put(name, varMin);
   }
 
-  /**
-   * @return the varMax
-   */
+  /** @return the varMax */
   public Object getMax(String name) {
     return varMax.get(name);
   }
 
-  /**
-   * @param varMax
-   *          the varMax to set
-   */
+  /** @param varMax the varMax to set */
   public void setMax(String name, Object varMax) {
     // logger.fine("Setting max " + name + " " + varMax);
     this.varMax.put(name, varMax);
   }
 
   /**
-   * sets new min only if newMin.compareTo(oldMin) > 0. For Integers, e.g., this
-   * means that the new min has to be bigger than the old min.
-   * 
+   * sets new min only if newMin.compareTo(oldMin) > 0. For Integers, e.g., this means that the new
+   * min has to be bigger than the old min.
+   *
    * @param name
    * @param newMin
    */
@@ -238,9 +190,9 @@ public class MinMax {
   }
 
   /**
-   * sets new max only if newMax.compareTo(oldMax) < 0. For Integers, e.g., this
-   * means that the new max has to be smaller than the old max.
-   * 
+   * sets new max only if newMax.compareTo(oldMax) < 0. For Integers, e.g., this means that the new
+   * max has to be smaller than the old max.
+   *
    * @param name
    * @param newMax
    */
@@ -293,5 +245,4 @@ public class MinMax {
     this.configVarMin.clear();
     this.configVarMin.putAll(other.configVarMin);
   }
-
 }

@@ -16,66 +16,67 @@
 
 package gov.nasa.jpf.constraints.expressions;
 
-/**
- * operator for logic formulas
- */
+/** operator for logic formulas */
 public enum LogicalOperator implements ExpressionOperator {
-
-    AND("&&") {
-        @Override
-        public boolean eval(final boolean lv, final boolean rv) {
-            return lv && rv;
-        }
-    }, OR("||") {
-        @Override
-        public boolean eval(final boolean lv, final boolean rv) {
-            return lv || rv;
-        }
-    }, IMPLY("->") {
-        @Override
-        public boolean eval(final boolean lv, final boolean rv) {
-            return !lv || rv;
-        }
-    }, EQUIV("<->") {
-        @Override
-        public boolean eval(final boolean lv, final boolean rv) {
-            return lv == rv;
-        }
-    }, XOR("^") {
-        @Override
-        public boolean eval(final boolean lv, final boolean rv) {
-            return lv ^ rv;
-        }
-    };
-
-    private final String str;
-
-    private LogicalOperator(final String str) {
-        this.str = str;
-    }
-
+  AND("&&") {
     @Override
-    public String toString() {
-        return str;
+    public boolean eval(final boolean lv, final boolean rv) {
+      return lv && rv;
     }
-
-    public static LogicalOperator fromString(final String str) {
-        switch (str) {
-            case "&&":
-                return AND;
-            case "||":
-                return OR;
-            case "=>":
-            case "->":
-                return IMPLY;
-            case "<->":
-                return EQUIV;
-            case "^":
-                return XOR;
-            default:
-                return null;
-        }
+  },
+  OR("||") {
+    @Override
+    public boolean eval(final boolean lv, final boolean rv) {
+      return lv || rv;
     }
+  },
+  IMPLY("->") {
+    @Override
+    public boolean eval(final boolean lv, final boolean rv) {
+      return !lv || rv;
+    }
+  },
+  EQUIV("<->") {
+    @Override
+    public boolean eval(final boolean lv, final boolean rv) {
+      return lv == rv;
+    }
+  },
+  XOR("^") {
+    @Override
+    public boolean eval(final boolean lv, final boolean rv) {
+      return lv ^ rv;
+    }
+  };
 
-    public abstract boolean eval(boolean lv, boolean rv);
+  private final String str;
+
+  private LogicalOperator(final String str) {
+    this.str = str;
+  }
+
+  @Override
+  public String toString() {
+    return str;
+  }
+
+  public static LogicalOperator fromString(final String str) {
+    switch (str) {
+      case "&&":
+        return AND;
+      case "||":
+        return OR;
+      case "=>":
+      case "->":
+        return IMPLY;
+      case "<->":
+        return EQUIV;
+      case "^":
+        return XOR;
+      default:
+        return null;
+    }
+  }
+
+  public abstract boolean eval(boolean lv, boolean rv);
 }
