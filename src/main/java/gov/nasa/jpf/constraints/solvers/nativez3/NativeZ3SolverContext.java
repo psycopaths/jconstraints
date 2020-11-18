@@ -33,7 +33,6 @@ import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import gov.nasa.jpf.constraints.util.TypeUtil;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayDeque;
@@ -306,7 +305,6 @@ public class NativeZ3SolverContext extends SolverContext {
 				String sValue = value.replace("\"", "");
 				Matcher m = bytePattern.matcher(sValue);
 				while (m.find()) {
-					System.out.println("group is: " + m.group().replace("\\x", ""));
 					char c = (char) Integer.parseInt(m.group().replace("\\x", ""), 16);
 					sValue = sValue.replace(m.group(), new String(new char[]{c}));
 				}
