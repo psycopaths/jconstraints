@@ -7,40 +7,48 @@ import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
+import java.util.Stack;
 
 public class ProcessWrapperContext extends SolverContext {
 
   private final ProcessWrapperSolver solver;
-  private Queue<List<Expression>> stack;
+  private Stack<List<Expression>> stack;
   private List<Expression> current;
 
   public ProcessWrapperContext(String name) {
-    stack = new LinkedList<>();
+    stack = new Stack<>();
     current = new LinkedList<>();
     solver = new ProcessWrapperSolver(name);
   }
 
+  public String getName() {
+    return solver.getName();
+  }
+
   @Override
   public void push() {
-    stack.add(current);
+    stack.push(current);
     current = new LinkedList<>();
   }
 
   @Override
   public void pop(int n) {
     for (int i = 0; i < n; i++) {
-      pop();
+      current = stack.pop();
     }
   }
 
   @Override
-  public void pop() {
-    current = stack.poll();
+  public Result solve(Valuation val) {
+    Expression test = getCurrentExpression();
+    Result res = solver.solve(test, val);
+    //    if (res.equals(Result.SAT)) {
+    //      assert (Boolean) test.evaluate(val);
+    //    }
+    return res;
   }
 
-  @Override
-  public Result solve(Valuation val) {
+  public Expression getCurrentExpression() {
     Expression test = ExpressionUtil.TRUE;
     for (List<Expression> list : stack) {
       for (Expression e : list) {
@@ -50,7 +58,7 @@ public class ProcessWrapperContext extends SolverContext {
     for (Expression e : current) {
       test = ExpressionUtil.and(test, e);
     }
-    return solver.solve(test, val);
+    return test;
   }
 
   @Override
@@ -60,7 +68,7 @@ public class ProcessWrapperContext extends SolverContext {
 
   @Override
   public void dispose() {
-    stack = new LinkedList<>();
+    stack = new Stack<>();
     current = new LinkedList<>();
   }
 }
