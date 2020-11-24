@@ -1,5 +1,7 @@
 package gov.nasa.jpf.constraints.solvers.encapsulation;
 
+import static java.lang.System.exit;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.ConstraintSolver.Result;
 import gov.nasa.jpf.constraints.api.Expression;
@@ -7,6 +9,7 @@ import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.solvers.encapsulation.messages.StartSolvingMessage;
 import gov.nasa.jpf.constraints.solvers.encapsulation.messages.StopSolvingMessage;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,11 +29,11 @@ public class SolverRunner {
     try {
       CommandLine cmd = parser.parse(getOptions(), args);
       solve(cmd.getOptionValue("s"));
-      System.exit(0);
-    } catch (IOException | ClassNotFoundException | ParseException e) {
+      exit(0);
+    } catch (IOException | ClassNotFoundException | ParseException | InterruptedException e) {
       ObjectOutputStream err = new ObjectOutputStream(System.err);
       err.writeObject(e);
-      System.exit(2);
+      exit(2);
     }
   }
 
@@ -40,19 +43,33 @@ public class SolverRunner {
     return options;
   }
 
-  private static void solve(String solverName) throws IOException, ClassNotFoundException {
-    ObjectInputStream inStream = new ObjectInputStream(System.in);
-    Expression expr = (Expression) inStream.readObject();
-    ConstraintSolver solver = ConstraintSolverFactory.getRootFactory().createSolver(solverName);
-    ObjectOutputStream out = new ObjectOutputStream(System.out);
-    out.writeObject(new StartSolvingMessage());
-    Valuation val = new Valuation();
-    Result res = solver.solve(expr, val);
-    out.writeObject(new StopSolvingMessage());
-    if (res.equals(Result.SAT)) {
-      assert ((Expression<Boolean>) expr).evaluate(val);
+  private static void solve(String solverName)
+      throws IOException, ClassNotFoundException, InterruptedException {
+    try (BufferedInputStream bin = new BufferedInputStream(System.in);
+        ObjectInputStream inStream = new ObjectInputStream(bin);
+        ObjectOutputStream out = new ObjectOutputStream(System.out)) {
+      ConstraintSolver solver = ConstraintSolverFactory.getRootFactory().createSolver(solverName);
+      while (true) {
+        if (bin.available() > 0) {
+          Object read = inStream.readObject();
+          if (read instanceof Expression) {
+            Expression expr = (Expression) read;
+
+            out.writeObject(new StartSolvingMessage());
+            Valuation val = new Valuation();
+            Result res = solver.solve(expr, val);
+            out.writeObject(new StopSolvingMessage());
+            out.writeObject(new SolvingResult(res, val));
+            out.flush();
+          } else {
+            StopSolvingMessage ssm = (StopSolvingMessage) read;
+            break;
+          }
+        } else {
+          // Thread.sleep(1);
+        }
+      }
     }
-    out.writeObject(new SolvingResult(res, val));
   }
 
   private static void silenceTheLogger() {

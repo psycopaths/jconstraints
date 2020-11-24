@@ -89,6 +89,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
           "-s",
           solverName);
       solver = pb.start();
+      registerShutdown(solver);
 
       OutputStream inSolver = solver.getOutputStream();
       inObject = new ObjectOutputStream(inSolver);
@@ -129,6 +130,21 @@ public class ProcessWrapperSolver extends ConstraintSolver {
       }
     }
     return Result.DONT_KNOW;
+  }
+
+  private void registerShutdown(Process solver) {
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  try {
+                    inObject.writeObject(new StopSolvingMessage());
+                    solver.waitFor();
+                  } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                    solver.destroyForcibly();
+                  }
+                }));
   }
 
   private boolean checkBes(BufferedInputStream bes) throws IOException, ClassNotFoundException {
