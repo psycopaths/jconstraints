@@ -20,6 +20,7 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.NumericType;
 import gov.nasa.jpf.constraints.types.Type;
 import java.io.IOException;
@@ -30,20 +31,43 @@ import org.apache.commons.math3.fraction.BigFraction;
 /** comparison between numbers */
 public class NumericBooleanExpression extends AbstractBoolExpression {
 
-  public static NumericBooleanExpression create(
-      Expression<?> left, NumericComparator operator, Expression<?> right) {
-    return new NumericBooleanExpression(left, operator, right);
-  }
-
   private final Expression<?> left;
   private final NumericComparator operator;
   private final Expression<?> right;
 
   public NumericBooleanExpression(
       Expression<?> left, NumericComparator operator, Expression<?> right) {
+    assert !(left != null && left.getType() instanceof BuiltinTypes.BoolType
+        || right != null && right.getType() instanceof BuiltinTypes.BoolType);
     this.left = left;
     this.operator = operator;
     this.right = right;
+  }
+
+  public static NumericBooleanExpression create(
+      Expression<?> left, NumericComparator operator, Expression<?> right) {
+    return new NumericBooleanExpression(left, operator, right);
+  }
+
+  private static <L, R> int compare(Expression<L> left, Expression<R> right, Valuation val) {
+    L lv = left.evaluate(val);
+    R rv = right.evaluate(val);
+    NumericType<L> ltype = (NumericType<L>) left.getType();
+    NumericType<R> rtype = (NumericType<R>) right.getType();
+
+    if (ltype.equals(rtype)) {
+      return ltype.compare(lv, (L) rv);
+    }
+
+    if (lv instanceof BigFraction && rv instanceof BigFraction) {
+      BigFraction lNum = (BigFraction) lv;
+      BigFraction rNum = (BigFraction) rv;
+      return lNum.compareTo(rNum);
+    }
+
+    BigDecimal lNum = ltype.decimalValue(lv);
+    BigDecimal rNum = rtype.decimalValue(rv);
+    return lNum.compareTo(rNum);
   }
 
   @Override
@@ -145,26 +169,5 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
 
   public Type<?> getOperandType() {
     return left.getType();
-  }
-
-  private static <L, R> int compare(Expression<L> left, Expression<R> right, Valuation val) {
-    L lv = left.evaluate(val);
-    R rv = right.evaluate(val);
-    NumericType<L> ltype = (NumericType<L>) left.getType();
-    NumericType<R> rtype = (NumericType<R>) right.getType();
-
-    if (ltype.equals(rtype)) {
-      return ltype.compare(lv, (L) rv);
-    }
-
-    if (lv instanceof BigFraction && rv instanceof BigFraction) {
-      BigFraction lNum = (BigFraction) lv;
-      BigFraction rNum = (BigFraction) rv;
-      return lNum.compareTo(rNum);
-    }
-
-    BigDecimal lNum = ltype.decimalValue(lv);
-    BigDecimal rNum = rtype.decimalValue(rv);
-    return lNum.compareTo(rNum);
   }
 }

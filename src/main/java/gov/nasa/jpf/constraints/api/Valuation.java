@@ -71,7 +71,16 @@ public class Valuation extends AbstractPrintable
   }
 
   public boolean containsValueFor(Variable<?> v) {
-    return this.entries.containsKey(v);
+    boolean isEntry = this.entries.containsKey(v);
+    if (!isEntry) {
+      for (Variable key : this.entries.keySet()) {
+        if (v.getName().equals(key.getName()) && v.getType().equals(key.getType())) {
+          isEntry = true;
+          break;
+        }
+      }
+    }
+    return isEntry;
   }
 
   public Set<Variable<?>> getVariables() {

@@ -117,9 +117,9 @@ public class ExtendedParserTest {
     PropositionalCompound propCompound = (PropositionalCompound) expr;
     assertEquals(LogicalOperator.OR, propCompound.getOperator());
 
-    NumericBooleanExpression assignmentB = (NumericBooleanExpression) propCompound.getRight();
+    PropositionalCompound assignmentB = (PropositionalCompound) propCompound.getRight();
     assertEquals(b, assignmentB.getLeft());
-    assertEquals(NumericComparator.EQ, assignmentB.getComparator());
+    assertEquals(LogicalOperator.EQUIV, assignmentB.getOperator());
 
     assertEquals(NumericBooleanExpression.class, propCompound.getLeft().getClass());
     NumericBooleanExpression comparisonC = (NumericBooleanExpression) propCompound.getLeft();
@@ -156,9 +156,9 @@ public class ExtendedParserTest {
     assertEquals(c, assignmentC.getLeft());
     assertEquals(NumericComparator.EQ, assignmentC.getComparator());
 
-    NumericBooleanExpression assignmentB = (NumericBooleanExpression) propCompound.getRight();
+    PropositionalCompound assignmentB = (PropositionalCompound) propCompound.getRight();
     assertEquals(b, assignmentB.getLeft());
-    assertEquals(NumericComparator.EQ, assignmentB.getComparator());
+    assertEquals(LogicalOperator.EQUIV, assignmentB.getOperator());
     return true;
   }
 

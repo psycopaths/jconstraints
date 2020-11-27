@@ -17,7 +17,52 @@
 package gov.nasa.jpf.constraints.parser;
 
 import static gov.nasa.jpf.constraints.parser.ExpressionLexer.PRIMEID;
-import static gov.nasa.jpf.constraints.parser.ExpressionParser.*;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.ADD;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BIGDECIMAL_LITERAL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BIGINT_LITERAL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BVAND;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BVNEG;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BVOR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BVSHL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BVSHR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BVSHUR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BVXOR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.BYTE_LITERAL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.DIV;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.DOUBLE_LITERAL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.EQ;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.EXISTS;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.FALSE;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.FLOAT_LITERAL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.FORALL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.GE;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.GT;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.ID;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.INT_LITERAL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LAND;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LE;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LEQ;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LIMP;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LNOT;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LONG_LITERAL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LOR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LT;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.LXOR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.MUL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.NE;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.QID;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.QUANTIFIER_VAR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.QUANTIFIER_VAR_LIST;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.REM;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.ROOT;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.SHORT_LITERAL;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.SUB;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.TRUE;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.TYPED_VAR;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.TYPED_VAR_LIST;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.TYPE_CAST;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.UNARY_MINUS;
+import static gov.nasa.jpf.constraints.parser.ExpressionParser.UNARY_PLUS;
 
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
@@ -52,51 +97,21 @@ import org.antlr.runtime.tree.TreeVisitor;
 
 public class ASTTranslator extends TreeVisitor {
 
-  private static class Context {
-    private final Map<String, Variable<?>> vars = new HashMap<String, Variable<?>>();
-    private final Context parent;
-
-    public Context() {
-      this(null);
-    }
-
-    public Context(Context parent) {
-      this.parent = parent;
-    }
-
-    public void declareVariables(Collection<? extends Variable<?>> variables) {
-      for (Variable<?> var : variables) {
-        if (vars.put(var.getName(), var) != null) {
-          throw new IllegalStateException("Duplicate declaration of variable " + var.getName());
-        }
-      }
-    }
-
-    public Collection<? extends Variable<?>> getVariables() {
-      return vars.values();
-    }
-
-    public Context getParent() {
-      return parent;
-    }
-
-    public Variable<?> lookup(String name) {
-      Variable<?> var = vars.get(name);
-      if (var != null) {
-        return var;
-      }
-      if (parent != null) {
-        return parent.lookup(name);
-      }
-      return null;
-    }
-  }
-
-  private Context current = new Context();
   private final TypeContext types;
+  private Context current = new Context();
 
   public ASTTranslator(TypeContext types) {
     this.types = types;
+  }
+
+  private static void requireType(Tree n, int... expected) {
+    int t = n.getType();
+    for (int i = 0; i < expected.length; i++) {
+      if (t == expected[i]) {
+        return;
+      }
+    }
+    throw new UnexpectedTokenException(n, expected);
   }
 
   public void declareVariables(Collection<? extends Variable<?>> variables) {
@@ -260,11 +275,25 @@ public class ASTTranslator extends TreeVisitor {
   public Expression<Boolean> translateNumericComparison(Tree n)
       throws ImpreciseRepresentationException {
     NumericComparator cmp;
+    Expression<?> left = translateArithmeticExpression(n.getChild(0));
+    Expression<?> right = translateArithmeticExpression(n.getChild(1));
+
+    boolean isBool =
+        left.getType().equals(BuiltinTypes.BOOL) && right.getType().equals(BuiltinTypes.BOOL);
     switch (n.getType()) {
       case EQ:
+        if (isBool) {
+          return PropositionalCompound.create(
+              (Expression<Boolean>) left, LogicalOperator.EQUIV, right);
+        }
         cmp = NumericComparator.EQ;
         break;
       case NE:
+        if (isBool) {
+          return Negation.create(
+              PropositionalCompound.create(
+                  (Expression<Boolean>) left, LogicalOperator.EQUIV, right));
+        }
         cmp = NumericComparator.NE;
         break;
       case LT:
@@ -282,9 +311,6 @@ public class ASTTranslator extends TreeVisitor {
       default:
         throw new UnexpectedTokenException(n, EQ, NE, LT, LE, GT, GE);
     }
-
-    Expression<?> left = translateArithmeticExpression(n.getChild(0));
-    Expression<?> right = translateArithmeticExpression(n.getChild(1));
 
     return NumericBooleanExpression.create(left, cmp, right);
   }
@@ -573,13 +599,44 @@ public class ASTTranslator extends TreeVisitor {
     return type;
   }
 
-  private static void requireType(Tree n, int... expected) {
-    int t = n.getType();
-    for (int i = 0; i < expected.length; i++) {
-      if (t == expected[i]) {
-        return;
+  private static class Context {
+
+    private final Map<String, Variable<?>> vars = new HashMap<String, Variable<?>>();
+    private final Context parent;
+
+    public Context() {
+      this(null);
+    }
+
+    public Context(Context parent) {
+      this.parent = parent;
+    }
+
+    public void declareVariables(Collection<? extends Variable<?>> variables) {
+      for (Variable<?> var : variables) {
+        if (vars.put(var.getName(), var) != null) {
+          throw new IllegalStateException("Duplicate declaration of variable " + var.getName());
+        }
       }
     }
-    throw new UnexpectedTokenException(n, expected);
+
+    public Collection<? extends Variable<?>> getVariables() {
+      return vars.values();
+    }
+
+    public Context getParent() {
+      return parent;
+    }
+
+    public Variable<?> lookup(String name) {
+      Variable<?> var = vars.get(name);
+      if (var != null) {
+        return var;
+      }
+      if (parent != null) {
+        return parent.lookup(name);
+      }
+      return null;
+    }
   }
 }

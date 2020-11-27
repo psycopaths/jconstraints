@@ -192,7 +192,7 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
 
   @Override
   public Expression<?>[] getChildren() {
-    throw new UnsupportedOperationException();
+    return new Expression[] {left};
   }
 
   @Override

@@ -17,6 +17,24 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
   private final Expression<?> right;
   private final Expression<?> offset;
 
+  public StringIntegerExpression(Expression<?> left, StringIntegerOperator operator) {
+    this.left = left;
+    this.right = null;
+    this.operator = operator;
+    this.offset = null;
+  }
+
+  public StringIntegerExpression(
+      Expression<?> left,
+      StringIntegerOperator operator,
+      Expression<?> right,
+      Expression<?> offset) {
+    this.left = left;
+    this.right = right;
+    this.operator = operator;
+    this.offset = offset;
+  }
+
   public static StringIntegerExpression createLength(Expression<?> left) {
     return new StringIntegerExpression(left, StringIntegerOperator.LENGTH);
   }
@@ -36,24 +54,6 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 
   public Expression<?> getRight() {
     return right;
-  }
-
-  public StringIntegerExpression(Expression<?> left, StringIntegerOperator operator) {
-    this.left = left;
-    this.right = null;
-    this.operator = operator;
-    this.offset = null;
-  }
-
-  public StringIntegerExpression(
-      Expression<?> left,
-      StringIntegerOperator operator,
-      Expression<?> right,
-      Expression<?> offset) {
-    this.left = left;
-    this.right = right;
-    this.operator = operator;
-    this.offset = offset;
   }
 
   @Override

@@ -7,6 +7,7 @@ import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.ValuationEntry;
 import gov.nasa.jpf.constraints.solvers.encapsulation.messages.StartSolvingMessage;
 import gov.nasa.jpf.constraints.solvers.encapsulation.messages.StopSolvingMessage;
+import gov.nasa.jpf.constraints.solvers.encapsulation.messages.TimeOutSolvingMessage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -114,18 +115,23 @@ public class ProcessWrapperSolver extends ConstraintSolver {
         Thread.sleep(1);
       }
       if (!checkBes(bes)) {
-        Object done = (StopSolvingMessage) outObject.readObject();
-        Object o = outObject.readObject();
+        Object done = outObject.readObject();
+        if (done instanceof StopSolvingMessage) {
+          Object o = outObject.readObject();
 
-        if (o instanceof SolvingResult) {
-          SolvingResult res = (SolvingResult) o;
-          if (res.getResult().equals(Result.SAT)) {
-            for (ValuationEntry e : res.getVal()) {
-              result.addEntry(e);
+          if (o instanceof SolvingResult) {
+            SolvingResult res = (SolvingResult) o;
+            if (res.getResult().equals(Result.SAT)) {
+              for (ValuationEntry e : res.getVal()) {
+                result.addEntry(e);
+              }
+              assert (Boolean) f.evaluate(result);
             }
-            assert (Boolean) f.evaluate(result);
+            return res.getResult();
           }
-          return res.getResult();
+        } else if (done instanceof TimeOutSolvingMessage) {
+          System.out.println("Timeout in process Solver");
+          solver.destroyForcibly();
         }
       }
     }
@@ -138,9 +144,11 @@ public class ProcessWrapperSolver extends ConstraintSolver {
             new Thread(
                 () -> {
                   try {
-                    inObject.writeObject(new StopSolvingMessage());
-                    solver.waitFor();
-                  } catch (IOException | InterruptedException e) {
+                    System.out.println("Shutdown hock");
+                    if (solver.isAlive()) {
+                      inObject.writeObject(new StopSolvingMessage());
+                    }
+                  } catch (IOException e) {
                     e.printStackTrace();
                     solver.destroyForcibly();
                   }

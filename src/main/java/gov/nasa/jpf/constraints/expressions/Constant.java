@@ -26,8 +26,24 @@ import gov.nasa.jpf.constraints.types.Type;
 import java.io.IOException;
 import java.util.Collection;
 
-/** constant value of type E */
+/**
+ * constant value of type E
+ */
 public class Constant<E> extends AbstractExpression<E> {
+
+  private final Type<E> type;
+  private final E value;
+
+  public Constant(Type<E> type, E value) {
+    this.type = type;
+    assert this.type.getDefaultValue().getClass().isInstance(value);
+    this.value = value;
+  }
+
+  @Deprecated
+  public Constant(Class<E> clazz, E value) {
+    this(ObjectConstraints.getPrimitiveType(clazz), value);
+  }
 
   public static <E> Constant<E> create(Type<E> type, E value) {
     return new Constant<E>(type, value);
@@ -40,14 +56,6 @@ public class Constant<E> extends AbstractExpression<E> {
 
   public static <E> Constant<E> createCasted(Type<E> type, Object value) {
     return new Constant<E>(type, type.cast(value));
-  }
-
-  private final Type<E> type;
-  private final E value;
-
-  public Constant(Type<E> type, E value) {
-    this.type = type;
-    this.value = value;
   }
 
   @Override
@@ -120,15 +128,10 @@ public class Constant<E> extends AbstractExpression<E> {
     }
   }
 
+  // LEGACY API
+
   @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
-  }
-
-  // LEGACY API
-
-  @Deprecated
-  public Constant(Class<E> clazz, E value) {
-    this(ObjectConstraints.getPrimitiveType(clazz), value);
   }
 }

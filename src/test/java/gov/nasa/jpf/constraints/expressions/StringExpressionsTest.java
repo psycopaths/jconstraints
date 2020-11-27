@@ -40,7 +40,7 @@ public class StringExpressionsTest {
     StringBooleanExpression equals = StringBooleanExpression.createEquals(fromInt, x);
 
     Valuation val = new Valuation();
-    val.setValue(x, "C");
+    val.setValue(x, "10");
     assertTrue(equals.evaluate(val));
   }
 
