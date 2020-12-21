@@ -14,10 +14,13 @@ the terms of the [Apache License 2.0][8].
 
 ## Building and Installing ##
 
-* In the *jConstraints* folder, run `mvn install`
+* In the *jConstraints* folder, run `./gradlew jar`
 * If the compilation was successful, the *jConstraints*
   library can be found in the JAR file
-  `target/jconstraints-[VERSION].jar`
+  `build/libs/jconstraints-[VERSION].jar`
+
+* You might run `./gradlew shadowJar` to get a fat JAR containing
+  all dependencies. It should be found as: `build/libs/jconstraints-[VERSION]-all.jar`
 
 
 ## How To Use ##
