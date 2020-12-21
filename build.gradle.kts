@@ -19,6 +19,9 @@ java {
     }
 }
 
+group="tools.aqua"
+version="0.9.6-SNAPSHOT"
+
 repositories {
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
@@ -43,5 +46,44 @@ tasks.test {
     }
     testLogging {
         events(FAILED, STANDARD_ERROR, SKIPPED, PASSED)
+    }
+}
+
+publishing{
+    publications{
+        create<MavenPublication>("mavenJava") {
+            artifactId = "jconstraints"
+            from(components["java"])
+            pom {
+                name.set("jConstraints")
+                description.set("jConstraints is a library for managing SMT constraints in Java.")
+                url.set("https://github.com/tudo-aqua/jconstraints")
+                licenses {
+                    license{
+                        name.set("Apache-2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("mmuesly")
+                        name.set("Malte Mues")
+                        email.set("mail.mues@gmail.com")
+                    }
+                    developer {
+                        id.set("fhowar")
+                        name.set("Falk Howar")
+                    }
+                }
+                scm {
+                    connection.set("https://github.com/tudo-aqua/jconstraints.git")
+                    url.set("https://github.com/tudo-aqua/jconstraints")
+                }
+            }
+        }
+        create<MavenPublication>("publishMaven") {
+            artifact(tasks["shadowJar"])
+            artifactId="jconstraints-all"
+        }
     }
 }
