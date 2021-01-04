@@ -6,8 +6,6 @@ import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorNegation;
 import gov.nasa.jpf.constraints.expressions.BitvectorOperator;
-import gov.nasa.jpf.constraints.expressions.BooleanExpression;
-import gov.nasa.jpf.constraints.expressions.BooleanOperator;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.IfThenElse;
@@ -479,27 +477,6 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
     throw new UnsupportedOperationException("not implemented yet.");
     // TODO: implement support for function expressions
     // return null;
-  }
-
-  @Override
-  @Deprecated
-  public Void visit(BooleanExpression n, Void v) {
-    ctx.open(boolOp(n.getOperator()));
-    visit(n.getLeft(), v);
-    visit(n.getRight(), v);
-    ctx.close();
-    return null;
-  }
-
-  private String boolOp(BooleanOperator op) {
-    switch (op) {
-      case EQ:
-        return "=";
-      case NEQ:
-        return "!=";
-      default:
-        throw new IllegalArgumentException("Unsupported: " + op);
-    }
   }
 
   @Override

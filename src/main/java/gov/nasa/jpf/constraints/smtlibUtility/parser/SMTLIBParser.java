@@ -4,8 +4,6 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorOperator;
-import gov.nasa.jpf.constraints.expressions.BooleanExpression;
-import gov.nasa.jpf.constraints.expressions.BooleanOperator;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.ExpressionOperator;
 import gov.nasa.jpf.constraints.expressions.IfThenElse;
@@ -70,23 +68,10 @@ import org.smtlib.impl.SMTExpr.Let;
 import org.smtlib.impl.SMTExpr.Symbol;
 import org.smtlib.impl.Sort;
 
-// import javafx.beans.binding.StringExpression;
-
 public class SMTLIBParser {
 
-  private static class Tuple<L, R> {
-    protected L left;
-    protected R right;
-
-    private Tuple(final L left, final R right) {
-      this.left = left;
-      this.right = right;
-    }
-  }
-
-  public SMTProblem problem;
-
   private final Set<Variable> letContext;
+  public SMTProblem problem;
 
   public SMTLIBParser() {
     problem = new SMTProblem();
@@ -270,8 +255,7 @@ public class SMTLIBParser {
     checkImpliesOperatorRequirements(operator, arguments);
 
     final ExpressionOperator newOperator = fixExpressionOperator(operator, arguments);
-    if (!(newOperator instanceof BooleanOperator
-        || newOperator instanceof StringBooleanOperator
+    if (!(newOperator instanceof StringBooleanOperator
         || newOperator instanceof StringIntegerOperator
         || newOperator instanceof StringOperator
         || newOperator instanceof RegExCompoundOperator
@@ -312,15 +296,6 @@ public class SMTLIBParser {
         }
       }
       return expr;
-    } else if (newOperator instanceof BooleanOperator) {
-      switch ((BooleanOperator) newOperator) {
-        case EQ:
-          return BooleanExpression.createEquals(arguments.poll(), arguments.poll());
-        case NEQ:
-          return BooleanExpression.createNotEquals(arguments.poll(), arguments.poll());
-        default:
-          throw new IllegalArgumentException("Unknown BooleanOperator");
-      }
     } else if (newOperator instanceof StringOperator) {
       switch ((StringOperator) newOperator) {
         case AT:
@@ -588,52 +563,51 @@ public class SMTLIBParser {
           && ((Negation) left).getNegated() instanceof StringBooleanExpression) {
         return newOperator;
       }
-      if (left instanceof BooleanExpression || right instanceof BooleanExpression) {
-        return BooleanOperator.EQ;
-      }
       if (left instanceof Variable<?> || left instanceof Constant<?>) {
         if (left.getType() instanceof BuiltinTypes.BoolType) {
-          return BooleanOperator.EQ;
+          return LogicalOperator.EQUIV;
         }
       }
       if (right instanceof Variable<?> || right instanceof Constant<?>) {
         if (right.getType() instanceof BuiltinTypes.BoolType) {
-          return BooleanOperator.EQ;
+          return LogicalOperator.EQUIV;
         }
       }
       if (right instanceof Negation
-          && ((Negation) right).getNegated() instanceof BooleanExpression) {
-        return BooleanOperator.EQ;
+          && ((Negation) right).getNegated() instanceof PropositionalCompound) {
+        return LogicalOperator.EQUIV;
       }
 
-      if (left instanceof Negation && ((Negation) left).getNegated() instanceof BooleanExpression) {
-        return BooleanOperator.EQ;
+      if (left instanceof Negation
+          && ((Negation) left).getNegated() instanceof PropositionalCompound) {
+        return LogicalOperator.EQUIV;
       }
     }
 
     if (operator.equals(NumericComparator.NE)) {
       Expression left = tmp.poll();
       Expression right = tmp.poll();
-      if (left instanceof BooleanExpression || right instanceof BooleanExpression) {
-        return BooleanOperator.NEQ;
+      if (left instanceof PropositionalCompound || right instanceof PropositionalCompound) {
+        return LogicalOperator.XOR;
       }
       if (left instanceof Variable<?> || left instanceof Constant<?>) {
         if (left.getType() instanceof BuiltinTypes.BoolType) {
-          return BooleanOperator.NEQ;
+          return LogicalOperator.XOR;
         }
       }
       if (right instanceof Variable<?> || right instanceof Constant<?>) {
         if (right.getType() instanceof BuiltinTypes.BoolType) {
-          return BooleanOperator.NEQ;
+          return LogicalOperator.XOR;
         }
       }
       if (right instanceof Negation
-          && ((Negation) right).getNegated() instanceof BooleanExpression) {
-        return BooleanOperator.NEQ;
+          && ((Negation) right).getNegated() instanceof PropositionalCompound) {
+        return LogicalOperator.XOR;
       }
 
-      if (left instanceof Negation && ((Negation) left).getNegated() instanceof BooleanExpression) {
-        return BooleanOperator.NEQ;
+      if (left instanceof Negation
+          && ((Negation) left).getNegated() instanceof PropositionalCompound) {
+        return LogicalOperator.XOR;
       }
     }
     return operator;
@@ -651,5 +625,15 @@ public class SMTLIBParser {
       }
     }
     return false;
+  }
+
+  private static class Tuple<L, R> {
+    protected L left;
+    protected R right;
+
+    private Tuple(final L left, final R right) {
+      this.left = left;
+      this.right = right;
+    }
   }
 }

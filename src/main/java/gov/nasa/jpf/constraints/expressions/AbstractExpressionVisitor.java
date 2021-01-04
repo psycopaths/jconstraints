@@ -86,10 +86,6 @@ public abstract class AbstractExpressionVisitor<R, D> implements ExpressionVisit
     return defaultVisit(n, data);
   }
 
-  @Override
-  public R visit(BooleanExpression n, D data) {
-    return defaultVisit(n, data);
-  }
   /* (non-Javadoc)
    * @see gov.nasa.jpf.constraints.api.ExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions.CastExpression, D)
    */

@@ -1,11 +1,11 @@
 package gov.nasa.jpf.constraints.smtlibUtility.parser;
 
+import static gov.nasa.jpf.constraints.smtlibUtility.parser.utility.ResourceParsingHelper.parseResourceFile;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.expressions.BooleanExpression;
 import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.smtlibUtility.SMTProblem;
@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import org.smtlib.IParser;
+import org.smtlib.IParser.ParserException;
 import org.testng.annotations.Test;
 
 public class LetExpressionParsingTest {
@@ -45,8 +46,8 @@ public class LetExpressionParsingTest {
     }
 
     final Expression assertion1 = problem.assertions.get(0);
-    assertEquals(assertion1.getClass(), BooleanExpression.class);
-    final BooleanExpression cAssertion1 = (BooleanExpression) assertion1;
+    assertEquals(assertion1.getClass(), PropositionalCompound.class);
+    final PropositionalCompound cAssertion1 = (PropositionalCompound) assertion1;
     assertEquals(cAssertion1.getRight().getClass(), LetExpression.class);
     final LetExpression letExpr = (LetExpression) cAssertion1.getRight();
     assertEquals(letExpr.getParameters().size(), 3);
@@ -104,5 +105,13 @@ public class LetExpressionParsingTest {
       assertTrue(names.contains(v.getName()), v.getName() + " not in names: " + names);
     }
     assertEquals(problem.assertions.get(0).getType(), BuiltinTypes.BOOL);
+  }
+
+  @Test(groups = {"jsmtlib"})
+  public void parse_constraint_1635444()
+      throws SMTLIBParserException, ParserException, IOException {
+    final SMTProblem problem = parseResourceFile("constraint-1635444.txt");
+    final Expression assertStmt = problem.assertions.get(0);
+    assertEquals(assertStmt.getClass(), LetExpression.class);
   }
 }
