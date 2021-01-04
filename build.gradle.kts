@@ -40,6 +40,9 @@ group = "tools.aqua"
 version = "0.9.6-SNAPSHOT"
 description = "jConstraints"
 
+license {
+    header = file("NOTICE")
+}
 
 tasks.test {
     useTestNG() {
