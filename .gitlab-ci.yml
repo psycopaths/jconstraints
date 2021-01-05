@@ -1,7 +1,7 @@
 default:
   image: openjdk:13-jdk-alpine
   script:
-    - ./gradlew verGJF
-    - ./gradlew license
-    - ./gradlew assemble test
+    - apk add openjdk8
+    - ./gradlew -Dorg.gradle.java.installations.paths=/opt/openjdk-13,/usr/lib/jvm/java-1.8-openjdk verGJF license
+    - ./gradlew -Dorg.gradle.java.installations.paths=/opt/openjdk-13,/usr/lib/jvm/java-1.8-openjdk assemble test
 
