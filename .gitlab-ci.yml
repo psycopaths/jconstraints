@@ -1,8 +1,7 @@
 default:
   image: openjdk:13-jdk-alpine
   script:
-    - apk add git gradle
-    - gradle verGJF
-    - gradle license
-    - gradle assemble test
+    - ./gradlew verGJF
+    - ./gradlew license
+    - ./gradlew assemble test
 
