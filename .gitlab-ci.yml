@@ -1,12 +1,8 @@
 default:
   image: openjdk:13-jdk-alpine
   script:
-    - apk add maven git gradle
-    - mkdir -p /tmp/dependencies
-    - git clone https://github.com/smtlib/jSMTLIB.git /tmp/dependencies/jSMTLIB
-    - cd /tmp/dependencies/jSMTLIB
-    - gradle assemble
-    - mvn install:install-file -DgroupId=org -DartifactId=smtlib -Dversion=SNAPSHOT -Dpackaging=jar -Dfile=build/libs/jSMTLIB-0.9.10.1.jar
-    - cd -
-    - mvn package
-    - mvn test
+    - apk add git gradle
+    - gradle verGJF
+    - gradle license
+    - gradle assemble test
+
