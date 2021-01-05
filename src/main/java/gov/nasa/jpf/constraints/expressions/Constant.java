@@ -1,4 +1,11 @@
-/*
+/**
+ * Copyright 2020, TU Dortmund, Malte Mues (@mmuesly)
+ *
+ * This is a derived version of JConstraints original located at:
+ * https://github.com/psycopaths/jconstraints
+ *
+ * Until commit: https://github.com/tudo-aqua/jconstraints/commit/876e377
+ * the original license is:
  * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
@@ -12,8 +19,10 @@
  * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
+ *
+ * Modifications and new contributions are Copyright by TU Dortmund 2020, Malte Mues
+ * under Apache 2.0 in alignment with the original repository license.
  */
-
 package gov.nasa.jpf.constraints.expressions;
 
 import gov.nasa.jpf.constraints.api.Expression;
@@ -22,13 +31,14 @@ import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.java.ObjectConstraints;
+import gov.nasa.jpf.constraints.types.BuiltinTypes.BigDecimalType;
 import gov.nasa.jpf.constraints.types.Type;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
 
-/**
- * constant value of type E
- */
+/** constant value of type E */
 public class Constant<E> extends AbstractExpression<E> {
 
   private final Type<E> type;
@@ -54,7 +64,15 @@ public class Constant<E> extends AbstractExpression<E> {
     return new Constant<E>(type, type.parse(txt));
   }
 
+  public static <E> Constant<E> createCasted(Type<E> type, Constant c) {
+    return createCasted(type, c.value);
+  }
+
   public static <E> Constant<E> createCasted(Type<E> type, Object value) {
+    if (type instanceof BigDecimalType && value instanceof BigInteger) {
+      BigDecimal val = BigDecimal.valueOf(((BigInteger) value).longValue());
+      return (Constant<E>) new Constant<BigDecimal>((Type<BigDecimal>) type, val);
+    }
     return new Constant<E>(type, type.cast(value));
   }
 
@@ -127,8 +145,6 @@ public class Constant<E> extends AbstractExpression<E> {
       a.append(String.valueOf(value));
     }
   }
-
-  // LEGACY API
 
   @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {

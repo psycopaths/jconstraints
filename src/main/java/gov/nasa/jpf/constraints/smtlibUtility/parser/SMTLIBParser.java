@@ -1,3 +1,28 @@
+/**
+ * Copyright 2020, TU Dortmund, Malte Mues (@mmuesly)
+ *
+ * This is a derived version of JConstraints original located at:
+ * https://github.com/psycopaths/jconstraints
+ *
+ * Until commit: https://github.com/tudo-aqua/jconstraints/commit/876e377
+ * the original license is:
+ * Copyright (C) 2015, United States Government, as represented by the
+ * Administrator of the National Aeronautics and Space Administration.
+ * All rights reserved.
+ *
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ * Modifications and new contributions are Copyright by TU Dortmund 2020, Malte Mues
+ * under Apache 2.0 in alignment with the original repository license.
+ */
 package gov.nasa.jpf.constraints.smtlibUtility.parser;
 
 import gov.nasa.jpf.constraints.api.Expression;
@@ -195,7 +220,6 @@ public class SMTLIBParser {
 
   private Expression processFunctionExpression(final FcnExpr sExpr) throws SMTLIBParserException {
     final String operatorStr = sExpr.head().headSymbol().value();
-
     final Queue<Expression> convertedArguments = new LinkedList<>();
     for (final IExpr arg : sExpr.args()) {
       final Expression jExpr = processArgument(arg);
@@ -220,7 +244,6 @@ public class SMTLIBParser {
       ret = createNegation(convertedArguments);
     } else if (operatorStr.equals("ite")) {
       ret = createITE(convertedArguments);
-
     } else {
       final ExpressionOperator operator =
           ExpressionOperator.fromString(
@@ -459,7 +482,7 @@ public class SMTLIBParser {
     if (expr instanceof UnaryMinus) {
       return convertUnaryMinus(type, (UnaryMinus) expr);
     } else if (expr instanceof Constant) {
-      return convertConstant(type, (Constant) expr);
+      return Constant.createCasted(type, (Constant) expr);
     } else {
       throw new SMTLIBParserExceptionInvalidMethodCall(
           "Expected a Constant or Unary Expression, but got" + expr.getClass());
@@ -467,11 +490,7 @@ public class SMTLIBParser {
   }
 
   private UnaryMinus convertUnaryMinus(final Type type, final UnaryMinus unary) {
-    return UnaryMinus.create(convertConstant(type, (Constant) unary.getNegated()));
-  }
-
-  private Constant convertConstant(final Type type, final Constant constant) {
-    return Constant.create(type, constant.getValue());
+    return UnaryMinus.create(Constant.createCasted(type, (Constant) unary.getNegated()));
   }
 
   private Constant resolveNumeral(final INumeral numeral) {
@@ -496,7 +515,6 @@ public class SMTLIBParser {
     if (symbol.value().equalsIgnoreCase("false")) {
       return ExpressionUtil.FALSE;
     }
-
     for (final Variable var : problem.variables) {
       if (var.getName().equals(symbol.value())) {
         return var;

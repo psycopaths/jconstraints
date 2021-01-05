@@ -1,4 +1,11 @@
-/*
+/**
+ * Copyright 2020, TU Dortmund, Malte Mues (@mmuesly)
+ *
+ * This is a derived version of JConstraints original located at:
+ * https://github.com/psycopaths/jconstraints
+ *
+ * Until commit: https://github.com/tudo-aqua/jconstraints/commit/876e377
+ * the original license is:
  * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
@@ -12,8 +19,10 @@
  * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
+ *
+ * Modifications and new contributions are Copyright by TU Dortmund 2020, Malte Mues
+ * under Apache 2.0 in alignment with the original repository license.
  */
-
 package gov.nasa.jpf.constraints.expressions;
 
 import gov.nasa.jpf.constraints.api.Expression;
@@ -30,6 +39,19 @@ import java.util.Collection;
 /** Numeric expression */
 public class NumericCompound<E> extends AbstractExpression<E> {
 
+  private final NumericOperator operator;
+  private final Expression<E> left;
+  private final Expression<E> right;
+
+  public NumericCompound(Expression<E> left, NumericOperator operator, Expression<E> right) {
+    assert left.getType() instanceof NumericType;
+    assert right.getType().equals(left.getType());
+
+    this.operator = operator;
+    this.left = left;
+    this.right = right;
+  }
+
   public static Expression<?> createCompatible(
       Expression<?> left, NumericOperator op, Expression<?> right, TypeContext types) {
     Type<?> lt = left.getType(), rt = right.getType();
@@ -44,19 +66,6 @@ public class NumericCompound<E> extends AbstractExpression<E> {
     Type<E> type = left.getType();
     Expression<E> r = right.requireAs(type);
     return new NumericCompound<>(left, operator, r);
-  }
-
-  private final NumericOperator operator;
-  private final Expression<E> left;
-  private final Expression<E> right;
-
-  public NumericCompound(Expression<E> left, NumericOperator operator, Expression<E> right) {
-    assert left.getType() instanceof NumericType;
-    assert right.getType().equals(left.getType());
-
-    this.operator = operator;
-    this.left = left;
-    this.right = right;
   }
 
   @Override
@@ -200,16 +209,16 @@ public class NumericCompound<E> extends AbstractExpression<E> {
           if (left instanceof UnaryMinus) {
             newLeft =
                 new UnaryMinus(
-                    new Constant(type, ((Constant) ((UnaryMinus) left).getNegated()).getValue()));
+                    Constant.createCasted(type, ((Constant) ((UnaryMinus) left).getNegated())));
           } else {
-            newLeft = new Constant(type, ((Constant) left).getValue());
+            newLeft = Constant.createCasted(type, (Constant) left);
           }
           if (right instanceof UnaryMinus) {
             newRight =
                 new UnaryMinus(
-                    new Constant(type, ((Constant) ((UnaryMinus) right).getNegated()).getValue()));
+                    Constant.createCasted(type, ((Constant) ((UnaryMinus) right).getNegated())));
           } else {
-            newRight = new Constant(type, ((Constant) right).getValue());
+            newRight = Constant.createCasted(type, (Constant) right);
           }
 
           return new NumericCompound(newLeft, this.operator, newRight);

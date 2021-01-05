@@ -1,3 +1,28 @@
+/**
+ * Copyright 2020, TU Dortmund, Malte Mues (@mmuesly)
+ *
+ * This is a derived version of JConstraints original located at:
+ * https://github.com/psycopaths/jconstraints
+ *
+ * Until commit: https://github.com/tudo-aqua/jconstraints/commit/876e377
+ * the original license is:
+ * Copyright (C) 2015, United States Government, as represented by the
+ * Administrator of the National Aeronautics and Space Administration.
+ * All rights reserved.
+ *
+ * The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
+ * platform is licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ * Modifications and new contributions are Copyright by TU Dortmund 2020, Malte Mues
+ * under Apache 2.0 in alignment with the original repository license.
+ */
 package gov.nasa.jpf.constraints.smtlibUtility.export;
 
 import static org.testng.Assert.assertEquals;
@@ -18,14 +43,14 @@ public class CastExpressionTest {
   ByteArrayOutputStream baos;
   PrintStream ps;
 
-  @BeforeMethod
+  @BeforeMethod(alwaysRun = true)
   public void initialize() {
     baos = new ByteArrayOutputStream();
     ps = new PrintStream(baos);
     se = (new SMTLibExportWrapper(new DontKnowSolver(), ps)).createContext();
   }
 
-  @Test(groups = {"basic", "smt-export"})
+  @Test(groups = {"base", "smt-export"})
   public void castSINT32IntegerTest() {
     String expected =
         "(declare-const X (_ BitVec 32))\n"
@@ -37,7 +62,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test(groups = {"basic", "smt-export"})
+  @Test(groups = {"base", "smt-export"})
   public void castIntegerSINT32Test() {
     String expected =
         "(declare-const X Int)\n"
@@ -49,7 +74,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test(groups = {"basic", "smt-export"})
+  @Test(groups = {"base", "smt-export"})
   public void castIntegerSINT8Test() {
     String expected =
         "(declare-const X Int)\n(assert (ite (< X 0) (bvneg ((_ nat2bv 8) X)) ((_ nat2bv 8) X)))\n";
@@ -60,7 +85,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test(groups = {"basic", "smt-export"})
+  @Test(groups = {"base", "smt-export"})
   public void castSINT8SINT32Test() {
     String expected = "(declare-const X (_ BitVec 8))\n(assert ((_ sign_extend 24) X))\n";
     CastExpression expr =
@@ -70,7 +95,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test(groups = {"basic", "smt-export"})
+  @Test(groups = {"base", "smt-export"})
   public void castSINT8UINT16Test() {
     String expected = "(declare-const X (_ BitVec 8))\n(assert ((_ sign_extend 8) X))\n";
     CastExpression expr =
@@ -80,7 +105,7 @@ public class CastExpressionTest {
     assertEquals(output, expected);
   }
 
-  @Test(groups = {"basic", "smt-export"})
+  @Test(groups = {"base", "smt-export"})
   public void castUINT16SINT32Test() {
     String expected = "(declare-const X (_ BitVec 16))\n(assert ((_ zero_extend 16) X))\n";
     CastExpression expr =

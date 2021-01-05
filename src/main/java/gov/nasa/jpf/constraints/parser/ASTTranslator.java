@@ -1,4 +1,11 @@
-/*
+/**
+ * Copyright 2020, TU Dortmund, Malte Mues (@mmuesly)
+ *
+ * This is a derived version of JConstraints original located at:
+ * https://github.com/psycopaths/jconstraints
+ *
+ * Until commit: https://github.com/tudo-aqua/jconstraints/commit/876e377
+ * the original license is:
  * Copyright (C) 2015, United States Government, as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All rights reserved.
@@ -12,8 +19,10 @@
  * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
+ *
+ * Modifications and new contributions are Copyright by TU Dortmund 2020, Malte Mues
+ * under Apache 2.0 in alignment with the original repository license.
  */
-
 package gov.nasa.jpf.constraints.parser;
 
 import static gov.nasa.jpf.constraints.parser.ExpressionLexer.PRIMEID;
@@ -97,21 +106,51 @@ import org.antlr.runtime.tree.TreeVisitor;
 
 public class ASTTranslator extends TreeVisitor {
 
-  private final TypeContext types;
+  private static class Context {
+    private final Map<String, Variable<?>> vars = new HashMap<String, Variable<?>>();
+    private final Context parent;
+
+    public Context() {
+      this(null);
+    }
+
+    public Context(Context parent) {
+      this.parent = parent;
+    }
+
+    public void declareVariables(Collection<? extends Variable<?>> variables) {
+      for (Variable<?> var : variables) {
+        if (vars.put(var.getName(), var) != null) {
+          throw new IllegalStateException("Duplicate declaration of variable " + var.getName());
+        }
+      }
+    }
+
+    public Collection<? extends Variable<?>> getVariables() {
+      return vars.values();
+    }
+
+    public Context getParent() {
+      return parent;
+    }
+
+    public Variable<?> lookup(String name) {
+      Variable<?> var = vars.get(name);
+      if (var != null) {
+        return var;
+      }
+      if (parent != null) {
+        return parent.lookup(name);
+      }
+      return null;
+    }
+  }
+
   private Context current = new Context();
+  private final TypeContext types;
 
   public ASTTranslator(TypeContext types) {
     this.types = types;
-  }
-
-  private static void requireType(Tree n, int... expected) {
-    int t = n.getType();
-    for (int i = 0; i < expected.length; i++) {
-      if (t == expected[i]) {
-        return;
-      }
-    }
-    throw new UnexpectedTokenException(n, expected);
   }
 
   public void declareVariables(Collection<? extends Variable<?>> variables) {
@@ -311,7 +350,6 @@ public class ASTTranslator extends TreeVisitor {
       default:
         throw new UnexpectedTokenException(n, EQ, NE, LT, LE, GT, GE);
     }
-
     return NumericBooleanExpression.create(left, cmp, right);
   }
 
@@ -532,7 +570,6 @@ public class ASTTranslator extends TreeVisitor {
       Variable<?> var = translateTypedVar(n.getChild(i));
       result.add(var);
     }
-
     return result;
   }
 
@@ -599,44 +636,13 @@ public class ASTTranslator extends TreeVisitor {
     return type;
   }
 
-  private static class Context {
-
-    private final Map<String, Variable<?>> vars = new HashMap<String, Variable<?>>();
-    private final Context parent;
-
-    public Context() {
-      this(null);
-    }
-
-    public Context(Context parent) {
-      this.parent = parent;
-    }
-
-    public void declareVariables(Collection<? extends Variable<?>> variables) {
-      for (Variable<?> var : variables) {
-        if (vars.put(var.getName(), var) != null) {
-          throw new IllegalStateException("Duplicate declaration of variable " + var.getName());
-        }
+  private static void requireType(Tree n, int... expected) {
+    int t = n.getType();
+    for (int i = 0; i < expected.length; i++) {
+      if (t == expected[i]) {
+        return;
       }
     }
-
-    public Collection<? extends Variable<?>> getVariables() {
-      return vars.values();
-    }
-
-    public Context getParent() {
-      return parent;
-    }
-
-    public Variable<?> lookup(String name) {
-      Variable<?> var = vars.get(name);
-      if (var != null) {
-        return var;
-      }
-      if (parent != null) {
-        return parent.lookup(name);
-      }
-      return null;
-    }
+    throw new UnexpectedTokenException(n, expected);
   }
 }
