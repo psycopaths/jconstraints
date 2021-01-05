@@ -1,7 +1,6 @@
 /*
  * Copyright 2020 TU Dortmund, Malte Mues
  */
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat.*
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
@@ -20,8 +19,8 @@ java {
     }
 }
 
-group="tools.aqua"
-version="0.9.6-SNAPSHOT"
+group = "tools.aqua"
+version = "0.9.6-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -45,6 +44,7 @@ description = "jConstraints"
 
 license {
     header = file("NOTICE")
+    excludes(setOf("**/*.smt2", "**/*.txt"))
 }
 
 tasks.test {
@@ -57,8 +57,8 @@ tasks.test {
     }
 }
 
-publishing{
-    publications{
+publishing {
+    publications {
         create<MavenPublication>("mavenJava") {
             artifactId = "jconstraints"
             from(components["java"])
@@ -67,7 +67,7 @@ publishing{
                 description.set("jConstraints is a library for managing SMT constraints in Java.")
                 url.set("https://github.com/tudo-aqua/jconstraints")
                 licenses {
-                    license{
+                    license {
                         name.set("Apache-2.0")
                         url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
@@ -91,7 +91,7 @@ publishing{
         }
         create<MavenPublication>("publishMaven") {
             artifact(tasks["shadowJar"])
-            artifactId="jconstraints-all"
+            artifactId = "jconstraints-all"
         }
     }
 }
