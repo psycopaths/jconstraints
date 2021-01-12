@@ -56,6 +56,9 @@ tasks.test {
         events(FAILED, STANDARD_ERROR, SKIPPED, PASSED)
     }
 }
+tasks.shadowJar.configure{
+    classifier = null
+}
 
 publishing {
     publications {
