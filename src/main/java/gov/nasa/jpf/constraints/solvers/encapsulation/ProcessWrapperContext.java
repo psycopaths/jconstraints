@@ -39,9 +39,18 @@ public class ProcessWrapperContext extends SolverContext {
   private List<Expression> current;
 
   public ProcessWrapperContext(String name) {
+    solver = new ProcessWrapperSolver(name);
+    init();
+  }
+
+  public ProcessWrapperContext(String name, String javaBinary) {
+    solver = new ProcessWrapperSolver(name, javaBinary);
+    init();
+  }
+
+  private void init() {
     stack = new Stack<>();
     current = new LinkedList<>();
-    solver = new ProcessWrapperSolver(name);
   }
 
   public String getName() {

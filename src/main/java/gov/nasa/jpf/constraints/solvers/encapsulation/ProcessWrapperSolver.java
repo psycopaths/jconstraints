@@ -49,6 +49,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
   private final String solverName;
   String jconstraintsJar;
   private String jConstraintsExtensionsPath;
+  private String javaBinary;
 
   private Process solver;
   private ObjectOutputStream inObject;
@@ -76,6 +77,14 @@ public class ProcessWrapperSolver extends ConstraintSolver {
     jconstraintsJar =
         Objects.requireNonNull(
             new File(".").list((dir, name) -> name.matches("jconstraints(?:.*)jar")))[0];
+    javaBinary = "java";
+  }
+
+  public ProcessWrapperSolver(String solver, String javaBinary) {
+    this(solver);
+    if (!javaBinary.equals("")) {
+      this.javaBinary = javaBinary;
+    }
   }
 
   @Override
@@ -96,7 +105,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
 
   @Override
   public SolverContext createContext() {
-    return new ProcessWrapperContext(solverName);
+    return new ProcessWrapperContext(solverName, javaBinary);
   }
 
   private Result runSolverProcess(Expression f, Valuation result)
@@ -104,7 +113,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
     if (solver == null) {
       ProcessBuilder pb = new ProcessBuilder();
       pb.command(
-          "java",
+          javaBinary,
           "-ea",
           "-cp",
           jconstraintsJar,
