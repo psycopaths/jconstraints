@@ -58,7 +58,7 @@ tasks.test {
 }
 
 tasks.shadowJar.configure{
-    archiveFileName.set("${baseName}-${classifier}-${version}")
+    archiveFileName.set("${baseName}-${classifier}-${version}.jar")
 }
 
 publishing {
