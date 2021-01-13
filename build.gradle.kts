@@ -56,8 +56,9 @@ tasks.test {
         events(FAILED, STANDARD_ERROR, SKIPPED, PASSED)
     }
 }
+
 tasks.shadowJar.configure{
-    classifier = null
+    archiveFileName.set("${baseName}-${classifier}-${version}")
 }
 
 publishing {
@@ -93,8 +94,11 @@ publishing {
             }
         }
         create<MavenPublication>("publishMaven") {
-            artifact(tasks["shadowJar"])
+            artifact(tasks["shadowJar"]){
+                classifier = null
+            }
             artifactId = "jconstraints-all"
+
         }
     }
 }
