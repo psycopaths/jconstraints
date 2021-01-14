@@ -176,9 +176,11 @@ public class ProcessWrapperSolver extends ConstraintSolver {
             new Thread(
                 () -> {
                   try {
-                    System.out.println("Shutdown hock");
                     if (solver.isAlive()) {
-                      inObject.writeObject(new StopSolvingMessage());
+                      StopSolvingMessage ssm = new StopSolvingMessage();
+                      ObjectOutputStream os = new ObjectOutputStream(solver.getOutputStream());
+                      os.writeObject(ssm);
+                      os.flush();
                     }
                   } catch (IOException e) {
                     e.printStackTrace();
@@ -198,7 +200,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
     return false;
   }
 
-  private void logCallToSolver(Expression f) {
+  private void logCallToSolver(Object f) {
     try (FileOutputStream fo =
         new FileOutputStream("/tmp/serialized_" + solverName + Long.toString(System.nanoTime()))) {
       ObjectOutputStream oo = new ObjectOutputStream(fo);
