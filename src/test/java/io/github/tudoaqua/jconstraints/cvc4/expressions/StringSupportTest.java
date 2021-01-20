@@ -15,6 +15,16 @@
  */
 package io.github.tudoaqua.jconstraints.cvc4.expressions;
 
+import static gov.nasa.jpf.constraints.api.ConstraintSolver.Result.SAT;
+import static gov.nasa.jpf.constraints.expressions.LogicalOperator.AND;
+import static gov.nasa.jpf.constraints.expressions.LogicalOperator.IMPLY;
+import static gov.nasa.jpf.constraints.expressions.NumericComparator.GT;
+import static gov.nasa.jpf.constraints.expressions.NumericComparator.LE;
+import static gov.nasa.jpf.constraints.expressions.NumericComparator.LT;
+import static gov.nasa.jpf.constraints.expressions.NumericComparator.NE;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
@@ -23,27 +33,27 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.LogicalOperator;
+import gov.nasa.jpf.constraints.expressions.Negation;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
 import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
+import gov.nasa.jpf.constraints.expressions.Quantifier;
+import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
 import gov.nasa.jpf.constraints.expressions.StringBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.StringCompoundExpression;
 import gov.nasa.jpf.constraints.expressions.StringIntegerExpression;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import io.github.tudoaqua.jconstraints.cvc4.CVC4Solver;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.HashMap;
-
-import static gov.nasa.jpf.constraints.api.ConstraintSolver.Result.SAT;
-import static gov.nasa.jpf.constraints.expressions.LogicalOperator.AND;
-import static gov.nasa.jpf.constraints.expressions.NumericComparator.GT;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class StringSupportTest {
 
@@ -118,7 +128,7 @@ public class StringSupportTest {
 		CastExpression castedStringExpression =
 				CastExpression.create(StringIntegerExpression.createLength(strVar), BuiltinTypes.SINT32);
 		NumericBooleanExpression lenEqExpr =
-				NumericBooleanExpression.create(castedStringExpression, NumericComparator.NE, UnaryMinus.create(c_1));
+				NumericBooleanExpression.create(castedStringExpression, NE, UnaryMinus.create(c_1));
 		cvc4Context.add(eqExpr);
 		cvc4Context.add(lenEqExpr);
 
@@ -199,5 +209,54 @@ public class StringSupportTest {
 		ConstraintSolver.Result res = cvc4.solve(complete, val);
 		assertEquals(res, SAT);
 		assertTrue((Boolean) complete.evaluate(val));
+	}
+
+	@Test
+	public void strIndexOf1() {
+		Variable str = Variable.create(BuiltinTypes.STRING, "str");
+		Constant c = Constant.create(BuiltinTypes.STRING, "/");
+
+		Expression complete = StringIntegerExpression.createIndexOf(str, c);
+		complete = NumericBooleanExpression
+				.create(complete, NE, Constant.create(BuiltinTypes.INTEGER, BigInteger
+						.valueOf(-1l)));
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = cvc4.solve(complete, val);
+		assertEquals(res, SAT);
+	}
+
+	@Test
+	public void strLastIndexOf1() {
+		Variable x = Variable.create(BuiltinTypes.INTEGER, "x");
+		Variable y = Variable.create(BuiltinTypes.INTEGER, "y");
+		Variable a = Variable.create(BuiltinTypes.STRING, "a");
+		Constant b = Constant.create(BuiltinTypes.STRING, "b");
+		Constant zero = Constant.create(BuiltinTypes.INTEGER, BigInteger.ZERO);
+		Constant ten = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(10));
+		Constant hundred = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(100));
+		Variable boundedC = Variable.create(BuiltinTypes.INTEGER, "c");
+		List<Variable<?>> boundedVars = new LinkedList<>();
+		boundedVars.add(boundedC);
+
+		Expression part1 = NumericBooleanExpression
+				.create(StringIntegerExpression.createLength(a), GT, ten);
+		Expression part2 = NumericBooleanExpression
+				.create(StringIntegerExpression.createLength(a), LT, hundred);
+		Expression part3 = StringBooleanExpression
+				.createEquals(b, StringCompoundExpression.createAt(a, x));
+		Expression part4 = PropositionalCompound
+				.create(NumericBooleanExpression.create(boundedC, GT, x), AND,
+						NumericBooleanExpression.create(boundedC, LE, StringIntegerExpression.createLength(a)));
+		Expression part5 = Negation.create(
+				StringBooleanExpression.createEquals(b, StringCompoundExpression.createAt(a, boundedC)));
+		Expression imply = PropositionalCompound.create(part4, IMPLY, part5);
+		Expression forall = new QuantifierExpression(Quantifier.FORALL, boundedVars, imply);
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = cvc4.solve(ExpressionUtil.and(part1, part2
+				, part3, forall), val);
+		assertEquals(res, SAT);
+		assertTrue((Boolean) part1.evaluate(val));
+		assertTrue((Boolean) part2.evaluate(val));
+		assertTrue((Boolean) part3.evaluate(val));
 	}
 }

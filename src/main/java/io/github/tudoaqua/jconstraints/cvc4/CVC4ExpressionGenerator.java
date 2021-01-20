@@ -39,7 +39,6 @@ import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorNegation;
 import gov.nasa.jpf.constraints.expressions.BitvectorOperator;
-import gov.nasa.jpf.constraints.expressions.BooleanExpression;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.IfThenElse;
@@ -480,18 +479,30 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
   }
 
   @Override
-  public Expr visit(BooleanExpression n, Expr data) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public Expr visit(QuantifierExpression q, Expr data) {
-    throw new UnsupportedOperationException();
+    vectorExpr args = new vectorExpr(em);
+    vectorExpr vars = new vectorExpr(em);
+    for (Variable v : q.getBoundVariables()) {
+      vars.add(em.mkBoundVar(v.getName(), typeMapjConstraintsCVC4(v.getType())));
+    }
+    Expr body = visit(q.getBody(), data);
+    args.add(em.mkExpr(Kind.BOUND_VAR_LIST, vars));
+    args.add(body);
+
+    switch (q.getQuantifier()) {
+      case EXISTS:
+        return em.mkExpr(Kind.FORALL, args);
+      case FORALL:
+        return em.mkExpr(Kind.EXISTS, args);
+      default:
+        throw new IllegalArgumentException("There are only two quantifiers");
+    }
   }
 
   @Override
   public <E> Expr visit(BitvectorNegation<E> n, Expr data) {
-    throw new UnsupportedOperationException();
+    Expr child = visit(n.getNegated(), data);
+    return em.mkExpr(Kind.BITVECTOR_NEG, child);
   }
 
   public HashMap<Variable, Expr> getVars() {

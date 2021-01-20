@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
 
-    implementation("gov.nasa:jconstraints:0.9.7-SNAPSHOT")
+    implementation("tools.aqua:jconstraints-all:0.9.6-SNAPSHOT")
     implementation("solver:CVC4-gpl:1.8.0")
     implementation("org.apache.commons:commons-math3:3.6.1")
 
