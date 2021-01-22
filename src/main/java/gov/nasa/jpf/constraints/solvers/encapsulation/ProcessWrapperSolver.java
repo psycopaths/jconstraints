@@ -137,7 +137,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
       while (bos.available() == 0 && bes.available() == 0) {
         // Thread.sleep(5);
       }
-      if (!checkBes(bes)) {
+      if (!checkBes(bes, f)) {
         if (outObject == null) {
           outObject = new ObjectInputStream(bos);
         }
@@ -146,7 +146,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
       while (bos.available() == 0 && bes.available() == 0) {
         Thread.sleep(1);
       }
-      if (!checkBes(bes)) {
+      if (!checkBes(bes, f)) {
         Object done = outObject.readObject();
         if (done instanceof StopSolvingMessage) {
           Object o = outObject.readObject();
@@ -189,20 +189,27 @@ public class ProcessWrapperSolver extends ConstraintSolver {
                 }));
   }
 
-  private boolean checkBes(BufferedInputStream bes) throws IOException, ClassNotFoundException {
+  private boolean checkBes(BufferedInputStream bes, Object f)
+      throws IOException, ClassNotFoundException {
     if (bes.available() > 0) {
       ObjectInputStream errObject = new ObjectInputStream(bes);
-      Object err = errObject.readObject();
-      Exception e = (Exception) err;
-      e.printStackTrace();
+      try {
+        Object err = errObject.readObject();
+        Exception e = (Exception) err;
+        e.printStackTrace();
+      } catch (ClassNotFoundException e) {
+        System.out.println("f: " + f);
+        logCallToSolver(f);
+      }
       throw new IOException();
     }
     return false;
   }
 
   private void logCallToSolver(Object f) {
+    String fileName = "/tmp/serialized_" + solverName + Long.toString(System.nanoTime());
     try (FileOutputStream fo =
-        new FileOutputStream("/tmp/serialized_" + solverName + Long.toString(System.nanoTime()))) {
+        new FileOutputStream(fileName)) {
       ObjectOutputStream oo = new ObjectOutputStream(fo);
       oo.writeObject(f);
     } catch (FileNotFoundException e) {
@@ -210,6 +217,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    System.out.println("Logged an Object to: " + fileName);
   }
 
   @Override
