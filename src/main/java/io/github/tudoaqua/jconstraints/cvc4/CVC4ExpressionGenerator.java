@@ -485,15 +485,15 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
     for (Variable v : q.getBoundVariables()) {
       vars.add(em.mkBoundVar(v.getName(), typeMapjConstraintsCVC4(v.getType())));
     }
-    Expr body = visit(q.getBody(), data);
     args.add(em.mkExpr(Kind.BOUND_VAR_LIST, vars));
+    Expr body = visit(q.getBody(), data);
     args.add(body);
 
     switch (q.getQuantifier()) {
       case EXISTS:
-        return em.mkExpr(Kind.FORALL, args);
-      case FORALL:
         return em.mkExpr(Kind.EXISTS, args);
+      case FORALL:
+        return em.mkExpr(Kind.FORALL, args);
       default:
         throw new IllegalArgumentException("There are only two quantifiers");
     }
