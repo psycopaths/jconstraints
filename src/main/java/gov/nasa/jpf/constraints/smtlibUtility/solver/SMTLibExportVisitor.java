@@ -528,19 +528,8 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
   /* Below this line should only be private casting methods
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
   private Void castIntegerSINTX(CastExpression cast, int bits) {
-    ctx.open("ite");
-    ctx.open("<");
+    ctx.open(String.format("(_ int2bv %d)", bits));
     visit(cast.getCasted());
-    visit(Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(0)));
-    ctx.close();
-    ctx.open("bvneg");
-    ctx.open(String.format("(_ nat2bv %d)", bits));
-    visit(cast.getCasted());
-    ctx.close();
-    ctx.close();
-    ctx.open(String.format("(_ nat2bv %d)", bits));
-    visit(cast.getCasted());
-    ctx.close();
     ctx.close();
     return null;
   }
