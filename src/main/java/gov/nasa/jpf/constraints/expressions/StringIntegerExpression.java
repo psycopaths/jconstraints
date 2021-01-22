@@ -27,6 +27,7 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -72,7 +73,8 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
   }
 
   public static StringIntegerExpression createIndexOf(Expression<?> left, Expression<?> right) {
-    return new StringIntegerExpression(left, StringIntegerOperator.INDEXOF, right, null);
+    return new StringIntegerExpression(left, StringIntegerOperator.INDEXOF, right, Constant.create(
+        BuiltinTypes.INTEGER, BigInteger.ZERO));
   }
 
   public Expression<?> getRight() {
@@ -158,8 +160,10 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
     switch (operator) {
       case INDEXOF:
         left.print(a, flags);
+        a.append(" ");
         right.print(a, flags);
         if (offset != null) {
+          a.append(" ");
           offset.print(a, flags);
         }
         break;
