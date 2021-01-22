@@ -73,8 +73,11 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
   }
 
   public static StringIntegerExpression createIndexOf(Expression<?> left, Expression<?> right) {
-    return new StringIntegerExpression(left, StringIntegerOperator.INDEXOF, right, Constant.create(
-        BuiltinTypes.INTEGER, BigInteger.ZERO));
+    return new StringIntegerExpression(
+        left,
+        StringIntegerOperator.INDEXOF,
+        right,
+        Constant.create(BuiltinTypes.INTEGER, BigInteger.ZERO));
   }
 
   public Expression<?> getRight() {

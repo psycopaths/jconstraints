@@ -208,8 +208,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
 
   private void logCallToSolver(Object f) {
     String fileName = "/tmp/serialized_" + solverName + Long.toString(System.nanoTime());
-    try (FileOutputStream fo =
-        new FileOutputStream(fileName)) {
+    try (FileOutputStream fo = new FileOutputStream(fileName)) {
       ObjectOutputStream oo = new ObjectOutputStream(fo);
       oo.writeObject(f);
     } catch (FileNotFoundException e) {
