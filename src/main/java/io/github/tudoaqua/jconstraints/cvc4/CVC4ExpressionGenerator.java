@@ -76,6 +76,7 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
 
   private final ExprManager em;
   private HashMap<Variable, Expr> vars;
+  private HashMap<String, Expr> boundedVars;
   private HashMap<String, edu.stanford.CVC4.Type> declaredTypes;
   private HashMap<Function, Expr> declaredFunctions;
 
@@ -89,6 +90,7 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
     this.em = emT;
     declaredTypes = new HashMap<>();
     declaredFunctions = new HashMap<>();
+    boundedVars = new HashMap<>();
     defaultRoundingMode = em.mkConst(RoundingMode.roundNearestTiesToEven);
   }
 
@@ -107,6 +109,8 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
     Type<E> t = v.getType();
     if (vars.containsKey(v)) {
       return vars.get(v);
+    } else if (boundedVars.containsKey(v.getName())) {
+      return boundedVars.get(v.getName());
     } else {
       Expr var = em.mkVar(v.getName(), typeMapjConstraintsCVC4(v.getType()));
       vars.put(v, var);
@@ -483,11 +487,17 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
     vectorExpr args = new vectorExpr(em);
     vectorExpr vars = new vectorExpr(em);
     for (Variable v : q.getBoundVariables()) {
-      vars.add(em.mkBoundVar(v.getName(), typeMapjConstraintsCVC4(v.getType())));
+      Expr cvc4Var = em.mkBoundVar(v.getName(), typeMapjConstraintsCVC4(v.getType()));
+      vars.add(cvc4Var);
+      boundedVars.put(v.getName(), cvc4Var);
     }
     args.add(em.mkExpr(Kind.BOUND_VAR_LIST, vars));
     Expr body = visit(q.getBody(), data);
     args.add(body);
+
+    for (Variable v : q.getBoundVariables()) {
+      boundedVars.remove(v.getName());
+    }
 
     switch (q.getQuantifier()) {
       case EXISTS:
