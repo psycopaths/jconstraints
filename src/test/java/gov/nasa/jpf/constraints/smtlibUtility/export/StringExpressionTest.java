@@ -69,7 +69,7 @@ public class StringExpressionTest {
 
   @Test(groups = {"base", "smt-export"})
   public void strIndexOf2Test() {
-    String expected = "(declare-const x String)\n(assert (str.indexof x \"TEST\"))\n";
+    String expected = "(declare-const x String)\n(assert (str.indexof x \"TEST\" 0))\n";
     StringIntegerExpression expr = StringIntegerExpression.createIndexOf(var, constant);
     Util.runTest(expr, expected);
   }
