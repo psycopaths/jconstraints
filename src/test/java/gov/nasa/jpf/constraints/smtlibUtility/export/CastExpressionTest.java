@@ -62,9 +62,7 @@ public class CastExpressionTest {
 
   @Test(groups = {"base", "smt-export"})
   public void castIntegerSINT32Test() {
-    String expected =
-        "(declare-const X Int)\n"
-            + "(assert (ite (< X 0) (bvneg ((_ nat2bv 32) X)) ((_ nat2bv 32) X)))\n";
+    String expected = "(declare-const X Int)\n" + "(assert ((_ int2bv 32) X))\n";
     CastExpression expr =
         CastExpression.create(Variable.create(BuiltinTypes.INTEGER, "X"), BuiltinTypes.SINT32);
     se.add(expr);
@@ -74,8 +72,7 @@ public class CastExpressionTest {
 
   @Test(groups = {"base", "smt-export"})
   public void castIntegerSINT8Test() {
-    String expected =
-        "(declare-const X Int)\n(assert (ite (< X 0) (bvneg ((_ nat2bv 8) X)) ((_ nat2bv 8) X)))\n";
+    String expected = "(declare-const X Int)\n(assert ((_ int2bv 8) X))\n";
     CastExpression expr =
         CastExpression.create(Variable.create(BuiltinTypes.INTEGER, "X"), BuiltinTypes.SINT8);
     se.add(expr);
