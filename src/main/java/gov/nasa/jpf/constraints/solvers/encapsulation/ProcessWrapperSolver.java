@@ -189,8 +189,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
                 }));
   }
 
-  private boolean checkBes(BufferedInputStream bes, Object f)
-      throws IOException, ClassNotFoundException {
+  private boolean checkBes(BufferedInputStream bes, Object f) throws IOException {
     if (bes.available() > 0) {
       ObjectInputStream errObject = new ObjectInputStream(bes);
       try {
