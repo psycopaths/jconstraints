@@ -29,6 +29,7 @@ import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 public class RegexOperatorExpression extends AbstractRegExExpression {
 
@@ -162,7 +163,7 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
   }
 
   private String evaluateStrToRe(Valuation values) {
-    return s;
+    return Pattern.quote(s);
   }
 
   private String evaluateRange(Valuation values) {
