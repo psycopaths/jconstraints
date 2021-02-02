@@ -158,7 +158,9 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
       BitVector r = new BitVector(bitvector);
       return em.mkConst(new FloatingPoint(floatSize.exponent(), floatSize.significand(), r));
     } else if (c.getType().equals(BuiltinTypes.STRING)) {
-      return em.mkConst(new CVC4String(c.getValue().toString()));
+      String content = c.getValue().toString();
+      content = content.replace("\"", "\"\"");
+      return em.mkConst(new CVC4String(content));
     } else {
       throw new UnsupportedOperationException(
           "Cannot convert Constant: " + c.getType() + "with value: " + c.getValue());
@@ -397,11 +399,18 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
   @Override
   public Expr visit(StringBooleanExpression n, Expr data) {
     vectorExpr exprs = new vectorExpr(em);
-    for (Expression child : n.getChildren()) {
-      exprs.add(visit(child, data));
-    }
+    Expression[] children = n.getChildren();
     Kind operator = convertStringBooleanOpeartor(n.getOperator());
-    return em.mkExpr(operator, exprs);
+    switch (n.getOperator()) {
+      case PREFIXOF:
+      case SUFFIXOF:
+        return em.mkExpr(operator, visit(children[1], data), visit(children[0], data));
+      default:
+        for (Expression child : children) {
+          exprs.add(visit(child, data));
+        }
+        return em.mkExpr(operator, exprs);
+    }
   }
 
   @Override
@@ -428,7 +437,8 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
   public Expr visit(RegExBooleanExpression n, Expr data) {
     Expr left = visit(n.getLeft());
     Expr right = visit(n.getRight());
-    return em.mkExpr(Kind.STRING_IN_REGEXP, left, right);
+    Kind k = Kind.STRING_IN_REGEXP;
+    return em.mkExpr(k, left, right);
   }
 
   @Override
@@ -466,10 +476,17 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
         left = visit(n.getLeft(), data);
         return em.mkExpr(Kind.REGEXP_OPT, left);
       case STRTORE:
-        left = em.mkConst(new CVC4String(n.getS()));
+        if (n.getS() != null) {
+          left = em.mkConst(new CVC4String(n.getS().replace("\\", "\\u{5c}"), true));
+        } else {
+          left = visit(n.getLeft());
+        }
         return em.mkExpr(Kind.STRING_TO_REGEXP, left);
       case ALLCHAR:
-        return em.mkConst(Kind.REGEXP_SIGMA);
+        //FIXME: Is there a better way in the new Java API?
+        from = em.mkConst(new CVC4String("\\u{00}", true));
+        to = em.mkConst(new CVC4String("\\u{ff}", true));
+        return em.mkExpr(Kind.REGEXP_RANGE, from, to);
       case ALL:
         throw new UnsupportedOperationException();
       case COMPLEMENT:

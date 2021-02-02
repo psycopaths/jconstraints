@@ -104,6 +104,7 @@ public class CVC4Solver extends ConstraintSolver {
           } else if (Kind.CONST_BOOLEAN.equals(k)) {
             val.setValue(entry.getKey(), new Boolean(valueString).booleanValue());
           } else if (Kind.CONST_STRING.equals(k)) {
+            valueString = resolveUnicode(value.toString());
             val.setValue(entry.getKey(), valueString.substring(1, valueString.length() - 1));
 
           } else {
@@ -112,6 +113,10 @@ public class CVC4Solver extends ConstraintSolver {
         }
       }
     }
+  }
+
+  private static String resolveUnicode(String toString) {
+    return toString.replaceAll(Pattern.quote("u{5c}"), "");
   }
 
   private static void addRightBitvectorType(Variable key, BigInteger bigValue, Valuation val) {
