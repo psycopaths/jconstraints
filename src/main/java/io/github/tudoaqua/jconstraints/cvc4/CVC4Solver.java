@@ -116,7 +116,8 @@ public class CVC4Solver extends ConstraintSolver {
   }
 
   private static String resolveUnicode(String toString) {
-    return toString.replaceAll(Pattern.quote("u{5c}"), "");
+    toString = toString.replaceAll(Pattern.quote("u{5c}"), "");
+    return toString.replaceAll(Pattern.quote("\\u{0}"), "\0");
   }
 
   private static void addRightBitvectorType(Variable key, BigInteger bigValue, Valuation val) {

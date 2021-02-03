@@ -16,7 +16,9 @@
 package io.github.tudoaqua.jconstraints.cvc4.expressions;
 
 import static gov.nasa.jpf.constraints.api.ConstraintSolver.Result.SAT;
+import static gov.nasa.jpf.constraints.api.ConstraintSolver.Result.UNSAT;
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.AND;
+import static gov.nasa.jpf.constraints.expressions.LogicalOperator.EQUIV;
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.IMPLY;
 import static gov.nasa.jpf.constraints.expressions.NumericComparator.GT;
 import static gov.nasa.jpf.constraints.expressions.NumericComparator.LE;
@@ -25,6 +27,11 @@ import static gov.nasa.jpf.constraints.expressions.NumericComparator.NE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import edu.stanford.CVC4.CVC4String;
+import edu.stanford.CVC4.Expr;
+import edu.stanford.CVC4.ExprManager;
+import edu.stanford.CVC4.Kind;
+import edu.stanford.CVC4.SmtEngine;
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
@@ -41,6 +48,8 @@ import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
 import gov.nasa.jpf.constraints.expressions.Quantifier;
 import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
+import gov.nasa.jpf.constraints.expressions.RegExBooleanExpression;
+import gov.nasa.jpf.constraints.expressions.RegexOperatorExpression;
 import gov.nasa.jpf.constraints.expressions.StringBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.StringCompoundExpression;
 import gov.nasa.jpf.constraints.expressions.StringIntegerExpression;
@@ -258,5 +267,40 @@ public class StringSupportTest {
 		assertTrue((Boolean) part1.evaluate(val));
 		assertTrue((Boolean) part2.evaluate(val));
 		assertTrue((Boolean) part3.evaluate(val));
+	}
+
+	@Test
+	public void stringToReTest() {
+		Variable a = Variable.create(BuiltinTypes.STRING, "a");
+		Variable regex = Variable.create(BuiltinTypes.STRING, "reg");
+		RegexOperatorExpression convRegex = RegexOperatorExpression.createStrToRe(regex);
+		RegExBooleanExpression inRegex = RegExBooleanExpression.create(a, convRegex);
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = cvc4.solve(inRegex, val);
+		assertEquals(res, SAT);
+		inRegex.evaluate(val);
+	}
+
+	@Test(enabled = false)
+	public void stringInReNativeTest() {
+		ExprManager em = new ExprManager();
+		SmtEngine smt = new SmtEngine(em);
+		Expr c1 = em.mkConst(new CVC4String("av"));
+		Expr allchar = em.mkConst(Kind.REGEXP_SIGMA);
+		String res = smt.checkSat(em.mkExpr(Kind.STRING_IN_REGEXP, c1, allchar)).toString();
+		assertTrue(res.equals("unsat"));
+	}
+
+	//FIXME: This seems to be a problem in the JAVA API??? (assert (str.in_re "av" re.allchar)) works on commandline.
+	@Test(enabled = false)
+	public void stringInReTest() {
+		Constant c = Constant.create(BuiltinTypes.STRING, "av");
+		RegExBooleanExpression rbe = RegExBooleanExpression
+				.create(c,
+						RegexOperatorExpression.createLoop(RegexOperatorExpression.createAllChar(), 1, 1));
+		Expression expr1 = PropositionalCompound.create(rbe, EQUIV, ExpressionUtil.TRUE);
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = cvc4.solve(expr1, val);
+		assertEquals(res, UNSAT);
 	}
 }

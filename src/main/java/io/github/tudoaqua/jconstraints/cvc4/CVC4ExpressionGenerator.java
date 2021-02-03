@@ -159,7 +159,6 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
       return em.mkConst(new FloatingPoint(floatSize.exponent(), floatSize.significand(), r));
     } else if (c.getType().equals(BuiltinTypes.STRING)) {
       String content = c.getValue().toString();
-      content = content.replace("\"", "\"\"");
       return em.mkConst(new CVC4String(content));
     } else {
       throw new UnsupportedOperationException(
@@ -483,10 +482,7 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
         }
         return em.mkExpr(Kind.STRING_TO_REGEXP, left);
       case ALLCHAR:
-        //FIXME: Is there a better way in the new Java API?
-        from = em.mkConst(new CVC4String("\\u{00}", true));
-        to = em.mkConst(new CVC4String("\\u{ff}", true));
-        return em.mkExpr(Kind.REGEXP_RANGE, from, to);
+        return em.mkConst(Kind.REGEXP_SIGMA);
       case ALL:
         throw new UnsupportedOperationException();
       case COMPLEMENT:
