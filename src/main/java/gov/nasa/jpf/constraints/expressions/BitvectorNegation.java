@@ -53,6 +53,13 @@ public class BitvectorNegation<E> extends AbstractExpression<E> {
     return type.negate(value);
   }
 
+  @Override
+  public E evaluateSMT(Valuation values) {
+    BVIntegerType<E> type = (BVIntegerType<E>) getType();
+    E value = negated.evaluateSMT(values);
+    return type.negate(value);
+  }
+
   public Expression<E> getNegated() {
     return negated;
   }

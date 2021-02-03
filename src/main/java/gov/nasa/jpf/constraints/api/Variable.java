@@ -58,6 +58,11 @@ public class Variable<E> extends Expression<E> {
   }
 
   @Override
+  public E evaluateSMT(Valuation values) {
+    return evaluate(values);
+  }
+
+  @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
     variables.add(this);
   }

@@ -67,6 +67,12 @@ public class CastExpression<F, E> extends AbstractExpression<E> {
   }
 
   @Override
+  public E evaluateSMT(Valuation values) {
+    F f = casted.evaluate(values);
+    return castOp.cast(f);
+  }
+
+  @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
     this.casted.collectFreeVariables(variables);
   }

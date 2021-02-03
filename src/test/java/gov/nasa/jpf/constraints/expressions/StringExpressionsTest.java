@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
 
 public class StringExpressionsTest {
 
-  @Test(groups = {"basic", "string-expressions"})
+  @Test(groups = {"base", "string-expressions"})
   public void toLowerEvaluationTest() {
     Variable var = Variable.create(BuiltinTypes.STRING, "x");
     Constant cU = Constant.create(BuiltinTypes.STRING, "UpperCase");
@@ -54,7 +54,7 @@ public class StringExpressionsTest {
     assertFalse(complete.evaluate(val));
   }
 
-  @Test(groups = {"basic", "string-expressions"})
+  @Test(groups = {"base", "string-expressions"})
   public void toAndFromIntEvaluationTest() {
     Variable x = Variable.create(BuiltinTypes.STRING, "x");
     Constant c = Constant.create(BuiltinTypes.STRING, "C");
@@ -67,7 +67,7 @@ public class StringExpressionsTest {
     assertTrue(equals.evaluate(val));
   }
 
-  @Test(groups = {"basic", "string-expressions"})
+  @Test(groups = {"base", "string-expressions"})
   public void equalsTestSpecialChars() {
     Variable x = Variable.create(BuiltinTypes.STRING, "_string1");
     Constant c = Constant.create(BuiltinTypes.STRING, "W\f49-44-44");
@@ -77,5 +77,19 @@ public class StringExpressionsTest {
     val.setValue(x, "W\f49-44-44");
 
     assertTrue(equals.evaluate(val));
+  }
+
+  @Test(groups = {"base", "string-expressions"})
+  public void suffixOfEvaluationTest() {
+    Variable x = Variable.create(BuiltinTypes.STRING, "x");
+    Constant c = Constant.create(BuiltinTypes.STRING, "\t");
+    StringBooleanExpression equals = StringBooleanExpression.createSuffixOf(x, c);
+
+    Valuation val = new Valuation();
+    val.setValue(x, "A \t");
+    assertTrue(equals.evaluate(val));
+
+    val.setValue(x, "ABV");
+    assertFalse(equals.evaluate(val));
   }
 }

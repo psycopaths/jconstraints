@@ -280,7 +280,7 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
       case OPTIONAL:
         return "re.opt";
       case STRTORE:
-        return "str.to_re";
+        return "str.to.re";
       case ALLCHAR:
         return "re.allchar";
       case ALL:
@@ -297,39 +297,43 @@ public class SMTLibExportVisitor extends AbstractExpressionVisitor<Void, Void> {
   @Override
   public Void visit(RegexOperatorExpression n, Void data) {
     String operator = regexOp(n.getOperator());
-    ctx.open(operator);
-    switch (n.getOperator()) {
-      case KLEENESTAR:
-        visit(n.getLeft(), data);
-        break;
-      case KLEENEPLUS:
-        visit(n.getLeft(), data);
-        break;
-      case LOOP:
-        throw new UnsupportedOperationException("");
-      case RANGE:
-        ctx.append("\"" + n.getCh1() + "\"");
-        ctx.append("\"" + n.getCh2() + "\"");
-        break;
-      case OPTIONAL:
-        visit(n.getLeft(), data);
-        break;
-      case STRTORE:
-        ctx.append("\"" + n.getS() + "\"");
-        break;
-      case ALLCHAR:
-        break;
-      case ALL:
-        throw new UnsupportedOperationException();
-      case COMPLEMENT:
-        visit(n.getLeft(), data);
-        break;
-      case NOSTR:
-        break;
-      default:
-        throw new UnsupportedOperationException();
+    if (n.getOperator().equals(RegExOperator.ALLCHAR)) {
+      ctx.append(operator);
+    } else {
+      ctx.open(operator);
+      switch (n.getOperator()) {
+        case KLEENESTAR:
+          visit(n.getLeft(), data);
+          break;
+        case KLEENEPLUS:
+          visit(n.getLeft(), data);
+          break;
+        case LOOP:
+          throw new UnsupportedOperationException("");
+        case RANGE:
+          ctx.append("\"" + n.getCh1() + "\"");
+          ctx.append("\"" + n.getCh2() + "\"");
+          break;
+        case OPTIONAL:
+          visit(n.getLeft(), data);
+          break;
+        case STRTORE:
+          ctx.append("\"" + n.getS() + "\"");
+          break;
+        case ALLCHAR:
+          break;
+        case ALL:
+          throw new UnsupportedOperationException();
+        case COMPLEMENT:
+          visit(n.getLeft(), data);
+          break;
+        case NOSTR:
+          break;
+        default:
+          throw new UnsupportedOperationException();
+      }
+      ctx.close();
     }
-    ctx.close();
     return null;
   }
 

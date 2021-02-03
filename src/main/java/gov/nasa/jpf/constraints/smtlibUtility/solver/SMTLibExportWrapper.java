@@ -36,6 +36,8 @@ public class SMTLibExportWrapper extends ConstraintSolver {
   private final ConstraintSolver back;
 
   private final PrintStream out;
+  private String singleQueryFolder = null;
+  private String queryPrefix = null;
 
   @Override
   public String getName() {
@@ -47,6 +49,11 @@ public class SMTLibExportWrapper extends ConstraintSolver {
     this.out = out;
   }
 
+  public void setOutFolder(String folder, String queryPrefix) {
+    this.singleQueryFolder = folder;
+    this.queryPrefix = queryPrefix;
+  }
+
   @Override
   public Result solve(Expression<Boolean> f, Valuation result) {
     SolverContext ctx = createContext();
@@ -56,6 +63,9 @@ public class SMTLibExportWrapper extends ConstraintSolver {
   @Override
   public SolverContext createContext() {
     SMTLibExportSolverContext ctx = new SMTLibExportSolverContext(back.createContext(), out);
+    if (singleQueryFolder != null) {
+      ctx.setSingleQuery(singleQueryFolder, queryPrefix);
+    }
     return ctx;
   }
 }

@@ -70,7 +70,17 @@ public class NumericCompound<E> extends AbstractExpression<E> {
   public E evaluate(Valuation values) {
     E lv = left.evaluate(values);
     E rv = right.evaluate(values);
+    return evaluateOperator(lv, rv);
+  }
 
+  @Override
+  public E evaluateSMT(Valuation values) {
+    E lv = left.evaluateSMT(values);
+    E rv = right.evaluateSMT(values);
+    return evaluateOperator(lv, rv);
+  }
+
+  private E evaluateOperator(E lv, E rv) {
     NumericType<E> type = (NumericType<E>) getType();
     switch (operator) {
       case PLUS:

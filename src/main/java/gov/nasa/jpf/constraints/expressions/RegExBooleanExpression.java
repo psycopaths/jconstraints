@@ -59,6 +59,13 @@ public class RegExBooleanExpression extends AbstractBoolExpression {
   }
 
   @Override
+  public Boolean evaluateSMT(Valuation values) {
+    String stringExpression = (String) left.evaluateSMT(values);
+    String regexExpression = (String) right.evaluateSMT(values);
+    return stringExpression.matches(regexExpression);
+  }
+
+  @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
   }

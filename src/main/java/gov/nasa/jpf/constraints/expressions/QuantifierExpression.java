@@ -152,6 +152,11 @@ public class QuantifierExpression extends AbstractBoolExpression {
   }
 
   @Override
+  public Boolean evaluateSMT(Valuation values) {
+    return evaluate(values);
+  }
+
+  @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
     // Omit bound variables
     // List of bound variables that DO NOT appear in the outer scope

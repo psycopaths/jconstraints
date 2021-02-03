@@ -56,9 +56,7 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
     this.right = right;
   }
 
-  private static <L, R> int compare(Expression<L> left, Expression<R> right, Valuation val) {
-    L lv = left.evaluate(val);
-    R rv = right.evaluate(val);
+  private <L, R> int compare(L lv, R rv) {
     NumericType<L> ltype = (NumericType<L>) left.getType();
     NumericType<R> rtype = (NumericType<R>) right.getType();
 
@@ -79,7 +77,17 @@ public class NumericBooleanExpression extends AbstractBoolExpression {
 
   @Override
   public Boolean evaluate(Valuation values) {
-    int res = compare(left, right, values);
+    Object lv = left.evaluate(values);
+    Object rv = right.evaluate(values);
+    int res = compare(lv, rv);
+    return operator.eval(res);
+  }
+
+  @Override
+  public Boolean evaluateSMT(Valuation values) {
+    Object lv = left.evaluateSMT(values);
+    Object rv = right.evaluateSMT(values);
+    int res = compare(lv, rv);
     return operator.eval(res);
   }
 

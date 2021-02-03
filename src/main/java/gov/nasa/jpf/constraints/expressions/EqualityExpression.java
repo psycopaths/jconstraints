@@ -34,7 +34,7 @@ import java.util.Collection;
  * This class should be implemented since equality is a more general concept than numeric comparison
  * (e.g., applies to boolean values also).
  */
-public class EqualityExpression extends AbstractBoolExpression {
+public abstract class EqualityExpression extends AbstractBoolExpression {
 
   @Override
   public Boolean evaluate(Valuation values) {

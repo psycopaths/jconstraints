@@ -54,6 +54,11 @@ public class Negation extends AbstractBoolExpression {
   }
 
   @Override
+  public Boolean evaluateSMT(Valuation values) {
+    return !this.negated.evaluateSMT(values);
+  }
+
+  @Override
   public void collectFreeVariables(final Collection<? super Variable<?>> variables) {
     this.negated.collectFreeVariables(variables);
   }

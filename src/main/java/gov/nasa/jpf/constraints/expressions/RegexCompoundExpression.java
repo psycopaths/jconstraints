@@ -78,34 +78,29 @@ public class RegexCompoundExpression extends AbstractRegExExpression {
 
   @Override
   public String evaluate(Valuation values) {
+    String lv = (String) left.evaluate(values);
+    String rv = (String) right.evaluate(values);
+    return computeCompound(lv, rv);
+  }
+
+  @Override
+  public String evaluateSMT(Valuation values) {
+    String lv = (String) left.evaluate(values);
+    String rv = (String) right.evaluate(values);
+    return computeCompound(lv, rv);
+  }
+
+  private String computeCompound(String lv, String rv) {
     switch (operator) {
       case CONCAT:
-        return evaluateConcat(values);
+        return lv + rv;
       case INTERSECTION:
-        return evaluateIntersection(values);
+        return "((?=" + lv + ")" + rv + ")";
       case UNION:
-        return evaluateUnion(values);
+        return "(" + lv + "|" + rv + ")";
       default:
         throw new IllegalArgumentException();
     }
-  }
-
-  private String evaluateUnion(Valuation values) {
-    String lv = (String) left.evaluate(values);
-    String rv = (String) right.evaluate(values);
-    return "(" + lv + "|" + rv + ")";
-  }
-
-  private String evaluateIntersection(Valuation values) {
-    String lv = (String) left.evaluate(values);
-    String rv = (String) right.evaluate(values);
-    return "((?=" + lv + ")" + rv + ")";
-  }
-
-  private String evaluateConcat(Valuation values) {
-    String lv = (String) left.evaluate(values);
-    String rv = (String) right.evaluate(values);
-    return lv + rv;
   }
 
   @Override

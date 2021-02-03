@@ -57,12 +57,20 @@ public abstract class Expression<E> extends AbstractPrintable implements Seriali
   }
 
   /**
-   * evaluates using the provided values for symbolic variables
+   * evaluates using the provided values for symbolic variables to Java semantics
    *
    * @param values
    * @return
    */
   public abstract E evaluate(Valuation values);
+
+  /**
+   * evaluates using the provided values for symbolic variables to SMT semantics
+   *
+   * @param values
+   * @return
+   */
+  public abstract E evaluateSMT(Valuation values);
 
   /**
    * collect all symbolic variables

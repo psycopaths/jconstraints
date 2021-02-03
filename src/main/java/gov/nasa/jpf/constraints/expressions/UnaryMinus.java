@@ -57,6 +57,13 @@ public class UnaryMinus<E> extends AbstractExpression<E> {
   }
 
   @Override
+  public E evaluateSMT(Valuation values) {
+    E num = negated.evaluateSMT(values);
+    NumericType<E> type = (NumericType<E>) getType();
+    return type.negate(num);
+  }
+
+  @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
     this.negated.collectFreeVariables(variables);
   }

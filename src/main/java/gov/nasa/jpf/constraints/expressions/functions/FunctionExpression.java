@@ -65,8 +65,19 @@ public class FunctionExpression<T> extends AbstractExpression<T> {
   }
 
   @Override
+  public T evaluateSMT(Valuation values) {
+    Object[] argValues = new Object[args.length];
+    for (int i = 0; i < args.length; i++) {
+      argValues[i] = args[i].evaluateSMT(values);
+    }
+    return function.evaluate(argValues);
+  }
+
+  @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
-    for (Expression<?> a : args) a.collectFreeVariables(variables);
+    for (Expression<?> a : args) {
+      a.collectFreeVariables(variables);
+    }
   }
 
   @Override

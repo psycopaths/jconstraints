@@ -49,6 +49,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
   private final String solverName;
   String jconstraintsJar;
   private String jConstraintsExtensionsPath;
+  private static int TIMEOUT = 60;
   private String javaBinary;
 
   private Process solver;
@@ -70,7 +71,9 @@ public class ProcessWrapperSolver extends ConstraintSolver {
     for (String s : env) {
       if (s.startsWith("-Djconstraints.extension.path")) {
         jConstraintsExtensionsPath = s;
-        break;
+      }
+      if (s.startsWith("-Djconstraints.wrapper.timeout")) {
+        TIMEOUT = Integer.parseInt(s.split("=")[1]);
       }
     }
 
@@ -120,7 +123,9 @@ public class ProcessWrapperSolver extends ConstraintSolver {
           jConstraintsExtensionsPath,
           "gov.nasa.jpf.constraints.solvers.encapsulation.SolverRunner",
           "-s",
-          solverName);
+          solverName,
+          "-t",
+          Integer.toString(TIMEOUT));
       solver = pb.start();
       registerShutdown(solver);
 

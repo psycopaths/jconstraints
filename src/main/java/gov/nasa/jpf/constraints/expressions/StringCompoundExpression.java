@@ -130,6 +130,28 @@ public class StringCompoundExpression extends AbstractStringExpression {
     }
   }
 
+  @Override
+  public String evaluateSMT(Valuation values) {
+    switch (operator) {
+      case AT:
+        return evaluateAtSMT(values);
+      case CONCAT:
+        return evaluateConcatSMT(values);
+      case REPLACE:
+        return evaluateReplaceSMT(values);
+      case SUBSTR:
+        return evaluateSubstringSMT(values);
+      case TOSTR:
+        return evaluateToStringSMT(values);
+      case TOLOWERCASE:
+        return evaluateToLowerSMT(values);
+      case TOUPPERCASE:
+        return evaluateToUpperSMT(values);
+      default:
+        throw new IllegalArgumentException();
+    }
+  }
+
   private String evaluateAt(Valuation values) {
     String string = (String) main.evaluate(values);
     BigInteger pos = (BigInteger) position.evaluate(values);
@@ -170,6 +192,57 @@ public class StringCompoundExpression extends AbstractStringExpression {
 
   private String evaluateToUpper(Valuation values) {
     String eval = (String) main.evaluate(values);
+    return eval.toUpperCase();
+  }
+
+  private String evaluateAtSMT(Valuation values) {
+    try {
+      String string = (String) main.evaluateSMT(values);
+      BigInteger pos = (BigInteger) position.evaluateSMT(values);
+      return String.valueOf(string.charAt(pos.intValue()));
+    } catch (StringIndexOutOfBoundsException e) {
+      return "";
+    }
+  }
+
+  private String evaluateReplaceSMT(Valuation values) {
+    String string = (String) main.evaluateSMT(values);
+    String source = (String) src.evaluateSMT(values);
+    String destination = (String) dst.evaluateSMT(values);
+    return string.replace(source, destination);
+  }
+
+  private String evaluateSubstringSMT(Valuation values) {
+    try {
+      String string = (String) main.evaluateSMT(values);
+      BigInteger of = (BigInteger) offset.evaluateSMT(values);
+      BigInteger len = (BigInteger) length.evaluateSMT(values);
+      return string.substring(of.intValue(), of.intValue() + len.intValue());
+    } catch (StringIndexOutOfBoundsException e) {
+      return "";
+    }
+  }
+
+  private String evaluateToStringSMT(Valuation values) {
+    BigInteger toStr = (BigInteger) main.evaluateSMT(values);
+    return String.valueOf(toStr.intValue());
+  }
+
+  private String evaluateConcatSMT(Valuation values) {
+    String concatString = "";
+    for (Expression<?> e : expressions) {
+      concatString += (String) e.evaluateSMT(values);
+    }
+    return concatString;
+  }
+
+  private String evaluateToLowerSMT(Valuation values) {
+    String eval = (String) main.evaluateSMT(values);
+    return eval.toLowerCase();
+  }
+
+  private String evaluateToUpperSMT(Valuation values) {
+    String eval = (String) main.evaluateSMT(values);
     return eval.toUpperCase();
   }
 

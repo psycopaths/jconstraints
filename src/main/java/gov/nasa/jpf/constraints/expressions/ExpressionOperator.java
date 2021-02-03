@@ -56,6 +56,9 @@ public interface ExpressionOperator extends Serializable {
       convertedOperator = RegExBooleanOperator.fromString(str);
     }
     if (convertedOperator == null) {
+      convertedOperator = BitvectorOperator.fromString(str);
+    }
+    if (convertedOperator == null) {
       throw new UnsupportedOperationException(
           "String " + str + " cannot be resolved to jConstraintsOperator");
     }

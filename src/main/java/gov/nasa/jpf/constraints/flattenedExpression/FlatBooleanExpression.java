@@ -64,6 +64,11 @@ public class FlatBooleanExpression extends Expression<Boolean> {
   }
 
   @Override
+  public Boolean evaluateSMT(final Valuation values) {
+    return flattenedParts.stream().map(e -> e.evaluateSMT(values)).reduce((a, b) -> a && b).get();
+  }
+
+  @Override
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     if (visitor instanceof FlattenedExpressionVisitior) {
       return accept((FlattenedExpressionVisitior<R, D>) visitor, data);

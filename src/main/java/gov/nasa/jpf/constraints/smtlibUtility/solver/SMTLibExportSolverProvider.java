@@ -42,12 +42,16 @@ public class SMTLibExportSolverProvider implements ConstraintSolverProvider {
   public ConstraintSolver createSolver(Properties config) {
     String backName = config.getProperty(SMTLibExportWrapper.NAME + ".back");
     String resultFile = config.getProperty(SMTLibExportWrapper.NAME + ".resultFile", null);
+    String singleQueryFolder =
+        config.getProperty(SMTLibExportWrapper.NAME + ".singleQueryFolder", null);
     ConstraintSolverFactory f = new ConstraintSolverFactory();
     ConstraintSolver back = f.createSolver(backName);
     PrintStream out = System.out;
+    String prefix = null;
     if (resultFile != null) {
       File outfile = new File(resultFile);
       outfile.getAbsoluteFile().getParentFile().mkdirs();
+      prefix = outfile.getName().split("\\.")[0];
       try {
         out = new PrintStream(outfile);
       } catch (FileNotFoundException e) {
@@ -55,7 +59,10 @@ public class SMTLibExportSolverProvider implements ConstraintSolverProvider {
         out = System.out;
       }
     }
-    ConstraintSolver smtWrapper = new SMTLibExportWrapper(back, out);
+    SMTLibExportWrapper smtWrapper = new SMTLibExportWrapper(back, out);
+    if (singleQueryFolder != null) {
+      smtWrapper.setOutFolder(singleQueryFolder, prefix);
+    }
     return smtWrapper;
   }
 }

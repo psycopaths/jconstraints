@@ -48,8 +48,10 @@ public enum NumericOperator implements ExpressionOperator {
         return DIV;
       case "*":
         return MUL;
+      case "bvsub":
       case "-":
         return MINUS;
+      case "bvadd":
       case "+":
         return PLUS;
       case "%":

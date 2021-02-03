@@ -62,6 +62,9 @@ public class SolverRunner {
     CommandLineParser parser = new DefaultParser();
     try {
       CommandLine cmd = parser.parse(getOptions(), args);
+      if (cmd.hasOption("timeout")) {
+        TIME_OUT_IN_SECONDS = Integer.parseInt(cmd.getOptionValue("timeout"));
+      }
       solve(cmd.getOptionValue("s"));
       exit(0);
     } catch (IOException
@@ -69,6 +72,7 @@ public class SolverRunner {
         | ParseException
         | InterruptedException
         | ExecutionException e) {
+      e.printStackTrace();
       ObjectOutputStream err = new ObjectOutputStream(System.err);
       err.writeObject(e);
       exit(2);
@@ -77,7 +81,8 @@ public class SolverRunner {
 
   private static Options getOptions() {
     Options options = new Options();
-    options.addOption("s", true, "SolverName of encapsulated solver");
+    options.addRequiredOption("s", "solver", true, "SolverName of encapsulated solver");
+    options.addOption("t", "timeout", true, "timeout");
     return options;
   }
 

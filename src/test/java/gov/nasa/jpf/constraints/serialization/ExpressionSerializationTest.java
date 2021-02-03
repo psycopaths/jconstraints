@@ -93,4 +93,19 @@ public class ExpressionSerializationTest {
     Valuation readVal = (Valuation) in.readObject();
     assertEquals(readVal.getValue(str1), val.getValue(str1));
   }
+
+  @Test(groups = {"serialization", "base"})
+  public void stringIntegerExpressionSerializationTest()
+      throws IOException, ClassNotFoundException {
+    Variable v = Variable.create(BuiltinTypes.STRING, "a");
+    Constant c = Constant.create(BuiltinTypes.STRING, "ab");
+    StringIntegerExpression sie = StringIntegerExpression.createIndexOf(v, c);
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ObjectOutputStream objectOut = new ObjectOutputStream(out);
+    objectOut.writeObject(sie);
+    ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
+    StringIntegerExpression readVal = (StringIntegerExpression) in.readObject();
+    assertEquals(sie.getChildren().length, 3);
+    assertEquals(readVal.getChildren().length, 3);
+  }
 }

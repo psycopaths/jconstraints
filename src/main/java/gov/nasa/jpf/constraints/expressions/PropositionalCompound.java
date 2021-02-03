@@ -61,6 +61,14 @@ public class PropositionalCompound extends AbstractBoolExpression {
   }
 
   @Override
+  public Boolean evaluateSMT(Valuation values) {
+    boolean lv = left.evaluateSMT(values);
+    boolean rv = right.evaluateSMT(values);
+
+    return operator.eval(lv, rv);
+  }
+
+  @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
     left.collectFreeVariables(variables);
     right.collectFreeVariables(variables);

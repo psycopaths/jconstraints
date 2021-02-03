@@ -25,19 +25,24 @@ package gov.nasa.jpf.constraints.smtlibUtility.parser;
 
 import static gov.nasa.jpf.constraints.smtlibUtility.parser.utility.ResourceParsingHelper.parseResourceFile;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import gov.nasa.jpf.constraints.api.Expression;
+import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
+import gov.nasa.jpf.constraints.expressions.StringBooleanExpression;
+import gov.nasa.jpf.constraints.expressions.StringBooleanOperator;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.smtlibUtility.SMTProblem;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import java.io.IOException;
 import java.math.BigInteger;
 import org.smtlib.IParser;
+import org.smtlib.IParser.ParserException;
 import org.testng.annotations.Test;
 
 public class SMTLIBParserTest {
@@ -140,5 +145,89 @@ public class SMTLIBParserTest {
 
     assertEquals(problem.variables.size(), 1);
     assertEquals(problem.assertions.size(), 1);
+  }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void parsingJBMCRegression01Test()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem = parseResourceFile("jbmc-regression_StaticCharMethods06_Main_2.smt2");
+
+    assertEquals(problem.variables.size(), 1);
+    assertEquals(problem.assertions.size(), 3);
+  }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void parsingJBMCRegression02Test()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem =
+        parseResourceFile("jbmc-regression_CharSequenceToString_Main_3.smt2");
+
+    assertEquals(problem.variables.size(), 1);
+    assertEquals(problem.assertions.size(), 3);
+  }
+
+  @Test(groups = {"jsmtlib", "base"})
+  public void parsingRegexUnions() throws SMTLIBParserException, ParserException, IOException {
+    String input =
+        "(declare-fun x () String)\n"
+            + "(assert (str.in.re x (re.union (str.to.re \"a\") (str.to.re \"b\") (str.to.re \"c\") (str.to.re \"d\") (str.to.re \"e\") (str.to.re \"f\") (str.to.re \"g\") (str.to.re \"h\") (str.to.re \"i\") (str.to.re \"j\") (str.to.re \"k\") (str.to.re \"l\") (str.to.re \"m\") (str.to.re \"n\") )))";
+    final SMTProblem parsedProblem = SMTLIBParser.parseSMTProgram(input);
+    Expression problem = parsedProblem.getAllAssertionsAsConjunction();
+    Valuation val = new Valuation();
+    val.setValue(Variable.create(BuiltinTypes.STRING, "x"), "n");
+    assertTrue((Boolean) problem.evaluate(val));
+    String strRepr = problem.toString();
+    assertTrue(problem.toString().contains("(str.to.re c)"));
+  }
+
+  @Test(groups = {"jsmtlib", "base"})
+  public void parsingSuffixOf() throws SMTLIBParserException, ParserException, IOException {
+    String input = "(declare-fun a () String)\n" + "(assert (str.suffixof a \"b\"))";
+    final SMTProblem parsedProblem = SMTLIBParser.parseSMTProgram(input);
+    Expression problem = parsedProblem.getAllAssertionsAsConjunction();
+    Valuation val = new Valuation();
+    val.setValue(Variable.create(BuiltinTypes.STRING, "a"), "b");
+    assertTrue((Boolean) problem.evaluate(val));
+    StringBooleanExpression expr = (StringBooleanExpression) parsedProblem.assertions.get(0);
+    assertEquals(expr.getOperator(), StringBooleanOperator.SUFFIXOF);
+  }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void jdartExample1Test()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem =
+        parseResourceFile("jbmc-regression_CharSequenceToString_Main_10.smt2");
+
+    assertEquals(problem.variables.size(), 1);
+    assertEquals(problem.assertions.size(), 4);
+  }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void jdartExample2Test()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem =
+        parseResourceFile("jbmc-regression_CharSequenceToString_Main_8.smt2");
+
+    assertEquals(problem.variables.size(), 1);
+    assertEquals(problem.assertions.size(), 4);
+  }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void jdartExample3Test()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem = parseResourceFile("jbmc-regression_StaticCharMethods02_Main_8.smt2");
+
+    assertEquals(problem.variables.size(), 1);
+    assertEquals(problem.assertions.size(), 4);
   }
 }

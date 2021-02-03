@@ -62,6 +62,11 @@ public class IfThenElse<E> extends AbstractExpression<E> {
   }
 
   @Override
+  public E evaluateSMT(Valuation values) {
+    return ifCond.evaluateSMT(values) ? thenExpr.evaluateSMT(values) : elseExpr.evaluateSMT(values);
+  }
+
+  @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
     ifCond.collectFreeVariables(variables);
     thenExpr.collectFreeVariables(variables);

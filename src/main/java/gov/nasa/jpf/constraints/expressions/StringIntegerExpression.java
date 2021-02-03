@@ -41,14 +41,14 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
   private final Expression<?> right;
   private final Expression<?> offset;
 
-  public StringIntegerExpression(Expression<?> left, StringIntegerOperator operator) {
+  private StringIntegerExpression(Expression<?> left, StringIntegerOperator operator) {
     this.left = left;
     this.right = null;
     this.operator = operator;
     this.offset = null;
   }
 
-  public StringIntegerExpression(
+  private StringIntegerExpression(
       Expression<?> left,
       StringIntegerOperator operator,
       Expression<?> right,
@@ -69,6 +69,9 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 
   public static StringIntegerExpression createIndexOf(
       Expression<?> left, Expression<?> right, Expression<?> offset) {
+    if (offset == null) {
+      return createIndexOf(left, right);
+    }
     return new StringIntegerExpression(left, StringIntegerOperator.INDEXOF, right, offset);
   }
 
@@ -86,35 +89,40 @@ public class StringIntegerExpression extends AbstractStringIntegerExpression {
 
   @Override
   public BigInteger evaluate(Valuation values) {
-
+    String lv = (String) left.evaluate(values);
     switch (operator) {
       case INDEXOF:
-        return evaluateIndexOf(values);
+        String rv = (String) right.evaluate(values);
+        BigInteger of = offset != null ? (BigInteger) offset.evaluate(values) : BigInteger.ZERO;
+        return BigInteger.valueOf(lv.indexOf(rv, of.intValue()));
       case LENGTH:
-        return evaluateLength(values);
+        return BigInteger.valueOf(lv.length());
       case TOINT:
-        return evaluateToInt(values);
+        return BigInteger.valueOf(Integer.valueOf(lv));
       default:
         throw new IllegalArgumentException();
     }
   }
 
-  private BigInteger evaluateToInt(Valuation values) {
-    String lv = (String) left.evaluate(values);
-    return BigInteger.valueOf(Integer.valueOf(lv));
-  }
-
-  private BigInteger evaluateLength(Valuation values) {
-    String string = (String) left.evaluate(values);
-    BigInteger length = BigInteger.valueOf(string.length());
-    return length;
-  }
-
-  private BigInteger evaluateIndexOf(Valuation values) {
-    String lv = (String) left.evaluate(values);
-    String rv = (String) right.evaluate(values);
-    BigInteger of = offset != null ? (BigInteger) offset.evaluate(values) : BigInteger.ZERO;
-    return BigInteger.valueOf(lv.indexOf(rv, of.intValue()));
+  @Override
+  public BigInteger evaluateSMT(Valuation values) {
+    String lv = (String) left.evaluateSMT(values);
+    switch (operator) {
+      case INDEXOF:
+        String rv = (String) right.evaluateSMT(values);
+        BigInteger of = offset != null ? (BigInteger) offset.evaluateSMT(values) : BigInteger.ZERO;
+        int index = lv.indexOf(rv, of.intValue());
+        if (index == -1 && of.intValue() >= 0 && of.intValue() <= lv.length() && rv.equals("")) {
+          index = of.intValue();
+        }
+        return BigInteger.valueOf(index);
+      case LENGTH:
+        return BigInteger.valueOf(lv.length());
+      case TOINT:
+        return BigInteger.valueOf(Integer.valueOf(lv));
+      default:
+        throw new IllegalArgumentException();
+    }
   }
 
   @Override

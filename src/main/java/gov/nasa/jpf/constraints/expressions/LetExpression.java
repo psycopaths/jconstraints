@@ -77,6 +77,12 @@ public class LetExpression extends EqualityExpression {
   }
 
   @Override
+  public Boolean evaluateSMT(Valuation values) {
+    Expression<Boolean> flattened = this.flattenLetExpression();
+    return flattened.evaluateSMT(values);
+  }
+
+  @Override
   public void collectFreeVariables(Collection<? super Variable<?>> variables) {
     Expression<Boolean> flattened = this.flattenLetExpression();
     flattened.collectFreeVariables(variables);
