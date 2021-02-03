@@ -308,6 +308,7 @@ public class NativeZ3SolverContext extends SolverContext {
 					char c = (char) Integer.parseInt(m.group().replace("\\x", ""), 16);
 					sValue = sValue.replace(m.group(), new String(new char[]{c}));
 				}
+				sValue = sValue.replaceAll(Pattern.quote("\\\\"), "\\\\");
 				val.setValue((Variable<String>) v, sValue);
 			} else {
 				if (unsafe) {

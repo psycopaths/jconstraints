@@ -37,8 +37,6 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorNegation;
-import gov.nasa.jpf.constraints.expressions.BooleanExpression;
-import gov.nasa.jpf.constraints.expressions.BooleanOperator;
 import gov.nasa.jpf.constraints.expressions.CastExpression;
 import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.IfThenElse;
@@ -71,7 +69,6 @@ import gov.nasa.jpf.constraints.types.IntegerType;
 import gov.nasa.jpf.constraints.types.NumericType;
 import gov.nasa.jpf.constraints.types.RealType;
 import gov.nasa.jpf.constraints.types.Type;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -167,16 +164,18 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				return ctx.mkBool(((Boolean) c.getValue()).booleanValue());
 			}
 			if (type.equals(BuiltinTypes.REGEX)) {
-				return ctx.mkToRe(ctx.mkString((String) c.getValue()));
+				String regexValue = (String) c.getValue();
+				return ctx.mkToRe(ctx.mkString(regexValue));
 			}
 			if (type.equals(BuiltinTypes.STRING)) {
-				return ctx.mkString((String) c.getValue());
+				String constValue = ((String) c.getValue());
+				constValue = constValue.replaceAll("\\\\", "\\\\x5c");
+				return ctx.mkString(constValue);
 			}
 			if (type instanceof BVIntegerType) {
 				BVIntegerType<? super E> bvt = (BVIntegerType<? super E>) type;
 				int bits = bvt.getNumBits();
 				E v = c.getValue();
-				byte[] zero = {0};
 				if (v instanceof Byte) {
 					return ctx.mkBV(new Byte((Byte) v).intValue(), bits);
 				}
@@ -964,29 +963,6 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	}
 
 	@Override
-	public Expr visit(BooleanExpression n, Void data) {
-		Expr left = null, right = null;
-		BooleanOperator operator;
-		try {
-			operator = n.getOperator();
-			left = visit(n.getLeft(), null);
-			right = visit(n.getRight(), null);
-			BoolExpr result = ctx.mkEq(left, right);
-			switch (operator) {
-				case EQ:
-					return result;
-				case NEQ:
-					return ctx.mkNot(result);
-				default:
-					throw new RuntimeException();
-			}
-		}
-		catch (Z3Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	@Override
 	public Expr visit(StringBooleanExpression n, Void data) {
 		Expr left = null, right = null;
 		StringBooleanOperator operator;
@@ -1000,9 +976,9 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				case CONTAINS:
 					return ctx.mkContains((SeqExpr) left, (SeqExpr) right);
 				case PREFIXOF:
-					return ctx.mkPrefixOf((SeqExpr) left, (SeqExpr) right);
+					return ctx.mkPrefixOf((SeqExpr) right, (SeqExpr) left);
 				case SUFFIXOF:
-					return ctx.mkSuffixOf((SeqExpr) left, (SeqExpr) right);
+					return ctx.mkSuffixOf((SeqExpr) right, (SeqExpr) left);
 				default:
 					throw new RuntimeException();
 			}
@@ -1014,8 +990,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 
 	@Override
 	public Expr visit(RegexOperatorExpression n, Void data) {
-		Expr left = null;
-		RegExOperator operator = null;
+		Expr left;
+		RegExOperator operator;
 		try {
 			operator = n.getOperator();
 			switch (operator) {
@@ -1032,14 +1008,23 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 					left = visit(n.getLeft());
 					return ctx.mkOption((ReExpr) left);
 				case RANGE:
-					return ctx.mkRange(ctx.mkString(String.valueOf(n.getCh1())), ctx.mkString(String.valueOf(n.getCh2())));
+					return ctx.mkRange(ctx.mkString(String.valueOf(n.getCh1())),
+							ctx.mkString(String.valueOf(n.getCh2())));
 				case ALL:
-				case ALLCHAR:
 					return ctx.mkFullRe(ctx.mkReSort(ctx.mkStringSort()));
+				case ALLCHAR:
+					//FIXME: Could we get Z3 ALLCHAR internal?
+					return ctx.mkRange(ctx.mkString("\\x00"), ctx.mkString("\\xff"));
 				case NOSTR:
 					return ctx.mkEmptyRe(ctx.mkStringSort());
 				case STRTORE:
-					return ctx.mkToRe(ctx.mkString(n.getS()));
+					if (n.getS() != null) {
+						String content = n.getS().replace("\\t", "\\x5ct");
+						return ctx.mkToRe(ctx.mkString(content));
+					} else {
+						Expr se = visit(n.getLeft());
+						return ctx.mkToRe((SeqExpr) se);
+					}
 				default:
 					throw new RuntimeException();
 			}
@@ -1410,16 +1395,16 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			return getOrCreateBoolVar(v);
 		}
 		if (type instanceof BVIntegerType) {
-			return getOrCreateBVVar((Variable<?>) v);
+			return getOrCreateBVVar(v);
 		}
 		if (type instanceof IntegerType) {
-			return getOrCreateIntVar((Variable<?>) v);
+			return getOrCreateIntVar(v);
 		}
 		if (type instanceof RealType) {
-			return getOrCreateRealVar((Variable<?>) v);
+			return getOrCreateRealVar(v);
 		}
 		if (type instanceof BuiltinTypes.StringType) {
-			return getOrCreateStringVar((Variable<?>) v);
+			return getOrCreateStringVar(v);
 		}
 		throw new IllegalArgumentException("Cannot handle variable type " + type);
 	}
@@ -1438,10 +1423,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	protected Expr createSeqVar(Variable<?> v) {
 		try {
 			// define var
-			SeqExpr z3Var = (SeqExpr) ctx.mkConst(v.getName(), ctx.getStringSort());
-
-			// logger.fine("Creating boolean variable " + v.getName());
-			return z3Var;
+			return (SeqExpr) ctx.mkConst(v.getName(), ctx.getStringSort());
 		}
 		catch (Z3Exception ex) {
 			throw new RuntimeException(ex);
@@ -1636,15 +1618,6 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			}
 			return z3Var;
 
-		}
-		catch (Z3Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	protected BoolExpr getBoolean(boolean b) {
-		try {
-			return b ? ctx.mkTrue() : ctx.mkFalse();
 		}
 		catch (Z3Exception ex) {
 			throw new RuntimeException(ex);

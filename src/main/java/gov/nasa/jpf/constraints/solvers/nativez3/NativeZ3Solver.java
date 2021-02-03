@@ -29,8 +29,8 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.QuantifierEliminator;
 import gov.nasa.jpf.constraints.api.Simplifier;
 import gov.nasa.jpf.constraints.api.Valuation;
+import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -162,7 +162,11 @@ public class NativeZ3Solver extends ConstraintSolver implements QuantifierElimin
 
 		final ApplyResult res = tactic.apply(goal);
 		final Goal[] subgoals = res.getSubgoals();
-		return convertSubgoals(subgoals);
+		try {
+			return convertSubgoals(subgoals);
+		} catch (ImpreciseRepresentationException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -178,23 +182,28 @@ public class NativeZ3Solver extends ConstraintSolver implements QuantifierElimin
 
 		final ApplyResult res = tactic.apply(goal);
 		if (res.getNumSubgoals() == 1 &&
-			(res.getSubgoals()[0].isDecidedSat() || res.getSubgoals()[0].isDecidedUnsat())) {
+				(res.getSubgoals()[0].isDecidedSat() || res.getSubgoals()[0].isDecidedUnsat())) {
 
 			logger.warning("Simplification failed.");
 			return expr;
 		}
 
 		final Goal[] subgoals = res.getSubgoals();
-		return convertSubgoals(subgoals);
+		try {
+			return convertSubgoals(subgoals);
+		} catch (ImpreciseRepresentationException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	private Expression<Boolean> convertSubgoals(final Goal[] subgoals) {
+	private Expression<Boolean> convertSubgoals(final Goal[] subgoals)
+			throws ImpreciseRepresentationException {
 		Expression result = null;
 		final NativeZ3TojConstraintConverter converter = new NativeZ3TojConstraintConverter();
 		for (final Goal g : subgoals) {
 			final BoolExpr[] formulas = g.getFormulas();
 			for (final BoolExpr f : formulas) {
-				final Expression<Boolean> jConstraintExpr = converter.parse(f);
+				final Expression<Boolean> jConstraintExpr = (Expression<Boolean>) converter.parse(f);
 				result = (result == null) ? jConstraintExpr : ExpressionUtil.and(result, jConstraintExpr);
 			}
 		}

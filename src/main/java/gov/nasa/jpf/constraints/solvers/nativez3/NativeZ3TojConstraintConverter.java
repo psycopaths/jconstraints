@@ -22,6 +22,7 @@ import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
 import gov.nasa.jpf.constraints.expressions.BitvectorOperator;
 import gov.nasa.jpf.constraints.expressions.Constant;
@@ -34,7 +35,6 @@ import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
-
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,32 +47,29 @@ public class NativeZ3TojConstraintConverter {
 		logger = Logger.getLogger("z3");
 	}
 
-	public Expression<Boolean> parse(Expr z3Expr) {
+	public Expression parse(Expr z3Expr) throws ImpreciseRepresentationException {
 		logger.info("parse:" + z3Expr);
-		Expression<Boolean> returnExpression = null;
+		Expression returnExpression = null;
 		ArrayList<Expression<Boolean>> arguments = convertArgs(z3Expr.getArgs());
 		try {
 			if (z3Expr.isAnd()) {
 				returnExpression = ExpressionUtil.and(arguments);
 			}
-		}
-		catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			logger.warning("isAnd failed");
 		}
 		try {
 			if (z3Expr.isOr()) {
 				returnExpression = ExpressionUtil.or(arguments);
 			}
-		}
-		catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			logger.warning("isOr failed");
 		}
 		try {
 			if (z3Expr.isXor()) {
 				returnExpression = ExpressionUtil.combine(LogicalOperator.XOR, null, arguments);
 			}
-		}
-		catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			logger.warning("isXor failed");
 		}
 
@@ -89,7 +86,7 @@ public class NativeZ3TojConstraintConverter {
 		}
 		if (z3Expr instanceof IntNum) {
 			String value = ((IntNum) z3Expr).toString();
-			returnExpression = new Constant(BuiltinTypes.INTEGER, value);
+			returnExpression = Constant.createParsed(BuiltinTypes.INTEGER, value);
 		}
 		if (z3Expr instanceof IntExpr) {
 			String name = ((IntExpr) z3Expr).toString();
@@ -160,7 +157,8 @@ public class NativeZ3TojConstraintConverter {
 		return returnExpression;
 	}
 
-	private ArrayList<Expression<Boolean>> convertArgs(Expr[] args) {
+	private ArrayList<Expression<Boolean>> convertArgs(Expr[] args)
+			throws ImpreciseRepresentationException {
 		ArrayList<Expression<Boolean>> converted = new ArrayList<>();
 		for (Expr expr : args) {
 			converted.add(parse(expr));
@@ -168,7 +166,8 @@ public class NativeZ3TojConstraintConverter {
 		return converted;
 	}
 
-	private Expression<Boolean> parseBitVector(Expr z3Expr, ArrayList<Expression<Boolean>> arguments) throws Exception {
+	private Expression<Boolean> parseBitVector(Expr z3Expr, ArrayList<Expression<Boolean>> arguments)
+			throws Exception {
 		if (z3Expr.isBVAND()) {
 			return new BitvectorExpression<>(arguments.get(0), BitvectorOperator.AND, arguments.get(1));
 		}
