@@ -16,17 +16,13 @@
 package gov.nasa.jpf.constraints.solver;
 
 import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3TojConstraintConverter;
-import org.junit.Before;
 import org.testng.annotations.Test;
 
 public class ExpressionConversionTest {
   
   public ExpressionConversionTest() {
   }
-  
-  @Before
-  public void setUp() {
-  }
+
 
   @Test
   public void testExpressionConversion(){

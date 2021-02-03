@@ -15,13 +15,14 @@
  */
 package gov.nasa.jpf.constraints.expressions;
 
+import static org.testng.AssertJUnit.assertEquals;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.ConstraintSolver.Result;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.exceptions.ImpreciseDoubleException;
 import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
 import gov.nasa.jpf.constraints.expressions.functions.math.MathFunctions;
 import gov.nasa.jpf.constraints.expressions.functions.math.axioms.AsinProperties;
@@ -34,7 +35,6 @@ import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3SolverContext;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import java.util.Properties;
-import junit.framework.Assert;
 import org.testng.annotations.Test;
 
 @Test
@@ -73,7 +73,7 @@ public class TrigonometricTest {
         Valuation val = new Valuation();
         Result res = ctx.solve(val);
         System.out.println(res + " : " + val);
-        Assert.assertEquals(Result.DONT_KNOW, res);
+        assertEquals(Result.DONT_KNOW, res);
         
     }
     
@@ -133,7 +133,7 @@ public class TrigonometricTest {
         Valuation val = new Valuation();
         Result res = ctx.solve(val);
         System.out.println(res + " : " + val);
-        Assert.assertEquals(Result.SAT, res);
+        assertEquals(Result.SAT, res);
         System.out.println(test.evaluate(val));
     }
 
@@ -177,8 +177,9 @@ public class TrigonometricTest {
         System.out.println(test.evaluate(val));
         System.out.println("sin(x1): " + Math.sin((Double) val.getValue(x1)));
         System.out.println("cos(x2): " + Math.cos((Double) val.getValue(x2)));
-        System.out.println(Math.sin((Double) val.getValue(x1)) - Math.cos((Double) val.getValue(x2)));
-        Assert.assertEquals(Result.SAT, res);
+        System.out
+            .println(Math.sin((Double) val.getValue(x1)) - Math.cos((Double) val.getValue(x2)));
+        assertEquals(Result.SAT, res);
 
     }
 
@@ -266,7 +267,7 @@ public class TrigonometricTest {
         Result res = ((NativeZ3SolverContext) ctx).approximate(val);
         System.out.println(res + " : " + val);
         System.out.println(test.evaluate(val));
-        Assert.assertEquals(Result.SAT, res);
+        assertEquals(Result.SAT, res);
     }
     
     

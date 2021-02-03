@@ -1,5 +1,9 @@
 package gov.nasa.jpf.constraints.expressions;
 
+import static gov.nasa.jpf.constraints.api.ConstraintSolver.Result.UNSAT;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Valuation;
@@ -7,13 +11,9 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3Solver;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import java.util.Properties;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Properties;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class StringSupportTest {
 
@@ -92,5 +92,15 @@ public class StringSupportTest {
 		ConstraintSolver.Result res = solver.solve(equals, val);
 		assertEquals(res, ConstraintSolver.Result.SAT);
 		assertTrue(equals.evaluate(val));
+	}
+
+	@Test
+	public void stringInReTest() {
+		Constant c = Constant.create(BuiltinTypes.STRING, "av");
+		RegExBooleanExpression rbe = RegExBooleanExpression
+				.create(c, RegexOperatorExpression.createAllChar());
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = solver.solve(rbe, val);
+		assertEquals(res, UNSAT);
 	}
 }

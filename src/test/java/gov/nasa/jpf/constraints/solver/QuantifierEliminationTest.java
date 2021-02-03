@@ -15,6 +15,8 @@
  */
 package gov.nasa.jpf.constraints.solver;
 
+import static org.testng.Assert.assertNotNull;
+
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.Constant;
@@ -29,20 +31,15 @@ import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3Solver;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.junit.Before;
-import static org.junit.Assert.*;
 import org.testng.annotations.Test;
 
 public class QuantifierEliminationTest {
   
   public QuantifierEliminationTest() {
-  }
-  
-  @Before
-  public void setUp() {
   }
 
   @Test
@@ -56,7 +53,7 @@ public class QuantifierEliminationTest {
     Variable a = new Variable(BuiltinTypes.INTEGER, "a");
     Variable b = new Variable(BuiltinTypes.INTEGER, "b");
 
-    Constant zero = new Constant(BuiltinTypes.INTEGER, 0);
+    Constant zero = new Constant(BuiltinTypes.INTEGER, BigInteger.ZERO);
 
     //Expression expr = new NumericBooleanExpression(x, NumericComparator.EQ, x);
 
