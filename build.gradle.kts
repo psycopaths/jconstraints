@@ -24,6 +24,12 @@ val test by tasks.getting(Test::class) {
     useTestNG()
 }
 
+tasks.shadowJar {
+    //FIXME: Exclude the other jconstraints-deps
+    exclude("tools.aqua:jconstraints-all:.*")
+
+}
+
 license {
     header = rootProject.file("NOTICE")
     strictCheck = true
