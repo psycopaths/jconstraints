@@ -23,10 +23,12 @@ import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.FuncDecl;
 import com.microsoft.z3.IntExpr;
+import com.microsoft.z3.IntSort;
 import com.microsoft.z3.Model;
 import com.microsoft.z3.ReExpr;
 import com.microsoft.z3.RealExpr;
 import com.microsoft.z3.SeqExpr;
+import com.microsoft.z3.SeqSort;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Sort;
 import com.microsoft.z3.Status;
@@ -77,10 +79,14 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr, Void> {
+
 	protected static Logger logger = Logger.getLogger("constraints");
 	protected final Context ctx;
 	protected final Solver solver;
 	protected final BoolExpr tainted;
+
+	//This seems to be configured for z3.
+	private final int STRING_LENGTH = 30000;
 
 	//	protected final Set<IDisposable> protect;
 //	protected final List<IDisposable> own = new ArrayList<IDisposable>();
@@ -907,32 +913,39 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				case AT:
 					main = visit(n.getMain());
 					position = visit(n.getPosition());
-					return ctx.mkAt((SeqExpr) main, (IntExpr) position);
+					return ctx.mkAt((SeqExpr<BitVecSort>) main, (IntExpr) position);
 				case CONCAT:
 					Expression<?>[] expressions = n.getExpressions();
-					SeqExpr[] expr = new SeqExpr[expressions.length];
-					for (int i = 0; i < expressions.length; i++) {
-						expr[i] = (SeqExpr) visit(expressions[i], null);
+					Expr<SeqSort<BitVecSort>> left = (Expr<SeqSort<BitVecSort>>) visit(expressions[0], null);
+					Expr<SeqSort<BitVecSort>> right = (Expr<SeqSort<BitVecSort>>) visit(expressions[1], null);
+					Expr<SeqSort<BitVecSort>> concat = (Expr<SeqSort<BitVecSort>>) ctx.mkConcat(left, right);
+					for (int i = 2; i < expressions.length; i++) {
+						Expr<SeqSort<BitVecSort>> next = (Expr<SeqSort<BitVecSort>>) visit(expressions[i],
+								null);
+						concat = ctx.mkConcat(concat, next);
 					}
-					return ctx.mkConcat(expr);
+					return concat;
 				case REPLACE:
 					main = visit(n.getMain());
 					src = visit(n.getSrc());
 					dst = visit(n.getDst());
-					return ctx.mkReplace((SeqExpr) main, (SeqExpr) src, (SeqExpr) dst);
+					return ctx.mkReplace((SeqExpr<BitVecSort>) main, (SeqExpr<BitVecSort>) src,
+							(SeqExpr<BitVecSort>) dst);
 				case SUBSTR:
 					main = visit(n.getMain());
 					offset = visit(n.getOffset());
 					length = visit(n.getLength());
-					return ctx.mkExtract((SeqExpr) main, (IntExpr) offset, (IntExpr) length);
+					return ctx.mkExtract((SeqExpr<BitVecSort>) main, (Expr<IntSort>) offset,
+							(Expr<IntSort>) length);
 				case TOSTR:
 					main = visit(n.getMain());
-					return ctx.intToString(main);
+					return ctx.intToString((Expr<IntSort>) main);
 				default:
 					throw new RuntimeException();
 			}
 		}
 		catch (Z3Exception ex) {
+			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
 	}
@@ -964,7 +977,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 
 	@Override
 	public Expr visit(StringBooleanExpression n, Void data) {
-		Expr left = null, right = null;
+		Expr<SeqSort<BitVecSort>> left = null, right = null;
 		StringBooleanOperator operator;
 		try {
 			operator = n.getOperator();
@@ -974,16 +987,18 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				case EQUALS:
 					return ctx.mkEq(left, right);
 				case CONTAINS:
-					return ctx.mkContains((SeqExpr) left, (SeqExpr) right);
+					return ctx.mkContains(left, right);
 				case PREFIXOF:
-					return ctx.mkPrefixOf((SeqExpr) right, (SeqExpr) left);
+					return ctx.mkPrefixOf(right, left);
 				case SUFFIXOF:
-					return ctx.mkSuffixOf((SeqExpr) right, (SeqExpr) left);
+					return ctx.mkSuffixOf(right, left);
 				default:
 					throw new RuntimeException();
 			}
 		}
 		catch (Z3Exception ex) {
+			ex.printStackTrace();
+
 			throw new RuntimeException(ex);
 		}
 	}
@@ -1020,7 +1035,8 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				case STRTORE:
 					if (n.getS() != null) {
 						String content = n.getS().replace("\\t", "\\x5ct");
-						return ctx.mkToRe(ctx.mkString(content));
+						SeqExpr<BitVecSort> sExpr = ctx.mkString(content);
+						return ctx.mkToRe(sExpr);
 					} else {
 						Expr se = visit(n.getLeft());
 						return ctx.mkToRe((SeqExpr) se);
@@ -1036,17 +1052,17 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 
 	@Override
 	public Expr visit(RegexCompoundExpression n, Void data) {
-		Expr left = null, right = null;
+		ReExpr<BitVecSort> left = null, right = null;
 		RegExCompoundOperator operator = null;
 		try {
-			left = visit(n.getChildren()[0], null);
-			right = visit(n.getChildren()[1], null);
+			left = (ReExpr<BitVecSort>) visit(n.getChildren()[0], null);
+			right = (ReExpr<BitVecSort>) visit(n.getChildren()[1], null);
 			operator = n.getOperator();
 			switch (operator) {
 				case CONCAT:
-					return ctx.mkConcat((ReExpr) left, (ReExpr) right);
+					return ctx.mkConcat(left, right);
 				case INTERSECTION:
-					return ctx.mkIntersect((ReExpr) left, (ReExpr) right);
+					return ctx.mkIntersect(left, right);
 				case UNION:
 					return ctx.mkUnion((ReExpr) left, (ReExpr) right);
 				default:
@@ -1054,6 +1070,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			}
 		}
 		catch (Z3Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException();
 		}
 
@@ -1261,13 +1278,13 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			solver.add(eq1);
 			sign = ctx.mkIntConst("__sign" + count++);
 			zero = ctx.mkInt(0);
-			ltz = ctx.mkLt(rAlias, zero);
+			ltz = ctx.mkLt(rAlias, ctx.mkInt2Real(zero));
 			one = ctx.mkInt(1);
 			minusOne = ctx.mkInt(-1);
 			ite = ctx.mkITE(ltz, minusOne, one);
 			eq = ctx.mkEq(sign, ite);
 			solver.add(eq);
-			mul = (RealExpr) ctx.mkMul(sign, rAlias);
+			mul = (RealExpr) ctx.mkMul(ctx.mkInt2Real(sign), rAlias);
 			r2i = ctx.mkReal2Int(mul);
 			return (IntExpr) ctx.mkMul(sign, r2i);
 		}
@@ -1412,7 +1429,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	private Expr getOrCreateStringVar(Variable<?> v) {
 		Expr ret = this.variables.get(v);
 		if (ret != null) {
-			return (SeqExpr) ret;
+			return ret;
 		}
 
 		Expr var = createSeqVar(v);
@@ -1420,12 +1437,11 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 		return var;
 	}
 
-	protected Expr createSeqVar(Variable<?> v) {
+	protected Expr<SeqSort<BitVecSort>> createSeqVar(Variable<?> v) {
 		try {
-			// define var
-			return (SeqExpr) ctx.mkConst(v.getName(), ctx.getStringSort());
-		}
-		catch (Z3Exception ex) {
+
+			return ctx.mkConst(v.getName(), ctx.getStringSort());
+		} catch (Z3Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
