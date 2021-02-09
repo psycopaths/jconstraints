@@ -1,5 +1,5 @@
 default:
   image: openjdk:8-jdk-alpine
   script:
-    - ./gradlew license
+    - ./gradlew checkLicenses
     - ./gradlew assemble test
