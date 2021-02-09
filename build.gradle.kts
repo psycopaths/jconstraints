@@ -17,13 +17,15 @@
  * limitations under the License.
  */
 
-import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR
 import java.time.LocalDate.now
 
 plugins {
-    `antlr`
+    antlr
     `java-library`
-    `java`
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("com.github.sherter.google-java-format") version "0.9"
@@ -84,8 +86,8 @@ tasks.test {
     }
 }
 
-tasks.shadowJar.configure{
-    archiveFileName.set("${baseName}-${classifier}-${version}.jar")
+tasks.shadowJar.configure {
+    archiveFileName.set("$archiveBaseName-$archiveClassifier-$archiveVersion.jar")
 }
 
 publishing {
@@ -121,7 +123,7 @@ publishing {
             }
         }
         create<MavenPublication>("publishMaven") {
-            artifact(tasks["shadowJar"]){
+            artifact(tasks["shadowJar"]) {
                 classifier = null
             }
             artifactId = "jconstraints-all"
