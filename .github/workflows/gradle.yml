@@ -20,7 +20,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Check license header
-      run: ./gradlew license
+      run: ./gradlew checkLicenses
     - name: Check formating
       run: ./gradlew verifyGoogleJavaFormat
     - name: Build with Gradle
