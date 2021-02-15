@@ -219,7 +219,8 @@ public class RegexOperatorExpression extends AbstractRegExExpression {
         a.append("( " + operator + " " + ch1 + " " + ch2 + ") ");
         break;
       case STRTORE:
-        a.append("(" + operator + " " + s + ") ");
+        String value = s != null ? s : left.toString();
+        a.append("(" + operator + " " + value + ") ");
         break;
       default:
         throw new IllegalArgumentException();

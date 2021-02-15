@@ -447,10 +447,6 @@ public class SMTLIBParser {
           return RegexOperatorExpression.createRange(low, high);
         case STRTORE:
           Expression e = arguments.poll();
-          if (e instanceof Constant) {
-            Constant expr = (Constant) e;
-            return RegexOperatorExpression.createStrToRe((String) expr.getValue());
-          }
           return RegexOperatorExpression.createStrToRe(e);
         default:
           throw new UnsupportedOperationException("Unknown RegexOperator: " + newOperator);
@@ -569,7 +565,7 @@ public class SMTLIBParser {
 
   private Constant resolveStringLiteral(final IStringLiteral stringliteral) {
     String value = stringliteral.value();
-    return Constant.create(BuiltinTypes.STRING, value);
+    return Constant.create(BuiltinTypes.STRING, value, true);
   }
 
   private Expression resolveSymbol(final ISymbol symbol)
