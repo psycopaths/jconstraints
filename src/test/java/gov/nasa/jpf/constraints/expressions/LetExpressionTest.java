@@ -19,6 +19,7 @@
 
 package gov.nasa.jpf.constraints.expressions;
 
+import static gov.nasa.jpf.constraints.expressions.NumericComparator.EQ;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -27,10 +28,15 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import gov.nasa.jpf.constraints.util.ExpressionUtil;
+import java.util.Set;
 import org.testng.annotations.Test;
 
 public class LetExpressionTest {
+
   Variable x = Variable.create(BuiltinTypes.SINT32, "x");
+  Variable x1 = Variable.create(BuiltinTypes.SINT32, "x1");
+  Variable x2 = Variable.create(BuiltinTypes.SINT32, "x2");
   Constant c = Constant.create(BuiltinTypes.SINT32, 5);
   Expression<Boolean> expr = NumericBooleanExpression.create(x, NumericComparator.GT, c);
   Constant c4 = Constant.create(BuiltinTypes.SINT32, 4);
@@ -38,7 +44,7 @@ public class LetExpressionTest {
 
   @Test(groups = {"expressions", "base"})
   public void LetExpressionAcceptsVisitorTest() {
-    LetExpressionVisitor visitor = new LetExpressionVisitor();
+    DummyVisitorForTest visitor = new DummyVisitorForTest();
     assertEquals(letExpr.accept(visitor, false), letExpr);
   }
 
@@ -66,8 +72,6 @@ public class LetExpressionTest {
 
   @Test(groups = {"expressions", "base"})
   public void flattenLetExpression2Test() {
-    Variable x1 = Variable.create(BuiltinTypes.SINT32, "x1");
-    Variable x2 = Variable.create(BuiltinTypes.SINT32, "x2");
     Constant c2 = Constant.create(BuiltinTypes.SINT32, 2);
     NumericBooleanExpression partA = NumericBooleanExpression.create(x1, NumericComparator.LE, c4);
     NumericCompound replacement = NumericCompound.create(x2, NumericOperator.PLUS, c2);
@@ -96,7 +100,22 @@ public class LetExpressionTest {
     assertEquals(let2.flattenLetExpression(), expectedOutcome2);
   }
 
-  public class LetExpressionVisitor extends AbstractExpressionVisitor<Expression, Boolean> {
+  @Test(groups = {"expressions", "base"})
+  public void chainedLetExpressionFlattening01Test() {
+    NumericCompound nc = NumericCompound.create(x, NumericOperator.PLUS, c4);
+    NumericBooleanExpression nbe = NumericBooleanExpression.create(x1, EQ, x2);
+    LetExpression inner = LetExpression.create(x1, nc, nbe);
+    Variable x4 = Variable.create(BuiltinTypes.SINT32, "x4");
+    LetExpression outter = LetExpression.create(x, x4, inner);
+    Expression flattened = outter.flattenLetExpression();
+    Set<Variable<?>> vars = ExpressionUtil.freeVariables(flattened);
+    assertFalse(vars.contains(x), "the x should be replaced by x4");
+    assertFalse(vars.contains(x1), "The x1 should be replaced by the numeric compound");
+    assertTrue(vars.contains(x4), "The x4 is very present now");
+  }
+
+  public class DummyVisitorForTest extends AbstractExpressionVisitor<Expression, Boolean> {
+
     @Override
     protected Expression defaultVisit(Expression expression, Boolean data) {
       return expression;

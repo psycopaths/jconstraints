@@ -23,8 +23,7 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.simplifiers.datastructures.ArithmeticVarReplacements;
-import gov.nasa.jpf.constraints.util.ExpressionUtil;
+import gov.nasa.jpf.constraints.expressions.flattening.LetExpressionFlattenerVisitor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -140,6 +139,7 @@ public class LetExpression extends EqualityExpression {
   }
 
   public Expression flattenLetExpression() {
-    return ExpressionUtil.transformVars(mainValue, new ArithmeticVarReplacements(values));
+    LetExpressionFlattenerVisitor v = new LetExpressionFlattenerVisitor();
+    return accept(v, null);
   }
 }
