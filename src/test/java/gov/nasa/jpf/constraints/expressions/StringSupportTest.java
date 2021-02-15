@@ -34,7 +34,8 @@ public class StringSupportTest {
 		Variable string = Variable.create(BuiltinTypes.STRING, "x1");
 		Expression len = StringIntegerExpression.createLength(string);
 		len = CastExpression.create(len, BuiltinTypes.SINT32);
-		NumericBooleanExpression compLen = NumericBooleanExpression.create(len, NumericComparator.EQ, c5);
+		NumericBooleanExpression compLen =
+				NumericBooleanExpression.create(len, NumericComparator.EQ, c5);
 
 		Valuation val = new Valuation();
 		ConstraintSolver.Result res = solver.solve(compLen, val);
@@ -50,7 +51,8 @@ public class StringSupportTest {
 		Variable string = Variable.create(BuiltinTypes.STRING, "x1");
 		Expression len = StringIntegerExpression.createLength(string);
 		len = CastExpression.create(len, BuiltinTypes.SINT32);
-		NumericBooleanExpression compLen = NumericBooleanExpression.create(len, NumericComparator.EQ, c5);
+		NumericBooleanExpression compLen =
+				NumericBooleanExpression.create(len, NumericComparator.EQ, c5);
 
 		Constant<String> cHallo = Constant.create(BuiltinTypes.STRING, "Hallo");
 		StringBooleanExpression strEq = StringBooleanExpression.createEquals(string, cHallo);
@@ -71,7 +73,6 @@ public class StringSupportTest {
 		Expression stringAt = StringCompoundExpression.createAt(strVar, c4);
 		Constant stringExpected = Constant.create(BuiltinTypes.STRING, "c");
 		stringAt = StringBooleanExpression.createEquals(stringAt, stringExpected);
-
 
 		Valuation val = new Valuation();
 		ConstraintSolver.Result res = solver.solve(stringAt, val);
@@ -97,10 +98,64 @@ public class StringSupportTest {
 	@Test
 	public void stringInReTest() {
 		Constant c = Constant.create(BuiltinTypes.STRING, "av");
-		RegExBooleanExpression rbe = RegExBooleanExpression
-				.create(c, RegexOperatorExpression.createAllChar());
+		RegExBooleanExpression rbe =
+				RegExBooleanExpression.create(c, RegexOperatorExpression.createAllChar());
 		Valuation val = new Valuation();
 		ConstraintSolver.Result res = solver.solve(rbe, val);
 		assertEquals(res, UNSAT);
 	}
+
+	@Test
+	public void concatTest() {
+		Variable a = Variable.create(BuiltinTypes.STRING, "a");
+		Variable b = Variable.create(BuiltinTypes.STRING, "b");
+		Variable c = Variable.create(BuiltinTypes.STRING, "c");
+		Expression sce = StringCompoundExpression.createConcat(a, b, c);
+		Expression sbe =
+				StringBooleanExpression.createEquals(sce, Constant.create(BuiltinTypes.STRING, "hallo"));
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = solver.solve(sbe, val);
+		assertEquals(res, ConstraintSolver.Result.SAT);
+		assertTrue((Boolean) sbe.evaluate(val));
+	}
+
+	@Test
+	public void concat2Test() {
+		Constant a = Constant.create(BuiltinTypes.STRING, "ha");
+		Constant b = Constant.create(BuiltinTypes.STRING, "ll");
+		Constant c = Constant.create(BuiltinTypes.STRING, "o");
+		Expression sce = StringCompoundExpression.createConcat(a, b, c);
+		Expression sbe =
+				StringBooleanExpression.createEquals(sce, Constant.create(BuiltinTypes.STRING, "hallo"));
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = solver.solve(sbe, val);
+		assertEquals(res, ConstraintSolver.Result.SAT);
+		assertTrue((Boolean) sbe.evaluate(val));
+	}
+
+	@Test
+	public void concat3Test() {
+		Variable a = Variable.create(BuiltinTypes.STRING, "a");
+		Variable b = Variable.create(BuiltinTypes.STRING, "b");
+		Constant c = Constant.create(BuiltinTypes.STRING, "o");
+		Expression sce = StringCompoundExpression.createConcat(a, b, c);
+		Expression sbe =
+				StringBooleanExpression.createEquals(sce, Constant.create(BuiltinTypes.STRING, "hallo"));
+		Valuation val = new Valuation();
+		ConstraintSolver.Result res = solver.solve(sbe, val);
+		assertEquals(res, ConstraintSolver.Result.SAT);
+		assertTrue((Boolean) sbe.evaluate(val));
+	}
+
+//	@Test
+//	public void nativeConcatTest() {
+//		Context ctx = new Context();
+//		Expr<SeqSort<BitVecSort>> a = ctx.mkConst("a", ctx.getStringSort());
+//		Expr<SeqSort<BitVecSort>> b = ctx.mkConst("b", ctx.getStringSort());
+//		SeqExpr<BitVecSort> constant = ctx.mkString("test");
+//		Expr concat = ctx.mkConcat(a, b);
+//		Expr eq = ctx.mkEq(concat, constant);
+//		Solver s = ctx.mkSolver();
+//		assertEquals(s.check(eq), Status.SATISFIABLE);
+//	}
 }

@@ -1,18 +1,18 @@
 package gov.nasa.jpf.constraints.smtComp;
 
+import static gov.nasa.jpf.constraints.api.ConstraintSolver.Result.SAT;
+import static org.testng.Assert.assertEquals;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.smtlibUtility.SMTProblem;
 import gov.nasa.jpf.constraints.smtlibUtility.parser.SMTLIBParserException;
 import gov.nasa.jpf.constraints.smtlibUtility.parser.utility.ResourceParsingHelper;
 import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3Solver;
+import java.io.IOException;
 import org.smtlib.IParser;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-
-import static gov.nasa.jpf.constraints.api.ConstraintSolver.Result.SAT;
-import static org.testng.Assert.assertEquals;
 
 public class QF_NRA_TEST {
     @Test

@@ -10,11 +10,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.smtlib.IParser.ParserException;
 
-public class LoaderUtil {
+public class LoadingUtil {
 
   public static SMTProblem loadProblemFromResources(String name)
       throws URISyntaxException, IOException, SMTLIBParserException, ParserException {
-    URL smtFile = LoaderUtil.class.getClassLoader().getResource(name);
+    URL smtFile = LoadingUtil.class.getClassLoader().getResource(name);
     SMTProblem problem =
         SMTLIBParser.parseSMTProgram(
             Files.readAllLines(Paths.get(smtFile.toURI())).stream()
