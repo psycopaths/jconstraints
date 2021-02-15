@@ -30,46 +30,6 @@ public class QF_S_RoundTripTest {
   }
 
   @Test
-  public void banditfuzzExample1Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
-    SMTProblem problem = LoadingUtil
-        .loadProblemFromResources("3594_1566478915.3770756852528010125309455_1.smt");
-    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
-    Valuation model = new Valuation();
-    Expression<Boolean> expr = problem.getAllAssertionsAsConjunction();
-    System.out.print(expr);
-    ConstraintSolver.Result jRes = cvc4.solve(expr, model);
-    assertEquals(ConstraintSolver.Result.SAT, jRes);
-    assertTrue(expr.evaluateSMT(model));
-  }
-
-  @Test
-  public void banditfuzzExample2Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
-    SMTProblem problem = LoadingUtil
-        .loadProblemFromResources("3575_1565554544.3963776322835254933674150_1.smt");
-    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
-    Valuation model = new Valuation();
-    Expression<Boolean> expr = problem.getAllAssertionsAsConjunction();
-    System.out.print(expr);
-    ConstraintSolver.Result jRes = cvc4.solve(expr, model);
-    assertEquals(ConstraintSolver.Result.UNSAT, jRes);
-  }
-
-  @Test
-  public void banditfuzzExample3Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
-    SMTProblem problem = LoadingUtil
-        .loadProblemFromResources("3605_1565559107.29890633704988511910132405_1.smt");
-    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
-    Valuation model = new Valuation();
-    Expression<Boolean> expr = problem.getAllAssertionsAsConjunction();
-    System.out.print(expr);
-    ConstraintSolver.Result jRes = cvc4.solve(expr, model);
-    assertEquals(ConstraintSolver.Result.UNSAT, jRes);
-  }
-
-  @Test
   public void jdartExample1Test()
       throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
     SMTProblem problem = LoadingUtil
@@ -188,4 +148,46 @@ public class QF_S_RoundTripTest {
     assertTrue(expr.evaluate(model));
   }
 
+
+  // FIXME: Recheck these tests after the new CVC4 java api is released.
+  // Monitor progress in: https://github.com/CVC4/CVC4/issues/5018
+  @Test(enabled = false)
+  public void banditfuzzExample1Test()
+      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+    SMTProblem problem = LoadingUtil
+        .loadProblemFromResources("3594_1566478915.3770756852528010125309455_1.smt");
+    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
+    Valuation model = new Valuation();
+    Expression<Boolean> expr = problem.getAllAssertionsAsConjunction();
+    System.out.print(expr);
+    ConstraintSolver.Result jRes = cvc4.solve(expr, model);
+    assertEquals(ConstraintSolver.Result.SAT, jRes);
+    assertTrue(expr.evaluateSMT(model));
+  }
+
+  @Test(enabled = false)
+  public void banditfuzzExample2Test()
+      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+    SMTProblem problem = LoadingUtil
+        .loadProblemFromResources("3575_1565554544.3963776322835254933674150_1.smt");
+    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
+    Valuation model = new Valuation();
+    Expression<Boolean> expr = problem.getAllAssertionsAsConjunction();
+    System.out.print(expr);
+    ConstraintSolver.Result jRes = cvc4.solve(expr, model);
+    assertEquals(ConstraintSolver.Result.UNSAT, jRes);
+  }
+
+  @Test(enabled = false)
+  public void banditfuzzExample3Test()
+      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+    SMTProblem problem = LoadingUtil
+        .loadProblemFromResources("3605_1565559107.29890633704988511910132405_1.smt");
+    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
+    Valuation model = new Valuation();
+    Expression<Boolean> expr = problem.getAllAssertionsAsConjunction();
+    System.out.print(expr);
+    ConstraintSolver.Result jRes = cvc4.solve(expr, model);
+    assertEquals(ConstraintSolver.Result.UNSAT, jRes);
+  }
 }
