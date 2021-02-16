@@ -37,6 +37,8 @@ import gov.nasa.jpf.constraints.expressions.NumericComparator;
 import gov.nasa.jpf.constraints.expressions.NumericCompound;
 import gov.nasa.jpf.constraints.expressions.NumericOperator;
 import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
+import gov.nasa.jpf.constraints.expressions.Quantifier;
+import gov.nasa.jpf.constraints.expressions.QuantifierExpression;
 import gov.nasa.jpf.constraints.expressions.RegExBooleanExpression;
 import gov.nasa.jpf.constraints.expressions.RegExBooleanOperator;
 import gov.nasa.jpf.constraints.expressions.RegExCompoundOperator;
@@ -79,6 +81,7 @@ import org.smtlib.IExpr.IStringLiteral;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IParser;
 import org.smtlib.IParser.ParserException;
+import org.smtlib.ISort;
 import org.smtlib.ISource;
 import org.smtlib.SMT;
 import org.smtlib.command.C_assert;
@@ -187,7 +190,7 @@ public class SMTLIBParser {
       throw new SMTLIBParserExceptionInvalidMethodCall(
           "Could not resolve type declared in function: " + application.toString());
     }
-    final Variable var = Variable.create(type, cmd.symbol().toString());
+    final Variable var = Variable.create(type, cmd.symbol().value());
     problem.addVariable(var);
   }
 
@@ -207,6 +210,8 @@ public class SMTLIBParser {
       resolved = resolveStringLiteral((IStringLiteral) arg);
     } else if (arg instanceof HexLiteral) {
       resolved = resolveHexLiteral((HexLiteral) arg);
+    } else if (arg instanceof IExpr.IForall || arg instanceof IExpr.IExists) {
+      resolved = processQuantifierExpression(arg);
     } else {
       throw new SMTLIBParserNotSupportedException(
           "The arguments type is not supported: " + arg.getClass());
@@ -235,11 +240,76 @@ public class SMTLIBParser {
       res = processLetExpression((Let) expr);
     } else if (expr instanceof Symbol) {
       res = resolveSymbol((ISymbol) expr);
+    } else if (expr instanceof IExpr.IForall || expr instanceof IExpr.IExists) {
+      res = processQuantifierExpression(expr);
     } else {
       throw new SMTLIBParserNotSupportedException(
-          "Cannot pare the subexpression of type: " + expr.getClass());
+          "Cannot parse the subexpression of type: " + expr.getClass());
     }
     return res;
+  }
+
+  private Expression processQuantifierExpression(final IExpr sExpr) throws SMTLIBParserException {
+    final Quantifier quantifier;
+    List<Variable<?>> boundVariables = new ArrayList<>();
+    Expression<Boolean> body;
+
+    if (sExpr instanceof IExpr.IForall) {
+      quantifier = Quantifier.FORALL;
+      List<IExpr.IDeclaration> parameters = ((IExpr.IForall) sExpr).parameters();
+      if (!parameters.isEmpty()) {
+        for (final IExpr.IDeclaration bound : parameters) {
+          final String parameterValue = bound.parameter().value();
+          ISort parameterSort = bound.sort();
+
+          if (!(parameterSort instanceof Sort.Application)) {
+            throw new SMTLIBParserException(
+                "Could only convert type of type NamedSort.Application");
+          }
+          final Sort.Application application = (Sort.Application) parameterSort;
+
+          final Type<?> type = TypeMap.getType(application.toString());
+          if (type == null) {
+            throw new SMTLIBParserExceptionInvalidMethodCall(
+                "Could not resolve type declared in function: " + application.toString());
+          } else {
+            final Variable parameter = Variable.create(type, parameterValue);
+            boundVariables.add(parameter);
+            problem.addVariable(parameter);
+          }
+        }
+      }
+      IExpr bodyExpr = ((IExpr.IForall) sExpr).expr();
+      body = processExpression(bodyExpr);
+    } else { // sExpr instanceof IExpr.IExists
+      quantifier = Quantifier.EXISTS;
+      List<IExpr.IDeclaration> parameters = ((IExpr.IExists) sExpr).parameters();
+      if (!parameters.isEmpty()) {
+        for (final IExpr.IDeclaration bound : parameters) {
+          final String parameterValue = bound.parameter().value();
+          ISort parameterSort = bound.sort();
+
+          if (!(parameterSort instanceof Sort.Application)) {
+            throw new SMTLIBParserException(
+                "Could only convert type of type NamedSort.Application");
+          }
+          final Sort.Application application = (Sort.Application) parameterSort;
+
+          final Type<?> type = TypeMap.getType(application.toString());
+          if (type == null) {
+            throw new SMTLIBParserExceptionInvalidMethodCall(
+                "Could not resolve type declared in function: " + application.toString());
+          } else {
+            final Variable parameter = Variable.create(type, parameterValue);
+            boundVariables.add(parameter);
+            problem.addVariable(parameter);
+          }
+        }
+      }
+      IExpr bodyExpr = ((IExpr.IExists) sExpr).expr();
+      body = processExpression(bodyExpr);
+    }
+    return QuantifierExpression.create(quantifier, boundVariables, body);
   }
 
   private Expression processLetExpression(final Let sExpr) throws SMTLIBParserException {

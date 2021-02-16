@@ -186,4 +186,9 @@ public class QuantifierExpression extends AbstractBoolExpression {
   public <R, D> R accept(ExpressionVisitor<R, D> visitor, D data) {
     return visitor.visit(this, data);
   }
+
+  public static QuantifierExpression create(
+      Quantifier q, List<? extends Variable<?>> boundVariables, Expression<Boolean> body) {
+    return new QuantifierExpression(q, boundVariables, body);
+  }
 }
