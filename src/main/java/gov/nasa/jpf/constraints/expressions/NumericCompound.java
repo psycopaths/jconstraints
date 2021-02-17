@@ -89,6 +89,8 @@ public class NumericCompound<E> extends AbstractExpression<E> {
         return type.div(lv, rv);
       case REM:
         return type.mod(lv, rv);
+      case MOD:
+        return type.mod(lv, rv);
       default:
         throw new IllegalStateException("Unknown numeric operator " + operator);
     }

@@ -259,4 +259,16 @@ public class SMTLIBParserTest {
     assertEquals(problem.variables.size(), 4);
     assertEquals(problem.assertions.size(), 3);
   }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void operatorMod01Test()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem =
+        parseResourceFile("2008_5735c9082c3f9cd487c6376032029bb499ba1f87113dc9ca03adc6bc.smt2");
+
+    assertEquals(problem.variables.size(), 1);
+    assertEquals(problem.assertions.size(), 1);
+  }
 }

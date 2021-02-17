@@ -25,7 +25,8 @@ public enum NumericOperator implements ExpressionOperator {
   MUL("*"),
   MINUS("-"),
   PLUS("+"),
-  REM("%");
+  REM("%"),
+  MOD("MOD");
 
   private final String str;
 
@@ -39,7 +40,7 @@ public enum NumericOperator implements ExpressionOperator {
   }
 
   public static NumericOperator fromString(String str) {
-    switch (str) {
+    switch (str.toLowerCase()) {
       case "/":
         return DIV;
       case "*":
@@ -50,8 +51,11 @@ public enum NumericOperator implements ExpressionOperator {
       case "bvadd":
       case "+":
         return PLUS;
+      case "rem":
       case "%":
         return REM;
+      case "mod":
+        return MOD;
       default:
         return null;
     }

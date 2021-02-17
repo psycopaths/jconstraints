@@ -158,8 +158,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public Byte mod(final Byte left, final Byte right) {
+    public Byte rem(final Byte left, final Byte right) {
       return (byte) (left % right);
+    }
+
+    @Override
+    public Byte mod(Byte left, Byte right) {
+      return (byte) Math.floorMod(left, right);
     }
 
     @Override
@@ -251,8 +256,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public Short mod(final Short left, final Short right) {
+    public Short rem(final Short left, final Short right) {
       return (short) (left % right);
+    }
+
+    @Override
+    public Short mod(Short left, Short right) {
+      return (short) Math.floorMod(left, right);
     }
 
     @Override
@@ -379,8 +389,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public Character mod(final Character left, final Character right) {
+    public Character rem(final Character left, final Character right) {
       return (char) (left % right);
+    }
+
+    @Override
+    public Character mod(Character left, Character right) {
+      throw new UnsupportedOperationException("Cannot compute mod for char");
     }
 
     @Override
@@ -539,8 +554,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public Integer mod(final Integer left, final Integer right) {
+    public Integer rem(final Integer left, final Integer right) {
       return left % right;
+    }
+
+    @Override
+    public Integer mod(Integer left, Integer right) {
+      return Math.floorMod(left, right);
     }
 
     @Override
@@ -652,8 +672,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public Long mod(final Long left, final Long right) {
+    public Long rem(final Long left, final Long right) {
       return left % right;
+    }
+
+    @Override
+    public Long mod(Long left, Long right) {
+      return Math.floorMod(left, right);
     }
 
     @Override
@@ -750,8 +775,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public Float mod(final Float left, final Float right) {
+    public Float rem(final Float left, final Float right) {
       return left % right;
+    }
+
+    @Override
+    public Float mod(Float left, Float right) {
+      throw new UnsupportedOperationException("Cannot compute mod for float");
     }
 
     @Override
@@ -841,8 +871,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public Double mod(final Double left, final Double right) {
+    public Double rem(final Double left, final Double right) {
       return left % right;
+    }
+
+    @Override
+    public Double mod(Double left, Double right) {
+      throw new UnsupportedOperationException("Cannot compute mod for double");
     }
 
     @Override
@@ -917,8 +952,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public BigInteger mod(final BigInteger left, final BigInteger right) {
+    public BigInteger rem(final BigInteger left, final BigInteger right) {
       return left.remainder(right);
+    }
+
+    @Override
+    public BigInteger mod(BigInteger left, BigInteger right) {
+      return left.mod(right);
     }
 
     @Override
@@ -999,8 +1039,13 @@ public abstract class BuiltinTypes implements Serializable {
     }
 
     @Override
-    public BigDecimal mod(final BigDecimal left, final BigDecimal right) {
+    public BigDecimal rem(final BigDecimal left, final BigDecimal right) {
       return left.remainder(right);
+    }
+
+    @Override
+    public BigDecimal mod(BigDecimal left, BigDecimal right) {
+      throw new UnsupportedOperationException("Cannot compute mod for REAL");
     }
 
     @Override
@@ -1121,6 +1166,11 @@ public abstract class BuiltinTypes implements Serializable {
 
     @Override
     public BigFraction mod(BigFraction left, BigFraction right) {
+      throw new UnsupportedOperationException("Modulo is not yet supported on RealValues");
+    }
+
+    @Override
+    public BigFraction rem(BigFraction left, BigFraction right) {
       throw new UnsupportedOperationException("Remainder is not yet supported on RealValues");
     }
 

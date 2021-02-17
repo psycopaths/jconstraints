@@ -41,6 +41,8 @@ public interface NumericType<T> extends Type<T> {
 
   public T div(T left, T right);
 
+  public T rem(T left, T right);
+
   public T mod(T left, T right);
 
   public T negate(T num);
