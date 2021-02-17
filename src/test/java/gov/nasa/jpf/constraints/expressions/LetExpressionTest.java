@@ -114,6 +114,24 @@ public class LetExpressionTest {
     assertTrue(vars.contains(x4), "The x4 is very present now");
   }
 
+  @Test(groups = {"expressions", "base"})
+  public void chainedLetExpressionFlattening02Test() {
+    Variable y = Variable.create(BuiltinTypes.SINT32, "Y");
+
+    NumericCompound nc = NumericCompound.create(x, NumericOperator.PLUS, c4);
+    NumericBooleanExpression nbe = NumericBooleanExpression.create(x1, EQ, x2);
+    LetExpression inner2 = LetExpression.create(y, nc, y);
+    LetExpression inner = LetExpression.create(x1, inner2, nbe);
+    Variable x4 = Variable.create(BuiltinTypes.SINT32, "x4");
+    LetExpression outter = LetExpression.create(x, x4, inner);
+    Expression flattened = outter.flattenLetExpression();
+    Set<Variable<?>> vars = ExpressionUtil.freeVariables(flattened);
+    assertFalse(vars.contains(x), "the x should be replaced by x4");
+    assertFalse(vars.contains(x1), "The x1 should be replaced by the numeric compound");
+    assertFalse(vars.contains(y), "The y should be replaced by the numeric compound");
+    assertTrue(vars.contains(x4), "The x4 is very present now");
+  }
+
   public class DummyVisitorForTest extends AbstractExpressionVisitor<Expression, Boolean> {
 
     @Override

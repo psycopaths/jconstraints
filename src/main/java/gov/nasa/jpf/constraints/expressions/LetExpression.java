@@ -24,6 +24,7 @@ import gov.nasa.jpf.constraints.api.ExpressionVisitor;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.flattening.LetExpressionFlattenerVisitor;
+import gov.nasa.jpf.constraints.types.Type;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -141,5 +142,10 @@ public class LetExpression extends EqualityExpression {
   public Expression flattenLetExpression() {
     LetExpressionFlattenerVisitor v = new LetExpressionFlattenerVisitor();
     return accept(v, null);
+  }
+
+  @Override
+  public Type getType() {
+    return mainValue.getType();
   }
 }

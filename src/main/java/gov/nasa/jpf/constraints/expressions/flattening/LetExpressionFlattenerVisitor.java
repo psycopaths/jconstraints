@@ -20,17 +20,24 @@
 package gov.nasa.jpf.constraints.expressions.flattening;
 
 import gov.nasa.jpf.constraints.api.Expression;
+import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.LetExpression;
 import gov.nasa.jpf.constraints.simplifiers.datastructures.ArithmeticVarReplacements;
 import gov.nasa.jpf.constraints.util.DuplicatingVisitor;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class LetExpressionFlattenerVisitor extends DuplicatingVisitor<Void> {
 
   @Override
   public Expression<?> visit(LetExpression let, Void data) {
     Expression visitedMain = visit(let.getMainValue(), data);
-    return ExpressionUtil.transformVars(
-        visitedMain, new ArithmeticVarReplacements(let.getParameterValues()));
+    Map<Variable, Expression> m = new HashMap<>();
+    for (Entry<Variable, Expression> e : let.getParameterValues().entrySet()) {
+      m.put(e.getKey(), visit(e.getValue(), data));
+    }
+    return ExpressionUtil.transformVars(visitedMain, new ArithmeticVarReplacements(m));
   }
 }
