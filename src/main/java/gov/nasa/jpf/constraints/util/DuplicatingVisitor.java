@@ -21,8 +21,17 @@ package gov.nasa.jpf.constraints.util;
 
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor;
+import gov.nasa.jpf.constraints.expressions.IfThenElse;
 
 public abstract class DuplicatingVisitor<D> extends AbstractExpressionVisitor<Expression<?>, D> {
+
+  @Override
+  public <E> Expression<?> visit(IfThenElse<E> n, D data) {
+    Expression conditionE = visit(n.getIf(), data);
+    Expression thenE = visit(n.getThen(), data);
+    Expression elseE = visit(n.getElse(), data);
+    return IfThenElse.create(conditionE, thenE, elseE);
+  }
 
   /* (non-Javadoc)
    * @see gov.nasa.jpf.constraints.api.AbstractExpressionVisitor#defaultVisit(gov.nasa.jpf.constraints.api.Expression, java.lang.Object)

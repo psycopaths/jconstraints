@@ -20,6 +20,7 @@
 package gov.nasa.jpf.constraints.expressions;
 
 import static gov.nasa.jpf.constraints.expressions.NumericComparator.EQ;
+import static gov.nasa.jpf.constraints.expressions.NumericComparator.GT;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -38,7 +39,7 @@ public class LetExpressionTest {
   Variable x1 = Variable.create(BuiltinTypes.SINT32, "x1");
   Variable x2 = Variable.create(BuiltinTypes.SINT32, "x2");
   Constant c = Constant.create(BuiltinTypes.SINT32, 5);
-  Expression<Boolean> expr = NumericBooleanExpression.create(x, NumericComparator.GT, c);
+  Expression<Boolean> expr = NumericBooleanExpression.create(x, GT, c);
   Constant c4 = Constant.create(BuiltinTypes.SINT32, 4);
   LetExpression letExpr = LetExpression.create(x, c4, expr);
 
@@ -66,7 +67,7 @@ public class LetExpressionTest {
 
   @Test(groups = {"expressions", "base"})
   public void flattenLetExpression1Test() {
-    Expression expectedOutcome = NumericBooleanExpression.create(c4, NumericComparator.GT, c);
+    Expression expectedOutcome = NumericBooleanExpression.create(c4, GT, c);
     assertEquals(letExpr.flattenLetExpression(), expectedOutcome);
   }
 
@@ -87,8 +88,7 @@ public class LetExpressionTest {
     Expression expr2 = PropositionalCompound.create(x3, LogicalOperator.AND, expr);
 
     Variable x4 = Variable.create(BuiltinTypes.SINT32, "x4");
-    NumericBooleanExpression replacementB =
-        NumericBooleanExpression.create(x4, NumericComparator.GT, c2);
+    NumericBooleanExpression replacementB = NumericBooleanExpression.create(x4, GT, c2);
     LetExpression let2 = LetExpression.create(x3, replacementB, expr2);
 
     Expression expectedOutcome2 =
@@ -130,6 +130,20 @@ public class LetExpressionTest {
     assertFalse(vars.contains(x1), "The x1 should be replaced by the numeric compound");
     assertFalse(vars.contains(y), "The y should be replaced by the numeric compound");
     assertTrue(vars.contains(x4), "The x4 is very present now");
+  }
+
+  @Test(groups = {"expressions", "base"})
+  public void letExpresisonsAndITE01Test() {
+    Variable X = Variable.create(BuiltinTypes.SINT32, "X");
+    Variable X1 = Variable.create(BuiltinTypes.SINT32, "X1");
+    Variable B = Variable.create(BuiltinTypes.BOOL, "B");
+    Constant c1 = Constant.create(BuiltinTypes.SINT32, 5);
+    IfThenElse ite = IfThenElse.create(B, X1, c1);
+    NumericBooleanExpression nbe =
+        NumericBooleanExpression.create(ite, GT, Constant.create(BuiltinTypes.SINT32, 6));
+    LetExpression let = LetExpression.create(X1, X, nbe);
+    Expression flat = let.flattenLetExpression();
+    assertFalse(flat.toString().contains("X1"), "X1 should be replaced");
   }
 
   public class DummyVisitorForTest extends AbstractExpressionVisitor<Expression, Boolean> {
