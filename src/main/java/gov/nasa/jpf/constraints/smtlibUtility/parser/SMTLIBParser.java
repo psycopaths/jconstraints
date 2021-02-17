@@ -58,6 +58,8 @@ import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,6 +78,7 @@ import org.smtlib.IExpr.INumeral;
 import org.smtlib.IExpr.IStringLiteral;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IParser;
+import org.smtlib.IParser.ParserException;
 import org.smtlib.ISource;
 import org.smtlib.SMT;
 import org.smtlib.command.C_assert;
@@ -101,6 +104,28 @@ public class SMTLIBParser {
   public SMTLIBParser() {
     problem = new SMTProblem();
     letContext = new HashSet<>();
+  }
+
+  public static SMTProblem parseSMTProgramFromFile(final String fileName)
+      throws IOException, SMTLIBParserException, ParserException {
+    String input =
+        Files.readAllLines(Paths.get(fileName)).stream()
+            .reduce(
+                "",
+                (a, b) -> {
+                  String processed = "";
+                  if (!b.startsWith(";")) {
+                    processed = b;
+                    if (processed.contains(" ;")) {
+                      processed = processed.split(" ;")[0];
+                      processed += "\n";
+                    } else if (processed.endsWith(";")) {
+                      processed = processed.substring(0, processed.length() - 1);
+                    }
+                  }
+                  return a + processed;
+                });
+    return parseSMTProgram(input);
   }
 
   public static SMTProblem parseSMTProgram(final String input)

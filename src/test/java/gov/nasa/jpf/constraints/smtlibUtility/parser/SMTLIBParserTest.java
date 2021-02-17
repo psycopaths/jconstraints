@@ -226,4 +226,37 @@ public class SMTLIBParserTest {
     assertEquals(problem.variables.size(), 1);
     assertEquals(problem.assertions.size(), 4);
   }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void stringExample1CommentTest()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem = parseResourceFile("6381_7979.corecstrs.readable.smt2");
+
+    assertEquals(problem.variables.size(), 129);
+    assertEquals(problem.assertions.size(), 110);
+  }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void stringExample2CommentTest()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem = parseResourceFile("17165_replace-010.smt2");
+
+    assertEquals(problem.variables.size(), 3);
+    assertEquals(problem.assertions.size(), 2);
+  }
+
+  @Test(
+      enabled = true,
+      groups = {"jsmtlib", "base"})
+  public void stringExample3CommentTest()
+      throws SMTLIBParserException, IParser.ParserException, IOException {
+    final SMTProblem problem = parseResourceFile("16985_regex-042.smt2");
+
+    assertEquals(problem.variables.size(), 4);
+    assertEquals(problem.assertions.size(), 3);
+  }
 }
