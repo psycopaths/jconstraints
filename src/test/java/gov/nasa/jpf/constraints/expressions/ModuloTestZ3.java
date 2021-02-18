@@ -15,12 +15,16 @@
  */
 package gov.nasa.jpf.constraints.expressions;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
+import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3Solver;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
-
+import java.math.BigInteger;
 import java.util.Properties;
 import org.testng.annotations.Test;
 
@@ -84,17 +88,47 @@ public class ModuloTestZ3 {
     
     NumericBooleanExpression expr3 = NumericBooleanExpression.create(
         var_f1, NumericComparator.EQ, NumericCompound.create(constc, NumericOperator.REM, constd));
-    
+
     Valuation val3 = new Valuation();
-    
+
     System.out.println(expr3);
     result = solver.solve(expr3, val3);
-    
+
     System.out.println("Valuation " + val3);
     System.out.println("Java says " + (constc.getValue() % constd.getValue()));
-    
+
 //    System.out.println("" + (-1 % 2));    
   }
-  
-  
+
+  @Test
+  public void modSemantic01Test() {
+    Variable x = Variable.create(BuiltinTypes.INTEGER, "x");
+    Constant c2 = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(2l));
+    Constant c5 = Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(5l));
+    NumericCompound nc = NumericCompound.create(x, NumericOperator.MOD, c5);
+    NumericBooleanExpression nbe = NumericBooleanExpression.create(nc, NumericComparator.EQ, c2);
+
+    NativeZ3Solver z3 = new NativeZ3Solver();
+    Valuation model = new Valuation();
+    ConstraintSolver.Result jRes = z3.solve(nbe, model);
+    assertEquals(jRes, ConstraintSolver.Result.SAT);
+    assertTrue(nbe.evaluateSMT(model));
+
+  }
+
+  @Test
+  public void modSemantic02Test() {
+    Variable x = Variable.create(BuiltinTypes.SINT32, "x");
+    Constant c2 = Constant.create(BuiltinTypes.SINT32, 2);
+    Constant c5 = Constant.create(BuiltinTypes.SINT32, 5);
+    NumericCompound nc = NumericCompound.create(x, NumericOperator.MOD, c5);
+    NumericBooleanExpression nbe = NumericBooleanExpression.create(nc, NumericComparator.EQ, c2);
+
+    NativeZ3Solver z3 = new NativeZ3Solver();
+    Valuation model = new Valuation();
+    ConstraintSolver.Result jRes = z3.solve(nbe, model);
+    assertEquals(jRes, ConstraintSolver.Result.SAT);
+    assertTrue(nbe.evaluateSMT(model));
+
+  }
 }

@@ -6,8 +6,6 @@ import gov.nasa.jpf.constraints.smtlibUtility.parser.SMTLIBParserException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.smtlib.IParser.ParserException;
 
 public class LoadingUtil {
@@ -16,13 +14,8 @@ public class LoadingUtil {
       throws URISyntaxException, IOException, SMTLIBParserException, ParserException {
     URL smtFile = LoadingUtil.class.getClassLoader().getResource(name);
     SMTProblem problem =
-        SMTLIBParser.parseSMTProgram(
-            Files.readAllLines(Paths.get(smtFile.toURI())).stream()
-                .reduce(
-                    "",
-                    (a, b) -> {
-                      return b.startsWith(";") ? a : a + b;
-                    }));
+        SMTLIBParser.parseSMTProgramFromFile(smtFile.getFile()
+        );
     return problem;
   }
 }

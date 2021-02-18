@@ -19,6 +19,7 @@ import com.microsoft.z3.ArithExpr;
 import com.microsoft.z3.BitVecExpr;
 import com.microsoft.z3.BitVecSort;
 import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.BoolSort;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.FuncDecl;
@@ -32,6 +33,7 @@ import com.microsoft.z3.SeqSort;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Sort;
 import com.microsoft.z3.Status;
+import com.microsoft.z3.Symbol;
 import com.microsoft.z3.Z3Exception;
 import com.microsoft.z3.enumerations.Z3_lbool;
 import gov.nasa.jpf.constraints.api.Expression;
@@ -64,6 +66,7 @@ import gov.nasa.jpf.constraints.expressions.StringOperator;
 import gov.nasa.jpf.constraints.expressions.UnaryMinus;
 import gov.nasa.jpf.constraints.expressions.functions.Function;
 import gov.nasa.jpf.constraints.expressions.functions.FunctionExpression;
+import gov.nasa.jpf.constraints.solvers.nativez3.errors.ConversionErrors;
 import gov.nasa.jpf.constraints.types.BVIntegerType;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.FloatingPointType;
@@ -73,6 +76,8 @@ import gov.nasa.jpf.constraints.types.RealType;
 import gov.nasa.jpf.constraints.types.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,20 +93,18 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	//This seems to be configured for z3.
 	private final int STRING_LENGTH = 30000;
 
-	//	protected final Set<IDisposable> protect;
-//	protected final List<IDisposable> own = new ArrayList<IDisposable>();
-	protected final Map<Variable<?>, Expr> variables;
+	protected final Map<Variable<?>, Expr<? extends Sort>> variables;
 	protected int count;
 	private Map<String, FuncDecl> funcDecls = new HashMap<>();
+	private int counter = 0;
+	private ArrayList<Sort> types = new ArrayList<>();
+	private ArrayList<Symbol> names = new ArrayList<>();
 
 	public NativeZ3ExpressionGenerator(Context ctx, Solver solver) throws Z3Exception {
 		this.ctx = ctx;
 		this.solver = solver;
-//		this.protect = new HashSet<IDisposable>();
 		this.tainted = (BoolExpr) ctx.mkFreshConst("__tainted", ctx.getBoolSort());
-//		this.protect.add(tainted);
-//		this.own.add(tainted);
-		this.variables = new HashMap<Variable<?>, Expr>();
+		this.variables = new HashMap<>();
 
 		this.count = 0;
 	}
@@ -110,23 +113,13 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 		this.ctx = parent.ctx;
 		this.solver = parent.solver;
 
-		this.variables = new HashMap<Variable<?>, Expr>(parent.variables);
-//		this.protect = new HashSet<IDisposable>(parent.protect);
+		this.variables = new HashMap<>(parent.variables);
 		this.tainted = parent.tainted;
 
 		this.count = parent.count;
 	}
 
 	protected static void uncheckedDispose(Object... disposables) {
-//		for (int i = 0; i < disposables.length; i++) {
-//			try {
-//				IDisposable disp = disposables[i];
-//				if (disp != null) {
-//					disp.dispose();
-//				}
-//			} catch (Throwable t) {
-//			}
-//		}
 	}
 
 
@@ -223,7 +216,6 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 		BoolExpr negatedExpr = null;
 		try {
 			negatedExpr = (BoolExpr) visit(n.getNegated());
-
 			return ctx.mkNot(negatedExpr);
 		}
 		catch (Z3Exception ex) {
@@ -301,21 +293,6 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			safeDispose(left, right, tmpEq);
 		}
 	}
-
-//	private ArithExpr ensureArith(Expr expr, Type<?> type) throws Z3Exception {
-//		if (expr instanceof ArithExpr) {
-//			return (ArithExpr) expr;
-//		}
-//
-//		if (expr instanceof BitVecExpr) {
-//			BVIntegerType<?> bvType = (BVIntegerType<?>) type;
-//			IntExpr intExp = makeBV2Int((BitVecExpr) expr, bvType);
-//			safeDispose(expr);
-//			return intExp;
-//		}
-//
-//		throw new UnsupportedOperationException();
-//	}
 
 	private Expr makeBVComparison(NumericComparator comp, boolean signed, BitVecExpr left, BitVecExpr right) throws
 			Z3Exception {
@@ -449,205 +426,6 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			throw new RuntimeException(ex);
 		}
 	}
-
-
-//	private <F, T, TT extends Type<T>> Expr makeBitvectorCast(BitVecExpr castedExpr,
-//															  BVIntegerType<F> from,
-//															  TT to) throws Z3Exception {
-//		try {
-//			if (to instanceof BVIntegerType) {
-//				BVIntegerType<?> bvTo = (BVIntegerType<?>) to;
-//				if (from.getNumBits() == bvTo.getNumBits()) {
-//					Expr tmp = castedExpr;
-//					castedExpr = null; // prevent disposal
-//					return tmp;
-//				}
-//				int diff = bvTo.getNumBits() - from.getNumBits();
-//				if (diff > 0) {
-//					if (from.isSigned()) {
-//						return ctx.mkSignExt(diff, castedExpr);
-//					}
-//					return ctx.mkZeroExt(diff, castedExpr);
-//				}
-//				return ctx.mkExtract(bvTo.getNumBits() - 1, 0, castedExpr);
-//			}
-//			if (to instanceof IntegerType) {
-//				//return ctx.mkBV2Int(castedExpr, from.isSigned());
-//				return makeBV2Int(castedExpr, from);
-//			}
-//			if (to instanceof RealType) {
-//				if (to instanceof FloatingPointType) {
-//					FloatingPointType<?> ft = (FloatingPointType<?>) to;
-//					int bitsAvail = ft.getSignificantBits() + 1;
-//					if (bitsAvail < from.getNumBits()) {
-//						BigInteger mask = BigInteger.valueOf(1L)
-//													.shiftLeft(from.getNumBits() - bitsAvail)
-//													.subtract(BigInteger.valueOf(1))
-//													.shiftLeft(bitsAvail);
-//
-//						BoolExpr posCheck = null, negCheck = null;
-//						BoolExpr check = null;
-//						BoolExpr condCheck = null;
-//
-//						BitVecExpr zero = null;
-//						BitVecExpr maskExpr = null;
-//						BitVecExpr andExpr = null;
-//
-//						try {
-//							maskExpr = ctx.mkBV(mask.toString(), from.getNumBits());
-//							zero = ctx.mkBV(0, from.getNumBits());
-//							andExpr = ctx.mkBVAND(castedExpr, maskExpr);
-//							posCheck = ctx.mkEq(andExpr, zero);
-//							if (from.isSigned()) {
-//								negCheck = ctx.mkEq(andExpr, maskExpr);
-//								check = ctx.mkOr(posCheck, negCheck);
-//							}
-//							if (check != null) {
-//								condCheck = ctx.mkOr(check, tainted);
-//							} else {
-//								condCheck = ctx.mkOr(posCheck, tainted);
-//							}
-//							solver.add(condCheck);
-//						}
-//						finally {
-//							uncheckedDispose(posCheck, negCheck, check, zero, maskExpr, andExpr);
-//						}
-//					}
-//				}
-//				IntExpr intTmp = null;
-//				try {
-//					intTmp = makeBV2Int(castedExpr, from);
-//					return ctx.mkInt2Real(intTmp);
-//				}
-//				finally {
-//					uncheckedDispose(intTmp);
-//				}
-//			}
-//			throw new IllegalArgumentException("Cannot handle bitvector cast to " + to);
-//		}
-//		finally {
-//			safeDispose(castedExpr);
-//		}
-//	}
-
-
-//	private IntExpr makeBV2Int(BitVecExpr expr, BVIntegerType<?> type) throws Z3Exception {
-//		if (!type.isSigned()) {
-//			return ctx.mkBV2Int(expr, false);
-//		}
-//
-//		BitVecExpr exprAlias = null;
-//		BitVecSort sort = null;
-//		BitVecExpr zero = null;
-//		BoolExpr eq1 = null, eq2 = null;
-//		BoolExpr ltz = null;
-//		IntExpr bv2i = null, unsigned = null;
-//		IntExpr bound = null;
-//		IntExpr sub = null;
-//		try {
-//			sort = ctx.mkBitVecSort(type.getNumBits());
-//			exprAlias = (BitVecExpr) ctx.mkBVConst("__bv2i" + count++, type.getNumBits());
-//			eq1 = ctx.mkEq(exprAlias, expr);
-//			solver.add(eq1);
-//			bv2i = ctx.mkBV2Int(exprAlias, false);
-//			unsigned = ctx.mkIntConst("__bv2i" + count++);
-//			eq2 = ctx.mkEq(bv2i, unsigned);
-//			solver.add(eq2);
-//
-//			zero = (BitVecExpr) ctx.mkBV(0, type.getNumBits());
-//			ltz = ctx.mkBVSLT(exprAlias, zero);
-//			bound = ctx.mkInt(BigInteger.valueOf(2).pow(type.getNumBits()).toString());
-//			sub = (IntExpr) ctx.mkSub(unsigned, bound);
-//
-//			return (IntExpr) ctx.mkITE(ltz, sub, unsigned);
-//		}
-//		finally {
-//			uncheckedDispose(exprAlias, sort, zero, eq1, eq2, ltz, bv2i, unsigned, bound, sub);
-//		}
-//	}
-
-//	private IntExpr makeReal2IntTrunc(ArithExpr real) throws Z3Exception {
-//		RealExpr rAlias = null;
-//		BoolExpr eq1 = null;
-//		IntExpr sign = null;
-//		IntExpr zero = null, minusOne = null, one = null;
-//		Expr ite = null;
-//		BoolExpr ltz = null;
-//		BoolExpr eq = null;
-//		RealExpr mul = null;
-//		IntExpr r2i = null;
-//		try {
-//			rAlias = ctx.mkRealConst("__r2i" + count++);
-//			eq1 = ctx.mkEq(rAlias, real);
-//			solver.add(eq1);
-//			sign = ctx.mkIntConst("__sign" + count++);
-//			zero = ctx.mkInt(0);
-//			ltz = ctx.mkLt(rAlias, zero);
-//			one = ctx.mkInt(1);
-//			minusOne = ctx.mkInt(-1);
-//			ite = ctx.mkITE(ltz, minusOne, one);
-//			eq = ctx.mkEq(sign, ite);
-//			solver.add(eq);
-//			mul = (RealExpr) ctx.mkMul(sign, rAlias);
-//			r2i = ctx.mkReal2Int(mul);
-//			return (IntExpr) ctx.mkMul(sign, r2i);
-//		}
-//		finally {
-//			uncheckedDispose(rAlias, eq1, sign, zero, minusOne, one, ite, ltz, eq, mul, r2i);
-//		}
-//	}
-
-//	private <F, T, TT extends Type<T>> Expr makeIntegerCast(IntExpr castedExpr, IntegerType<F> from, TT to) throws
-//			Z3Exception {
-//		try {
-//			if (to instanceof BVIntegerType) {
-//				BVIntegerType<?> bvTo = (BVIntegerType<?>) to;
-//				return ctx.mkInt2BV(bvTo.getNumBits(), castedExpr);
-//			}
-//			if (to instanceof IntegerType) {
-//				Expr tmp = castedExpr;
-//				castedExpr = null; // prevent disposal
-//				return tmp;
-//			}
-//			if (to instanceof NumericType) {
-//				return ctx.mkInt2Real(castedExpr);
-//			}
-//			throw new IllegalStateException("Cannot handle integer cast to " + to);
-//		}
-//		finally {
-//			safeDispose(castedExpr);
-//		}
-//	}
-//
-//	private <F, T, TT extends Type<T>> Expr makeRealCast(RealExpr castedExpr, NumericType<F> from, TT to) throws
-//			Z3Exception {
-//		try {
-//			if (to instanceof BVIntegerType) {
-//				BVIntegerType<?> bvTo = (BVIntegerType<?>) to;
-//				IntExpr intTmp = null;
-//				try {
-//					intTmp = makeReal2IntTrunc(castedExpr);
-//					return ctx.mkInt2BV(bvTo.getNumBits(), intTmp);
-//				}
-//				finally {
-//					uncheckedDispose(intTmp);
-//				}
-//			}
-//			if (to instanceof IntegerType) {
-//				return makeReal2IntTrunc(castedExpr);
-//			}
-//			if (to instanceof NumericType) {
-//				Expr tmp = castedExpr;
-//				castedExpr = null; // prevent disposal
-//				return tmp;
-//			}
-//			throw new IllegalStateException("Cannot handle integer cast to " + to);
-//		}
-//		finally {
-//			safeDispose(castedExpr);
-//		}
-//	}
-
 
 	/* (non-Javadoc)
 	 * @see gov.nasa.jpf.constraints.expressions.AbstractExpressionVisitor#visit(gov.nasa.jpf.constraints.expressions
@@ -805,29 +583,85 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 	 */
 	@Override
 	public Expr visit(QuantifierExpression q, Void data) {
-		BoolExpr expr = null;
+		Expr<BoolSort> expr = null;
 		try {
-			expr = (BoolExpr) visit(q.getBody());
-
 			List<? extends Variable<?>> bound = q.getBoundVariables();
-			Expr[] boundExpr = new Expr[bound.size()];
-			for (int i = 0; i < boundExpr.length; i++) {
-				boundExpr[i] = visit(bound.get(i));
+			for (int i = 0; i < bound.size(); i++) {
+				Variable v = bound.get(i);
+				types.add(counter, resolveTypeToSort(v.getType()));
+				names.add(counter, ctx.mkSymbol(v.getName()));
+				if (variables.containsKey(v)) {
+					throw new ConversionErrors(
+							"Illegal Conversion state. Bounded var must not be in this map");
+				}
+				variables.put(v, ctx.mkBound(counter, types.get(counter)));
+				++counter;
 			}
-
+			expr = (Expr<BoolSort>) visit(q.getBody());
+			Expr ret;
+			Collections.reverse(types);
+			Collections.reverse(names);
 			switch (q.getQuantifier()) {
 				case EXISTS:
-					return ctx.mkExists(boundExpr, expr, 0, null, null, null, null);
-				default: // case FORALL:
-					return ctx.mkForall(boundExpr, expr, 0, null, null, null, null);
+					ret = ctx
+							.mkExists(types.toArray(new Sort[0]), names.toArray(new Symbol[0]), expr, 1, null,
+									null, null, null);
+					break;
+				case FORALL:
+					ret = ctx
+							.mkForall(types.toArray(new Sort[0]), names.toArray(new Symbol[0]), expr, 1,
+									null, null, null, null);
+					break;
+				default:
+					throw new ConversionErrors("Unknown Quanitifer");
 			}
-		}
-		catch (Z3Exception ex) {
+			Collections.reverse(types);
+			Collections.reverse(names);
+			for (Variable v : bound) {
+				variables.remove(v);
+				--counter;
+				types.remove(counter);
+				names.remove(counter);
+
+			}
+			return ret;
+		} catch (Z3Exception ex) {
 			throw new RuntimeException(ex);
-		}
-		finally {
+		} finally {
 			safeDispose(expr);
 		}
+	}
+
+	private Sort resolveTypeToSort(Type t) {
+		if (t.equals(BuiltinTypes.BOOL)) {
+			return ctx.mkBoolSort();
+		} else if (t.equals(BuiltinTypes.STRING)) {
+			return ctx.mkStringSort();
+		} else if (t.equals(BuiltinTypes.REGEX)) {
+			return ctx.mkReSort(ctx.mkStringSort());
+		} else if (t.equals(BuiltinTypes.DECIMAL)) {
+			return ctx.mkFPSort64();
+		} else if (t.equals(BuiltinTypes.FLOAT)) {
+			return ctx.mkFPSort32();
+		} else if (t.equals(BuiltinTypes.DOUBLE)) {
+			return ctx.mkFPSort64();
+		} else if (t.equals(BuiltinTypes.INTEGER)) {
+			return ctx.mkIntSort();
+		} else if (t.equals(BuiltinTypes.SINT8)) {
+			return ctx.mkBitVecSort(8);
+		} else if (t.equals(BuiltinTypes.UINT16) || t.equals(BuiltinTypes.SINT16)) {
+			return ctx.mkBitVecSort(16);
+		} else if (t.equals(BuiltinTypes.SINT32)) {
+			return ctx.mkBitVecSort(32);
+		} else if (t.equals(BuiltinTypes.SINT64)) {
+			return ctx.mkBitVecSort(64);
+		} else if (t.equals(BuiltinTypes.REAL)) {
+			return ctx.mkRealSort();
+		} else {
+			throw new ConversionErrors("Cannot convert type to sort: " + t.getName());
+		}
+
+
 	}
 
 
@@ -1359,6 +1193,10 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				return signed ? ctx.mkBVSDiv(left, right) : ctx.mkBVUDiv(left, right);
 			case REM:
 				return signed ? ctx.mkBVSRem(left, right) : ctx.mkBVURem(left, right);
+			case MOD:
+				if (signed) {
+					return ctx.mkBVSMod(left, right);
+				}
 			default:
 				throw new IllegalArgumentException("Cannot handle numeric operator " + op);
 		}
@@ -1379,6 +1217,10 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 					return ctx.mkRem((IntExpr) left, (IntExpr) right);
 				}
 				return makeRealRemainder(left, right);
+			case MOD:
+				if (left instanceof IntExpr && right instanceof IntExpr) {
+					return ctx.mkMod((IntExpr) left, (IntExpr) right);
+				}
 			default:
 				throw new IllegalArgumentException("Cannot handle numeric operator " + op);
 		}
@@ -1550,16 +1392,15 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			}
 
 			return z3Var;
-		}
-		catch (Z3Exception ex) {
+		} catch (Z3Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
-	protected RealExpr getOrCreateRealVar(Variable<?> v) {
+	protected Expr getOrCreateRealVar(Variable<?> v) {
 		Expr ret = this.variables.get(v);
 		if (ret != null) {
-			return (RealExpr) ret;
+			return (Expr) ret;
 		}
 
 		RealExpr var = createRealVar(v);
