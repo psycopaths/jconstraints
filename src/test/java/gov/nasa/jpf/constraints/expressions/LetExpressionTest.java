@@ -19,6 +19,7 @@
 
 package gov.nasa.jpf.constraints.expressions;
 
+import static gov.nasa.jpf.constraints.expressions.LogicalOperator.AND;
 import static gov.nasa.jpf.constraints.expressions.NumericComparator.EQ;
 import static gov.nasa.jpf.constraints.expressions.NumericComparator.GT;
 import static org.testng.Assert.assertEquals;
@@ -85,14 +86,14 @@ public class LetExpressionTest {
     assertEquals(expr.flattenLetExpression(), expectedOutcome);
 
     Variable x3 = Variable.create(BuiltinTypes.BOOL, "x3");
-    Expression expr2 = PropositionalCompound.create(x3, LogicalOperator.AND, expr);
+    Expression expr2 = PropositionalCompound.create(x3, AND, expr);
 
     Variable x4 = Variable.create(BuiltinTypes.SINT32, "x4");
     NumericBooleanExpression replacementB = NumericBooleanExpression.create(x4, GT, c2);
     LetExpression let2 = LetExpression.create(x3, replacementB, expr2);
 
     Expression expectedOutcome2 =
-        PropositionalCompound.create(replacementB, LogicalOperator.AND, expectedOutcome);
+        PropositionalCompound.create(replacementB, AND, expectedOutcome);
 
     System.out.println(let2);
     System.out.println(let2.flattenLetExpression());
@@ -145,6 +146,49 @@ public class LetExpressionTest {
     Expression flat = let.flattenLetExpression();
     assertFalse(flat.toString().contains("X1"), "X1 should be replaced");
   }
+
+  @Test(groups = {"expressions", "base"})
+  public void letExpresisonsAndITE02Test() {
+    Variable X = Variable.create(BuiltinTypes.BOOL, "X");
+    Variable X1 = Variable.create(BuiltinTypes.BOOL, "X1");
+    Variable X2 = Variable.create(BuiltinTypes.BOOL, "X2");
+    Variable X3 = Variable.create(BuiltinTypes.BOOL, "X3");
+    Variable X4 = Variable.create(BuiltinTypes.BOOL, "X4");
+    Variable X5 = Variable.create(BuiltinTypes.BOOL, "X5");
+    Variable X6 = Variable.create(BuiltinTypes.BOOL, "X6");
+    Variable X7 = Variable.create(BuiltinTypes.BOOL, "X7");
+    Variable X8 = Variable.create(BuiltinTypes.BOOL, "X8");
+    Variable B = Variable.create(BuiltinTypes.BOOL, "B");
+    Variable B2 = Variable.create(BuiltinTypes.BOOL, "B2");
+    Variable B3 = Variable.create(BuiltinTypes.BOOL, "B3");
+    Variable B4 = Variable.create(BuiltinTypes.BOOL, "B4");
+    Variable B5 = Variable.create(BuiltinTypes.BOOL, "B5");
+    Variable LetX1 = Variable.create(BuiltinTypes.BOOL, "LetX1");
+    Variable LetX2 = Variable.create(BuiltinTypes.BOOL, "?LetX2");
+    Variable LetX3 = Variable.create(BuiltinTypes.BOOL, "?LetX1");
+    Variable LetX4 = Variable.create(BuiltinTypes.BOOL, "$xLetX1");
+    Variable LetX5 = Variable.create(BuiltinTypes.BOOL, "$xLetX5");
+
+    IfThenElse ite = IfThenElse.create(B, X1, X);
+    IfThenElse ite2 = IfThenElse.create(B2, X1, LetX1);
+    IfThenElse ite3 = IfThenElse.create(B3, X2, X3);
+    IfThenElse ite4 = IfThenElse.create(B4, X4, LetX2);
+    LetExpression let1 = LetExpression
+        .create(LetX4, PropositionalCompound.create(LetX3, AND, LetX5), LetX4);
+    LetExpression let2 = LetExpression.create(LetX3, ite4, let1);
+    LetExpression let3 = LetExpression.create(LetX2, ite3, let2);
+    LetExpression let4 = LetExpression.create(LetX5, ite2, let3);
+    LetExpression let5 = LetExpression.create(LetX1, ite, let4);
+
+    Expression flat = let5.flattenLetExpression();
+    Set<Variable<?>> vars = ExpressionUtil.freeVariables(flat);
+    assertFalse(vars.contains(LetX1));
+    assertFalse(vars.contains(LetX2));
+    assertFalse(vars.contains(LetX3));
+    assertFalse(vars.contains(LetX4));
+    assertFalse(vars.contains(LetX5));
+  }
+
 
   public class DummyVisitorForTest extends AbstractExpressionVisitor<Expression, Boolean> {
 
