@@ -75,6 +75,12 @@ public class StringCompoundExpression extends AbstractStringExpression {
         main, StringOperator.REPLACE, null, null, null, src, dst, null);
   }
 
+  public static StringCompoundExpression createReplaceAll(
+      Expression<?> main, Expression<?> src, Expression<?> dst) {
+    return new StringCompoundExpression(
+        main, StringOperator.REPLACEALL, null, null, null, src, dst, null);
+  }
+
   public static StringCompoundExpression createToLower(Expression<?> main) {
     return new StringCompoundExpression(
         main, StringOperator.TOLOWERCASE, null, null, null, null, null, null);

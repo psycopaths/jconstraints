@@ -92,8 +92,7 @@ public class LetExpressionTest {
     NumericBooleanExpression replacementB = NumericBooleanExpression.create(x4, GT, c2);
     LetExpression let2 = LetExpression.create(x3, replacementB, expr2);
 
-    Expression expectedOutcome2 =
-        PropositionalCompound.create(replacementB, AND, expectedOutcome);
+    Expression expectedOutcome2 = PropositionalCompound.create(replacementB, AND, expectedOutcome);
 
     System.out.println(let2);
     System.out.println(let2.flattenLetExpression());
@@ -173,8 +172,8 @@ public class LetExpressionTest {
     IfThenElse ite2 = IfThenElse.create(B2, X1, LetX1);
     IfThenElse ite3 = IfThenElse.create(B3, X2, X3);
     IfThenElse ite4 = IfThenElse.create(B4, X4, LetX2);
-    LetExpression let1 = LetExpression
-        .create(LetX4, PropositionalCompound.create(LetX3, AND, LetX5), LetX4);
+    LetExpression let1 =
+        LetExpression.create(LetX4, PropositionalCompound.create(LetX3, AND, LetX5), LetX4);
     LetExpression let2 = LetExpression.create(LetX3, ite4, let1);
     LetExpression let3 = LetExpression.create(LetX2, ite3, let2);
     LetExpression let4 = LetExpression.create(LetX5, ite2, let3);
@@ -188,7 +187,6 @@ public class LetExpressionTest {
     assertFalse(vars.contains(LetX4));
     assertFalse(vars.contains(LetX5));
   }
-
 
   public class DummyVisitorForTest extends AbstractExpressionVisitor<Expression, Boolean> {
 

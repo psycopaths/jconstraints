@@ -466,6 +466,9 @@ public class SMTLIBParser {
         case REPLACE:
           return StringCompoundExpression.createReplace(
               arguments.poll(), arguments.poll(), arguments.poll());
+        case REPLACEALL:
+          return StringCompoundExpression.createReplaceAll(
+              arguments.poll(), arguments.poll(), arguments.poll());
         case SUBSTR:
           return StringCompoundExpression.createSubstring(
               arguments.poll(), arguments.poll(), arguments.poll());

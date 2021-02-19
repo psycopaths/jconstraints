@@ -25,6 +25,7 @@ public enum StringOperator implements ExpressionOperator {
   AT("str.at"),
   TOSTR("int.to.str"),
   REPLACE("str.replace"),
+  REPLACEALL("str.replaceall"),
   TOLOWERCASE("str.lower"),
   TOUPPERCASE("str.upper");
 
@@ -51,6 +52,8 @@ public enum StringOperator implements ExpressionOperator {
         return TOSTR;
       case "str.replace":
         return REPLACE;
+      case "str.replaceall":
+        return REPLACEALL;
       case "str.lower":
         return TOLOWERCASE;
       case "str.upper":
