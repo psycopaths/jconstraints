@@ -40,14 +40,13 @@ public class SMTCommandLine {
         String smtProgram = reader.lines().reduce((a, b) -> b.startsWith(";") ? a : a + b).get();
         SMTProblem problem = SMTLIBParser.parseSMTProgram(smtProgram);
 
-        ConstraintSolverFactory factory = ConstraintSolverFactory.getRootFactory();
-        ConstraintSolver solver = factory.createSolver();
+        ConstraintSolver solver = ConstraintSolverFactory.createSolver(args[1]);
         ConstraintSolver.Result result =
             solver.isSatisfiable(problem.getAllAssertionsAsConjunction());
         System.out.println("The result ist: " + result.name());
       }
     } else {
-      System.out.println("This script expects at least one filename to solve.");
+      System.out.println("This script expects one filename and one solver.");
     }
   }
 }

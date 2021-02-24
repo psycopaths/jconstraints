@@ -10,3 +10,4 @@ TU Dortmund University.
 
 * [Falk Howar](mailto:falk.howar@tu-dortmund.de)
 * [Malte Mues](mailto:mail.mues@gmail.com)
+* [Julien Leuering](mailto:julien.leuering@tu-dortmund.de)

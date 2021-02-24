@@ -87,7 +87,7 @@ public class SolverRunner {
     try (BufferedInputStream bin = new BufferedInputStream(System.in);
         ObjectInputStream inStream = new ObjectInputStream(bin);
         ObjectOutputStream out = new ObjectOutputStream(System.out)) {
-      ConstraintSolver solver = ConstraintSolverFactory.getRootFactory().createSolver(solverName);
+      ConstraintSolver solver = ConstraintSolverFactory.createSolver(solverName);
       while (true) {
         if (bin.available() > 0) {
           Object read = inStream.readObject();

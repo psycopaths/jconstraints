@@ -73,7 +73,7 @@ public class SolvingService extends ConstraintSolver {
   }
 
   private void init(List<String> allowed) {
-    Set<String> availableProviderNames = ConstraintSolverFactory.getLoadedProviders();
+    Set<String> availableProviderNames = ConstraintSolverFactory.getNames();
 
     Set<Class> solverClasses = new HashSet<>();
     for (String name : availableProviderNames) {
@@ -81,7 +81,7 @@ public class SolvingService extends ConstraintSolver {
         continue;
       }
       supportedSolvers.add(name);
-      ConstraintSolver solver = ConstraintSolverFactory.getRootFactory().createSolver(name);
+      ConstraintSolver solver = ConstraintSolverFactory.createSolver(name);
       if (!solverClasses.contains(solver.getClass())) {
         solvers.add(solver);
         solverClasses.add(solver.getClass());

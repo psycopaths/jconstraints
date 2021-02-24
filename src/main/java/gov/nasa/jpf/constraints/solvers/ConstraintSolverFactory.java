@@ -19,194 +19,129 @@
 
 package gov.nasa.jpf.constraints.solvers;
 
+import static java.util.Collections.unmodifiableSet;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
-import gov.nasa.jpf.constraints.extensions.ExtensionLoader;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Factory for instantiating constraint solvers */
-public class ConstraintSolverFactory {
+/**
+ * Looks for available {@code ConstraintSolverProvider} services, instantiates, and saves them for
+ * later use.
+ */
+public final class ConstraintSolverFactory {
 
-  protected static Logger logger = Logger.getLogger("constraints");
-
-  private static final ConstraintSolverFactory ROOT_FACTORY;
+  private static final ServiceLoader<ConstraintSolverProvider> loader =
+      ServiceLoader.load(ConstraintSolverProvider.class);
+  private static final Properties config = new Properties();
+  private static final Map<String, ConstraintSolverProvider> providers =
+      new HashMap<String, ConstraintSolverProvider>();
+  private static final Logger logger = Logger.getLogger("constraints");
 
   static {
-    ROOT_FACTORY = new ConstraintSolverFactory(System.getProperties(), null);
-    ROOT_FACTORY.discoverProviders(ExtensionLoader.getInstance());
+    discoverProviders();
   }
 
-  public static ConstraintSolverFactory getRootFactory() {
-    return ROOT_FACTORY;
+  /**
+   * Returns the names of all found {@link ConstraintSolverProvider} services.
+   *
+   * @return an {@code unmodifiableSet} of names of all found {@code ConstraintSolverProvider}
+   *     services
+   */
+  public static Set<String> getNames() {
+    return unmodifiableSet(providers.keySet());
   }
 
-  public static Set<String> getLoadedProviders() {
-    return getRootFactory().providers.keySet();
-  }
-
-  private final Map<String, ConstraintSolverProvider> providers =
-      new HashMap<String, ConstraintSolverProvider>();
-  private final Properties config = new Properties();
-  private final ConstraintSolverFactory parentFactory;
-
-  public ConstraintSolverFactory() {
-    this(System.getProperties(), ROOT_FACTORY);
-  }
-
-  public ConstraintSolverFactory(Properties config) {
-    this(config, ROOT_FACTORY);
-  }
-
-  public ConstraintSolverFactory(Properties config, ConstraintSolverFactory parent) {
-    this.config.putAll(config);
-    this.parentFactory = parent;
-  }
-
-  private Properties effectiveConfig(Properties addConfig) {
-    Properties config = new Properties(this.config);
-    config.putAll(addConfig);
-    return config;
-  }
-
-  public void registerProvider(ConstraintSolverProvider provider) {
-    String[] names = provider.getNames();
-
-    for (String name : names) registerProvider(name, provider);
-  }
-
-  public void registerProvider(String name, ConstraintSolverProvider provider) {
-    ConstraintSolverProvider prov = providers.get(name);
-    if (prov != null && prov != provider) {
-      logger.log(Level.WARNING, "Overwriting constraint solver provider with name ''{0}''", name);
-    }
-    providers.put(name, provider);
-  }
-
-  public void discoverProviders() {
-    discoverProviders(ExtensionLoader.getInstance());
-  }
-
-  public void discoverProviders(ExtensionLoader extLoader) {
-    discoverProviders(extLoader.getClassLoader());
-  }
-
-  public void discoverProviders(ClassLoader classLoader) {
-    Enumeration<URL> solverFiles;
-    try {
-      solverFiles = classLoader.getResources("META-INF/constraints/solvers");
-    } catch (IOException ex) {
-      logger.log(Level.WARNING, "Solver provider discovery failed", ex);
-      return;
-    }
-
-    while (solverFiles.hasMoreElements()) {
-      URL url = solverFiles.nextElement();
-
-      InputStream is = null;
-
-      try {
-        is = url.openStream();
-
-        BufferedReader r = new BufferedReader(new InputStreamReader(is));
-
-        String line;
-        while ((line = r.readLine()) != null) {
-          String content = line.split("#", 2)[0].trim();
-
-          if ("".equals(content)) continue;
-
-          try {
-            ConstraintSolverProvider provider = retrieveProvider(content, classLoader);
-            registerProvider(provider);
-          } catch (IllegalArgumentException ex) {
-            logger.log(Level.WARNING, "Could not retrieve constraint solver (provider)", ex);
-          }
-        }
-      } catch (IOException ex) {
-        logger.log(
-            Level.WARNING, "Error reading file {0}: {1}", new Object[] {url, ex.getMessage()});
-      } finally {
-        if (is != null) {
-          try {
-            is.close();
-          } catch (IOException ex) {
-          }
-        }
+  /**
+   * Registers the given {@link ConstraintSolverProvider}. If another provider with the same name is
+   * already registered a warning is being logged. It is generally not recommended to register
+   * providers manually as the {@code ConstraintSolverService} should discover them automatically.
+   * Doing so could create unexpected program-wide side effects.
+   *
+   * @param newProvider the {@code constraintSolverProvider} to be registered
+   */
+  public static void registerProvider(ConstraintSolverProvider newProvider) {
+    String[] names = newProvider.getNames();
+    for (String name : names) {
+      ConstraintSolverProvider existingProvider = providers.put(name, newProvider);
+      if (existingProvider != null && existingProvider != newProvider) {
+        logger.log(Level.WARNING, "Overwriting constraint solver provider with name ''{0}''", name);
       }
     }
   }
 
-  private ConstraintSolverProvider retrieveProvider(String providerName, ClassLoader loader) {
-    try {
-      Class<?> clazz = Class.forName(providerName, true, loader);
-
-      if (ConstraintSolverProvider.class.isAssignableFrom(clazz)) {
-        Class<? extends ConstraintSolverProvider> cspClazz =
-            clazz.asSubclass(ConstraintSolverProvider.class);
-
-        try {
-          return cspClazz.newInstance();
-        } catch (IllegalAccessException ex) {
-        } catch (InstantiationException ex) {
-        }
+  private static void discoverProviders() throws ServiceConfigurationError {
+    for (ConstraintSolverProvider solver : loader) {
+      for (String foundName : solver.getNames()) {
+        providers.put(foundName, solver);
       }
-
-      Class<? extends ConstraintSolver> csClazz = clazz.asSubclass(ConstraintSolver.class);
-      return new ReflectionSolverProvider(csClazz);
-    } catch (Exception ex) {
-      throw new IllegalArgumentException(
-          "'" + providerName + "' does not denote a valid constraint solver (provider)");
     }
   }
 
-  protected ConstraintSolverProvider getNamedProvider(String name) {
-    ConstraintSolverProvider p = providers.get(name);
-    if (p == null && parentFactory != null) return parentFactory.getNamedProvider(name);
-    return p;
+  /**
+   * Creates an instance of the {@link ConstraintSolver} with the name {@code name} and the given
+   * config. The name is not the name that will be given to the solver, but rather the name which is
+   * defined in the {@link ConstraintSolverProvider} of the {@code ConstraintSolver} that should be
+   * created. If no {@code ConstraintSolverProvider} with that name is registered a {@code
+   * SolverNotFoundException is thrown}. The given {@code properties} object is given to the {@code
+   * ConstrainSolver} being created.
+   *
+   * @see #createSolver(Properties)
+   * @see #createSolver(String)
+   * @param name a {@code String} containing the name of the {@code ConstraintSolver} that should be
+   *     created
+   * @param config the {@code properties} object the solver will receive.
+   * @return an instance of the specified {@code ConstraintSolver}
+   */
+  public static ConstraintSolver createSolver(String name, Properties config) {
+    ConstraintSolverProvider s = providers.get(name);
+    if (s == null) {
+      throw new SolverNotFoundExcpetion("Specified solver could not be found");
+    } else {
+      return s.createSolver(config);
+    }
   }
 
-  public ConstraintSolver createSolver(String name, Properties config) {
-    return createSolver(name, config, true);
-  }
-
-  public ConstraintSolver createSolver(String name, Properties config, boolean useFactoryConfig) {
-
-    ConstraintSolverProvider provider = getNamedProvider(name);
-
-    if (useFactoryConfig) config = effectiveConfig(config);
-
-    if (provider == null) provider = retrieveProvider(name, getClass().getClassLoader());
-
-    return provider.createSolver(config);
-  }
-
-  public ConstraintSolver createSolver(Properties config) {
-    return createSolver(config, true);
-  }
-
-  public ConstraintSolver createSolver(Properties config, boolean useFactoryConfig) {
-    if (useFactoryConfig) config = effectiveConfig(config);
-
+  /**
+   * Creates an instance of the {@link ConstraintSolver} specified in the config and also passes the
+   * config to the solver. The config has to have the {@code symbolic.dp} property set to the name
+   * of the solver that should be created. The name is not the name that will be given to the
+   * solver, but rather the name which is defined in the {@link ConstraintSolverProvider} of the
+   * {@code ConstraintSolver} that should be created. If no {@code ConstraintSolverProvider} with
+   * that name is registered a {@code SolverNotFoundException is thrown}.
+   *
+   * @see #createSolver(String, Properties)
+   * @see #createSolver(String)
+   * @param config a {@code properties} object in which at least the {@code symbolic.dp} property is
+   *     set to the name of the wanted {@code ConstraintSolver}. The config is also passed to the
+   *     solver at creation.
+   * @return an instance of the specified {@code ConstraintSolver}
+   */
+  public static ConstraintSolver createSolver(Properties config) {
     String solver = config.getProperty("symbolic.dp");
-
-    return createSolver(solver, config, false);
+    return createSolver(solver, config);
   }
 
-  public ConstraintSolver createSolver() {
-    return createSolver(this.config, false);
-  }
-
-  public ConstraintSolver createSolver(String name) {
-    return createSolver(name, this.config, false);
+  /**
+   * Creates an instance of the {@link ConstraintSolver} with the name {@code name}. The name is not
+   * the name that will be given to the solver, but rather the name which is defined in the {@link
+   * ConstraintSolverProvider} of the {@code ConstraintSolver} that should be created. If no {@code
+   * ConstraintSolverProvider} with that name is registered a {@code SolverNotFoundException is
+   * thrown}.
+   *
+   * @see #createSolver(String, Properties)
+   * @see #createSolver(Properties)
+   * @param name a {@code String} containing the name of the {@code ConstraintSolver} that should be
+   *     created
+   * @return an instance of the specified {@code ConstraintSolver}
+   */
+  public static ConstraintSolver createSolver(String name) {
+    return createSolver(name, config);
   }
 }
