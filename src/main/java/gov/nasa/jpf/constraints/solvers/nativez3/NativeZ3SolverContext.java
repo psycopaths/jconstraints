@@ -35,6 +35,7 @@ package gov.nasa.jpf.constraints.solvers.nativez3;
 import com.microsoft.z3.AST;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
+import com.microsoft.z3.FPNum;
 import com.microsoft.z3.FuncDecl;
 import com.microsoft.z3.Model;
 import com.microsoft.z3.Solver;
@@ -295,6 +296,20 @@ public class NativeZ3SolverContext extends SolverContext {
 
 			final AST res = model.getConstInterp(decl);
 			final String value = res.toString().trim();
+			if (res instanceof FPNum) {
+				FPNum resFP = (FPNum) res;
+				long rep = resFP.getSignificandUInt64();
+				Double d = Double.longBitsToDouble(rep);
+				if (v.getType().equals(BuiltinTypes.DOUBLE)) {
+					val.setValue((Variable<Double>) v, d);
+					continue;
+				} else if (v.getType().equals(BuiltinTypes.FLOAT)) {
+					val.setValue((Variable<Float>) v, d.floatValue());
+					continue;
+				} else {
+					throw new IllegalArgumentException("Cannot parse the FP value");
+				}
+			}
 			if (TypeUtil.isRealSort(v) && value.contains("/")) {
 				final String[] split = value.split("/");
 				final BigDecimal nom = new BigDecimal(split[0].trim());

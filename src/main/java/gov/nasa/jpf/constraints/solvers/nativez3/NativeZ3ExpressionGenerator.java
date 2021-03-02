@@ -39,6 +39,8 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.BoolSort;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
+import com.microsoft.z3.FPExpr;
+import com.microsoft.z3.FPSort;
 import com.microsoft.z3.FuncDecl;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntSort;
@@ -207,6 +209,14 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			if (type instanceof IntegerType) {
 				return ctx.mkInt(c.getValue().toString());
 			}
+			if (type.equals(BuiltinTypes.DOUBLE)) {
+				Double value = (Double) c.getValue();
+				return ctx.mkFP(value, (FPSort) resolveTypeToSort(type));
+			}
+			if (type.equals(BuiltinTypes.FLOAT)) {
+				Float value = (Float) c.getValue();
+				return ctx.mkFP(value, (FPSort) resolveTypeToSort(type));
+			}
 			if (type instanceof RealType) {
 				RealType<E> nt = (RealType<E>) type;
 				// FIXME: this is imprecise for nan and infinity
@@ -293,10 +303,16 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				return result;
 			}
 
-			NumericType<?> lt = (NumericType<?>) n.getLeft().getType(), rt = (NumericType<?>) n.getRight().getType();
+			NumericType<?> lt = (NumericType<?>) n.getLeft().getType(), rt = (NumericType<?>) n.getRight()
+					.getType();
 
 			if (lt instanceof BVIntegerType && lt.equals(rt)) {
-				return makeBVComparison(n.getComparator(), lt.isSigned(), (BitVecExpr) left, (BitVecExpr) right);
+				return makeBVComparison(n.getComparator(), lt.isSigned(), (BitVecExpr) left,
+						(BitVecExpr) right);
+			}
+
+			if (left instanceof FPExpr && right instanceof FPExpr) {
+				return makeFPComparison(n.getComparator(), (FPExpr) left, (FPExpr) right);
 			}
 
 			left = ensureArith(left, lt);
@@ -355,8 +371,33 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				try {
 					eq = ctx.mkEq(left, right);
 					return ctx.mkNot(eq);
+				} finally {
+					uncheckedDispose(eq);
 				}
-				finally {
+			default:
+				throw new UnsupportedOperationException("Comparator " + comp + " not supported");
+		}
+	}
+
+	private Expr makeFPComparison(NumericComparator comp, FPExpr left, FPExpr right)
+			throws Z3Exception {
+		switch (comp) {
+			case EQ:
+				return ctx.mkEq(left, right);
+			case GE:
+				return ctx.mkFPGEq(left, right);
+			case GT:
+				return ctx.mkFPGt(left, right);
+			case LE:
+				return ctx.mkFPLEq(left, right);
+			case LT:
+				return ctx.mkFPLt(left, right);
+			case NE:
+				BoolExpr eq = null;
+				try {
+					eq = ctx.mkEq(left, right);
+					return ctx.mkNot(eq);
+				} finally {
 					uncheckedDispose(eq);
 				}
 			default:
@@ -382,16 +423,7 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 				}
 
 				// FIXME: is there a better way to determine the type?
-				Sort ret = null;
-				if (f.getReturnType() instanceof RealType<?>) {
-					ret = ctx.getRealSort();
-				} else if (f.getReturnType().equals(BuiltinTypes.BOOL)) {
-					ret = ctx.getBoolSort();
-				} else if (f.getReturnType() instanceof IntegerType<?>) {
-					ret = ctx.getIntSort();
-				} else {
-					throw new RuntimeException("Function symbols for return type not supported: " + f.getReturnType());
-				}
+				Sort ret = resolveTypeToSort(f.getReturnType());
 
 				fDecl = ctx.mkFuncDecl(f.getName(), argTypes, ret);
 				funcDecls.put(f.getName(), fDecl);
@@ -459,17 +491,38 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			NumericType<E> type = (NumericType<E>) n.getType();
 
 			if (type instanceof BVIntegerType) {
-				return makeBitvectorNumericCompound(n.getOperator(), type.isSigned(), (BitVecExpr) left, (BitVecExpr) right);
+				return makeBitvectorNumericCompound(n.getOperator(), type.isSigned(), (BitVecExpr) left,
+						(BitVecExpr) right);
+			}
+
+			if (left instanceof FPExpr && right instanceof FPExpr) {
+				return makeFPNumericCompound(n.getOperator(), (FPExpr) left, (FPExpr) right);
 			}
 
 			return makeArithmeticNumericCompound(n.getOperator(), (ArithExpr) left, (ArithExpr) right);
-		}
-		catch (Z3Exception ex) {
+		} catch (Z3Exception ex) {
 			throw new RuntimeException(ex);
-		}
-		finally {
+		} finally {
 			safeDispose(left, right);
 		}
+	}
+
+	private Expr makeFPNumericCompound(NumericOperator operator, FPExpr left, FPExpr right) {
+		switch (operator) {
+			case PLUS:
+				return ctx.mkFPAdd(ctx.mkFPRoundNearestTiesToEven(), left, right);
+			case MINUS:
+				return ctx.mkFPSub(ctx.mkFPRoundNearestTiesToEven(), left, right);
+			case MUL:
+				return ctx.mkFPMul(ctx.mkFPRoundNearestTiesToEven(), left, right);
+			case DIV:
+				return ctx.mkFPDiv(ctx.mkFPRoundNearestTiesToEven(), left, right);
+			case REM:
+				return ctx.mkFPRem(left, right);
+			default:
+				throw new IllegalArgumentException("Cannot handle numeric operator " + operator);
+		}
+
 	}
 
 //	private Expr makeBitvectorNumericCompound(NumericOperator op,
@@ -581,7 +634,11 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			Type<E> type = n.getType();
 
 			if (type instanceof BVIntegerType) {
-				return ctx.mkBVNeg((BitVecExpr) negated);
+				return ctx.mkBVNeg(negated);
+			}
+
+			if (type instanceof FloatingPointType) {
+				return ctx.mkFPNeg(negated);
 			}
 
 			return ctx.mkUnaryMinus((ArithExpr) negated);
@@ -1276,6 +1333,9 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 		if (type instanceof IntegerType) {
 			return getOrCreateIntVar(v);
 		}
+		if (type instanceof FloatingPointType) {
+			return getOrCreateFPVar(v);
+		}
 		if (type instanceof RealType) {
 			return getOrCreateRealVar(v);
 		}
@@ -1283,6 +1343,14 @@ public class NativeZ3ExpressionGenerator extends AbstractExpressionVisitor<Expr,
 			return getOrCreateStringVar(v);
 		}
 		throw new IllegalArgumentException("Cannot handle variable type " + type);
+	}
+
+	private Expr getOrCreateFPVar(Variable<?> v) {
+		Expr ret = this.variables.get(v);
+		if (ret == null) {
+			ret = ctx.mkConst(v.getName(), resolveTypeToSort(v.getType()));
+		}
+		return ret;
 	}
 
 	private Expr getOrCreateStringVar(Variable<?> v) {

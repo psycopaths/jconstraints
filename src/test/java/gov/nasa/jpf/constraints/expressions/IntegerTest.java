@@ -43,7 +43,6 @@ import gov.nasa.jpf.constraints.expressions.functions.math.MathFunctions;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import java.util.Properties;
-import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -58,24 +57,24 @@ public class IntegerTest {
     
      @Test
      public void testIntegerFunction() {
-        Properties conf = new Properties();     
-        conf.setProperty("symbolic.dp", "z3");
-        ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-        ConstraintSolver solver = factory.createSolver();        
-        SolverContext ctx = solver.createContext();     
-     
-        Variable x = new Variable(BuiltinTypes.INTEGER, "x");
-        Variable y = new Variable(BuiltinTypes.INTEGER, "y");
-        //Expression expr = new NumericBooleanExpression(x, NumericComparator.EQ, x);
+       Properties conf = new Properties();
+       conf.setProperty("symbolic.dp", "z3");
+       ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
+       ConstraintSolver solver = factory.createSolver();
+       SolverContext ctx = solver.createContext();
 
-        Expression expr = new NumericBooleanExpression(
-                y, 
-                NumericComparator.EQ,
-                new FunctionExpression<>(MathFunctions.IABS, x));                
-                
-        ctx.add(expr);
-        
-        Valuation val = new Valuation();
+       Variable x = new Variable(BuiltinTypes.SINT32, "x");
+       Variable y = new Variable(BuiltinTypes.SINT32, "y");
+       //Expression expr = new NumericBooleanExpression(x, NumericComparator.EQ, x);
+
+       Expression expr = new NumericBooleanExpression(
+           y,
+           NumericComparator.EQ,
+           new FunctionExpression<>(MathFunctions.IABS, x));
+
+       ctx.add(expr);
+
+       Valuation val = new Valuation();
         Result r = ctx.solve(val);
         System.out.println(r + ": " + val);
      }

@@ -84,27 +84,28 @@ public class TrigonometricTest {
         ctx.add(new NumericBooleanExpression(new Constant<>(BuiltinTypes.DOUBLE, 0.0), NumericComparator.LT, x));
 
         ctx.add(new NumericBooleanExpression(new Constant<>(BuiltinTypes.DOUBLE, 0.0),
-                                             NumericComparator.LT,
-                                             new FunctionExpression<>(MathFunctions.ATAN2, y, x)));
+            NumericComparator.LT,
+            new FunctionExpression<>(MathFunctions.ATAN2, y, x)));
 
         Valuation val = new Valuation();
         Result res = ctx.solve(val);
         System.out.println(res + " : " + val);
         assertEquals(Result.DONT_KNOW, res);
-        
+
     }
-    
-    @Test
+
+    //FIXME: This takes very long with Floating Points
+    @Test(enabled = false)
     public void testTrigonometrics() {
 
         Properties conf = new Properties();
         //conf.setProperty("z3.timeout", "1000");              
         SolverContext ctx = createContext(conf);
-        
+
         AsinProperties asin = new AsinProperties(10);
         SinProperties sin = new SinProperties(10);
         CosProperties cos = new CosProperties(sin);
-        
+
         ctx.add(asin.getDefinition());
         ctx.add(sin.getDefinition());
         ctx.add(cos.getDefinition());
@@ -154,7 +155,9 @@ public class TrigonometricTest {
         System.out.println(test.evaluate(val));
     }
 
-    @Test
+
+    //FIXME: Running on real FP this takes realy long for a unit test.
+    @Test(enabled = false)
     public void testCoral1() {
         //Constraint: (sin(x1) - cos(x2)) = 0.0 
         //        && x1 >= -1 
@@ -200,7 +203,8 @@ public class TrigonometricTest {
 
     }
 
-    @Test
+    //FIXME: Running on real FP this takes realy long for a unit test.
+    @Test(enabled = false)
     public void testCoral2() {
         //Constraint: (sin(x1) - cos(x2)) = 0.0 
         //        && x1 >= -1 

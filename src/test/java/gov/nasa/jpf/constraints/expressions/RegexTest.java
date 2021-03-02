@@ -32,10 +32,8 @@
  */
 package gov.nasa.jpf.constraints.expressions;
 
-import java.math.BigInteger;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
@@ -44,10 +42,9 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
+import java.math.BigInteger;
+import java.util.Properties;
 import org.testng.annotations.Test;
-
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
 
 
 public class RegexTest {
@@ -121,15 +118,16 @@ public class RegexTest {
 		StringCompoundExpression sce1 = StringCompoundExpression.createAt(w, nc1);
 		StringBooleanExpression sbe = StringBooleanExpression.createEquals(m, sce1);
 		NumericBooleanExpression nbe =
-				NumericBooleanExpression.create(Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(3)),
-												NumericComparator.EQ,
-												nc2);
+				NumericBooleanExpression
+						.create(Constant.create(BuiltinTypes.INTEGER, BigInteger.valueOf(3)),
+								NumericComparator.EQ,
+								nc2);
 		Expression<Boolean> finalExpr = ExpressionUtil.and(sbe, nbe);
 		Valuation val = new Valuation();
 		ConstraintSolver.Result result = solver.solve(finalExpr, val);
 		assertEquals(result, ConstraintSolver.Result.SAT);
 		assertEquals(val.getValue("i"), BigInteger.valueOf(2));
-		assertTrue(finalExpr.evaluate(val));
+		assertTrue("The valuation should fit the expression", finalExpr.evaluate(val));
 	}
 
 
