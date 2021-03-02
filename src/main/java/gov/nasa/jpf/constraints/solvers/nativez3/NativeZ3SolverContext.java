@@ -65,6 +65,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NativeZ3SolverContext extends SolverContext {
+
 	private static final Logger logger = Logger.getLogger("constraints");
 
 	private final Deque<NativeZ3ExpressionGenerator> generatorStack = new ArrayDeque<>();
@@ -73,9 +74,11 @@ public class NativeZ3SolverContext extends SolverContext {
 
 	private Solver solver;
 
-	private final Pattern bytePattern = Pattern.compile("\\\\x(\\d\\d)");
+	private final Pattern bytePattern = Pattern
+			.compile("(?:[^\\\\]|^)(?<toBeReplaced>\\\\x(?<digits>[0-9a-f]{2}))");
 
-	public NativeZ3SolverContext(final Solver solver, final NativeZ3ExpressionGenerator rootGenerator) {
+	public NativeZ3SolverContext(final Solver solver,
+			final NativeZ3ExpressionGenerator rootGenerator) {
 		this.solver = solver;
 		this.generatorStack.push(rootGenerator);
 		this.expressionStack.push(ExpressionUtil.TRUE);
@@ -337,8 +340,9 @@ public class NativeZ3SolverContext extends SolverContext {
 				String sValue = value.replace("\"", "");
 				Matcher m = bytePattern.matcher(sValue);
 				while (m.find()) {
-					char c = (char) Integer.parseInt(m.group().replace("\\x", ""), 16);
-					sValue = sValue.replace(m.group(), new String(new char[]{c}));
+					String group = m.group("digits");
+					char c = (char) Integer.parseInt(group, 16);
+					sValue = sValue.replace(m.group("toBeReplaced"), new String(new char[]{c}));
 				}
 				sValue = sValue.replaceAll(Pattern.quote("\\\\"), "\\\\");
 				val.setValue((Variable<String>) v, sValue);

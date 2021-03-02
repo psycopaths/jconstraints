@@ -49,6 +49,7 @@ import org.testng.annotations.Test;
 
 public class QF_STest {
 
+
   @Test
   public void joacoExample1Test()
       throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
@@ -58,8 +59,8 @@ public class QF_STest {
     Expression<Boolean> expr = problem.getAllAssertionsAsConjunction();
     ConstraintSolver.Result jRes = solver.solve(expr, model);
     assertEquals(jRes, ConstraintSolver.Result.SAT);
-    System.out.println(model);
-    assertTrue("Model should evaluate to true", expr.evaluateSMT(model));
+    boolean evaluated = expr.evaluateSMT(model);
+    assertTrue("Model should evaluate to true", evaluated);
   }
 
   @Test
@@ -164,7 +165,8 @@ public class QF_STest {
     assertTrue("Model should evaluate to true", expr.evaluate(model));
   }
 
-  @Test
+  //Times out in 4.8.10 - might be better in future versions of Z3
+  @Test(enabled = false, timeOut = 20000)
   public void appscanExample6Test()
       throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
     SMTProblem problem = LoadingUtil
@@ -178,7 +180,8 @@ public class QF_STest {
     assertTrue("Model should evaluate to true", expr.evaluate(model));
   }
 
-  @Test(enabled = false)
+  //Times out in 4.8.10 - might be better in future versions of Z3
+  @Test(enabled = false, timeOut = 20000)
   public void appscanExample7Test()
       throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
     //With Z3 4.8.10, this test times out
@@ -194,7 +197,7 @@ public class QF_STest {
         problem.getAllAssertionsAsConjunction().evaluate(model));
   }
 
-  @Test
+  @Test(timeOut = 20000)
   public void appscanExample8Test()
       throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
     SMTProblem problem = LoadingUtil
