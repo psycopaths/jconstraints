@@ -7,6 +7,7 @@ plugins {
     `java-library`
     `maven-publish`
     id("com.github.hierynomus.license") version "0.15.0"
+    id("com.github.sherter.google-java-format") version "0.9"
     id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 

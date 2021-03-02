@@ -2,33 +2,30 @@
  * Redistribution with Modifications of jconstraints-z3:
  * https://github.com/tudo-aqua/jconstraints-z3/commit/a9ab06a29f426cc3f1dd1f8406ebba8b65cf9f5d
  *
- * Copyright (C) 2015, United States Government, as represented by the
- * Administrator of the National Aeronautics and Space Administration.
- * All rights reserved.
+ * <p>Copyright (C) 2015, United States Government, as represented by the Administrator of the
+ * National Aeronautics and Space Administration. All rights reserved.
  *
- * <p>The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment
- * platform is licensed under the Apache License, Version 2.0 (the "License"); you
- * may not use this file except in compliance with the License. You may obtain a
- * copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+ * <p>The PSYCO: A Predicate-based Symbolic Compositional Reasoning environment platform is licensed
+ * under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * <p>Unless required by applicable law or agreed to in writing, software distributed
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- *
- * <p>Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * <p>Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * <p> Modifications are Copyright 2020 TU Dortmund, Malte Mues (@mmuesly, mail.mues@gmail.com)
- * We license the changes and additions to this repository under Apache License, Version 2.0.
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * <p>Modifications are Copyright 2020 TU Dortmund, Malte Mues (@mmuesly, mail.mues@gmail.com) We
+ * license the changes and additions to this repository under Apache License, Version 2.0.
  */
 package gov.nasa.jpf.constraints.expressions;
 
@@ -42,20 +39,19 @@ import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
-import org.testng.annotations.Test;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.testng.annotations.Test;
 
-public class ExpressionZ3Test   {
+public class ExpressionZ3Test {
 
   @Test
-  public void expressionTest()throws ImpreciseRepresentationException, ImpreciseDoubleException {
+  public void expressionTest() throws ImpreciseRepresentationException, ImpreciseDoubleException {
 
-	/*
+    /*
     if (args.length < 1) {
       System.out.println("Usage: ExpressionsExampleZ3 [path to libZ3Java]");
       return;
@@ -63,7 +59,6 @@ public class ExpressionZ3Test   {
 
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "NativeZ3");
-
 
     // construct expression
 
@@ -80,7 +75,8 @@ public class ExpressionZ3Test   {
 
     NumericCompound<Double> outer = NumericCompound.create(inner, NumericOperator.MUL, var_i2);
 
-    NumericBooleanExpression expr = NumericBooleanExpression.create(outer, NumericComparator.GT, const_10);
+    NumericBooleanExpression expr =
+        NumericBooleanExpression.create(outer, NumericComparator.GT, const_10);
 
     System.out.println(expr);
 
@@ -97,10 +93,10 @@ public class ExpressionZ3Test   {
     for (Variable<?> var : vars) {
       System.out.print(var.getName() + " ");
       rename.put(var.getName(), "int_" + i++);
-
     }
     System.out.println();
-    Expression<Boolean> expr2 = ExpressionUtil.renameVars(expr, rename).requireAs(BuiltinTypes.BOOL);
+    Expression<Boolean> expr2 =
+        ExpressionUtil.renameVars(expr, rename).requireAs(BuiltinTypes.BOOL);
     System.out.println(expr2);
 
     // replacement
@@ -112,8 +108,8 @@ public class ExpressionZ3Test   {
 
     // solve
 
-//    m.setIntMin(0);
-//    m.setVarMax(var_i1, 0.100);
+    //    m.setIntMin(0);
+    //    m.setVarMax(var_i1, 0.100);
 
     ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
     ConstraintSolver solver = factory.createSolver();
@@ -127,7 +123,6 @@ public class ExpressionZ3Test   {
     ConstraintSolver.Result result2 = solver.solve(expr3, val2);
     System.out.println(result2);
     System.out.println(val2);
-
   }
 
   private class RenameMap extends HashMap<String, String> implements Function<String, String> {
@@ -137,5 +132,4 @@ public class ExpressionZ3Test   {
       return getOrDefault(variable, variable);
     }
   }
-
 }
