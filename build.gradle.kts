@@ -101,6 +101,7 @@ fun ShadowJar.commonSetup() {
 }
 
 tasks.shadowJar {
+    archiveClassifier.set("with-smtlib")
     dependencies {
         include(dependency("com.github.tudo-aqua:jSMTLIB:5c11ee5"))
     }
@@ -108,7 +109,7 @@ tasks.shadowJar {
 }
 
 val fatShadowJar by tasks.registering(ShadowJar::class) {
-    archiveClassifier.set("all")
+    archiveClassifier.set("with-all")
     from(sourceSets.main.map { it.output })
     configurations = listOf(project.configurations["runtimeClasspath"])
     archiveFileName.set(
