@@ -92,31 +92,32 @@ tasks.test {
     }
 }
 
-tasks.shadowJar {
+fun ShadowJar.commonSetup() {
     relocate("org.smtlib", "tools.aqua.redistribution.org.smtlib")
     dependencies {
-        include(dependency("com.github.tudo-aqua:jSMTLIB:5c11ee5"))
         exclude("*.smt2", "*.smt2.*")
         exclude("APIExample.class")
     }
 }
 
+tasks.shadowJar {
+    dependencies {
+        include(dependency("com.github.tudo-aqua:jSMTLIB:5c11ee5"))
+    }
+    commonSetup()
+}
+
 val fatShadowJar by tasks.registering(ShadowJar::class) {
-    relocate("org.smtlib", "tools.aqua.redistribution.org.smtlib")
     archiveClassifier.set("all")
     from(sourceSets.main.map { it.output })
     configurations = listOf(project.configurations["runtimeClasspath"])
-    dependencies {
-        exclude("*.smt2")
-        exclude("Core.smt2.saved")
-        exclude("APIExample.class")
-    }
     archiveFileName.set(
         "${archiveBaseName.get()}-${archiveClassifier.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
     )
     manifest {
         attributes["Main-Class"] = "gov.nasa.jpf.constraints.smtlibUtility.SMTCommandLine"
     }
+    commonSetup()
 }
 
 tasks.withType<GenerateModuleMetadata> {
