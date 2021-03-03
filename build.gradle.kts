@@ -112,9 +112,6 @@ val fatShadowJar by tasks.registering(ShadowJar::class) {
     archiveClassifier.set("with-all")
     from(sourceSets.main.map { it.output })
     configurations = listOf(project.configurations["runtimeClasspath"])
-    archiveFileName.set(
-        "${archiveBaseName.get()}-${archiveClassifier.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
-    )
     manifest {
         attributes["Main-Class"] = "gov.nasa.jpf.constraints.smtlibUtility.SMTCommandLine"
     }
