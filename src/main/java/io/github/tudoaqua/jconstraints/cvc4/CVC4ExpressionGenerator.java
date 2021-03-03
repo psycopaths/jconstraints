@@ -139,7 +139,7 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
       return em.mkConst((Boolean) c.getValue());
     } else if (c.getType().equals(BuiltinTypes.REAL)) {
       BigFraction bf = (BigFraction) c.getValue();
-      return em.mkConst(new Rational(bf.getNumerator(), bf.getDenominator()));
+      return em.mkConst(new Rational(bf.getNumerator().intValue(), bf.getDenominator().intValue()));
     } else if (c.getType().equals(BuiltinTypes.SINT32)) {
       Constant<java.lang.Integer> intConst = (Constant<java.lang.Integer>) c;
       return em.mkConst(new BitVector(32, intConst.getValue()));
