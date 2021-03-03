@@ -18,16 +18,14 @@
 /**
  * Copyright 2020 TU Dortmund, Nils Schmidt und Malte Mues
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package io.github.tudoaqua.jconstraints.cvc4;
@@ -349,7 +347,7 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
       return em.mkExpr(Kind.TO_REAL, visit(cast.getCasted(), data));
     } else if (cast.getType().equals(BuiltinTypes.DOUBLE)
         && (cast.getCasted().getType().equals(BuiltinTypes.SINT32)
-        || cast.getCasted().getType().equals(BuiltinTypes.SINT64))) {
+            || cast.getCasted().getType().equals(BuiltinTypes.SINT64))) {
       Expr toCast = visit(cast.getCasted(), data);
       Expr op =
           em.mkConst(
@@ -372,7 +370,7 @@ public class CVC4ExpressionGenerator extends AbstractExpressionVisitor<Expr, Exp
       return em.mkExpr(op, defaultRoundingMode, toCast);
     } else if (cast.getType().equals(BuiltinTypes.FLOAT)
         && (cast.getCasted().getType().equals(BuiltinTypes.SINT32)
-        || cast.getCasted().getType().equals(BuiltinTypes.SINT64))) {
+            || cast.getCasted().getType().equals(BuiltinTypes.SINT64))) {
       Expr toCast = visit(cast.getCasted(), data);
       Expr op =
           em.mkConst(

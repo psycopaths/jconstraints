@@ -23,6 +23,7 @@ import java.time.LocalDate.now
 
 plugins {
     `java-library`
+    id("com.github.sherter.google-java-format") version "0.9"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("org.cadixdev.licenser") version "0.5.0"
 }
