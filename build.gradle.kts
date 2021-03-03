@@ -34,6 +34,7 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 group = "tools.aqua"
@@ -43,7 +44,9 @@ description = "JConstraints-z3"
 dependencies {
     implementation("com.google.guava:guava:30.1-jre")
     implementation("io.github.tudo-aqua:z3-turnkey:4.8.10")
-    implementation("tools.aqua:jconstraints:0.9.6-SNAPSHOT")
+    //implementation("tools.aqua:jconstraints:0.9.6-SNAPSHOT")
+    //Use jitpack for build until jconstraints has SNAPSHOT builds on maven central
+    implementation("com.github.tudo-aqua:jconstraints:b057fe7")
 
     testImplementation("org.testng:testng:7.0.0")
 }
