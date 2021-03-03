@@ -129,7 +129,9 @@ publishing {
             artifactId = "jconstraints"
             from(components["java"])
             artifacts.clear()
-            artifact(tasks["shadowJar"])
+            artifact(tasks["shadowJar"]) {
+                classifier = null
+            }
             pom {
                 name.set("jConstraints")
                 description.set("jConstraints is a library for managing SMT constraints in Java.")
