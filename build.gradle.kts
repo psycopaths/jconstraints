@@ -44,7 +44,7 @@ dependencies {
 
     //Use jitpack.io until a better solution is in place for jConstraints
     implementation("com.github.tudo-aqua:jconstraints:b057fe7")
-    implementation("solver:CVC4-gpl:1.8.0")
+    implementation("io.github.tudo-aqua:cvc4-turnkey-permissive:1.8")
     implementation("org.apache.commons:commons-math3:3.6.1")
 
     testImplementation("org.testng:testng:7.0.0")
