@@ -77,7 +77,7 @@ license {
 
 
 tasks.test {
-    useTestNG() {
+    useTestNG {
         useDefaultListeners = true
         includeGroups = setOf("base")
     }
@@ -87,6 +87,26 @@ tasks.test {
 }
 
 tasks.shadowJar {
+    relocate("org.smtlib", "tools.aqua.redistribution.org.smtlib")
+    dependencies {
+        exclude(dependency("org.antlr:antlr:3.5.2"))
+        exclude(dependency("com.google.guava:guava:.*"))
+        exclude(dependency("commons-cli:commons-cli:.*"))
+        exclude(dependency("dk.brics:automaton:.*"))
+        exclude(dependency("org.antlr:antlr-runtime:.*"))
+        exclude(dependency("org.apache.commons:commons-math3:.*"))
+        exclude("com/google/**/*")
+        exclude("META-INF/maven/com.google.*/**/*")
+        exclude("META-INF/maven/org.antlr/**/*")
+        exclude("org/checkerframework/**/*")
+        exclude("org/stringtemplate/**/*")
+        exclude("*.smt2")
+        exclude("Core.smt2.saved")
+        exclude("APIExample.class")
+        exclude("javax/annotation/**/*")
+
+    }
+
     archiveFileName.set(
         "${archiveBaseName.get()}-${archiveClassifier.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
     )
