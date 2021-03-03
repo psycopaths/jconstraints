@@ -37,29 +37,37 @@ import org.antlr.runtime.tree.Tree;
 public class ParserUtil {
 
   public static List<Variable<?>> parseVariableDeclaration(String string)
-      throws RecognitionException, ImpreciseRepresentationException {
+      throws ImpreciseRepresentationException {
     ExpressionParser parser = getParser(string);
-    Tree ast = parser.start().tree;
-    ASTTranslator translator = new ASTTranslator(new TypeContext(true));
-    translator.translateRootLogical(ast);
-    Collection<? extends Variable<?>> variables = translator.getVariableOfTopContext();
-    return new ArrayList(variables);
+    try {
+      Tree ast = parser.start().tree;
+      ASTTranslator translator = new ASTTranslator(new TypeContext(true));
+      translator.translateRootLogical(ast);
+      Collection<? extends Variable<?>> variables = translator.getVariableOfTopContext();
+      return new ArrayList(variables);
+    } catch (RecognitionException e) {
+      throw new AntlrException(e.getMessage());
+    }
   }
 
   public static Expression<Boolean> parseLogical(String string)
-      throws RecognitionException, ImpreciseRepresentationException {
+      throws ImpreciseRepresentationException {
     return parseLogical(string, new TypeContext(true), Collections.<Variable<?>>emptySet());
   }
 
   public static Expression<Boolean> parseLogical(
       String string, TypeContext types, Collection<? extends Variable<?>> variables)
-      throws RecognitionException, ImpreciseRepresentationException {
+      throws ImpreciseRepresentationException {
     ExpressionParser parser = getParser(string);
-    Tree ast = parser.start().tree;
-    System.out.println(ast.toStringTree());
-    ASTTranslator translator = new ASTTranslator(types);
-    translator.declareVariables(variables);
-    return translator.translateRootLogical(ast);
+    try {
+      Tree ast = parser.start().tree;
+      System.out.println(ast.toStringTree());
+      ASTTranslator translator = new ASTTranslator(types);
+      translator.declareVariables(variables);
+      return translator.translateRootLogical(ast);
+    } catch (RecognitionException e) {
+      throw new AntlrException(e.getMessage());
+    }
   }
 
   public static Expression parseArithmetic(String string)
@@ -77,14 +85,18 @@ public class ParserUtil {
     return translator.translateRootArithmetic(ast);
   }
 
-  public static Variable parseVariable(String string) throws RecognitionException {
+  public static Variable parseVariable(String string) {
     ExpressionParser parser = getParser(string);
-    Tree ast = parser.start_variable().tree;
-    ASTTranslator translator = new ASTTranslator(new TypeContext(true));
-    return translator.translateRootVariable(ast);
+    try {
+      Tree ast = parser.start_variable().tree;
+      ASTTranslator translator = new ASTTranslator(new TypeContext(true));
+      return translator.translateRootVariable(ast);
+    } catch (RecognitionException e) {
+      throw new AntlrException(e.getMessage());
+    }
   }
 
-  private static ExpressionParser getParser(String string) throws RecognitionException {
+  private static ExpressionParser getParser(String string) {
     CharStream cs = new ANTLRStringStream(string);
     ExpressionLexer lex = new ExpressionLexer(cs);
     TokenStream ts = new CommonTokenStream(lex);

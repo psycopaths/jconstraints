@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -108,8 +109,25 @@ tasks.shadowJar {
     }
 
     archiveFileName.set(
+        "${archiveBaseName.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
+    )
+}
+
+val fatShadowJar by tasks.registering(ShadowJar::class) {
+    relocate("org.smtlib", "tools.aqua.redistribution.org.smtlib")
+    archiveClassifier.set("all")
+    from(sourceSets["main"].output)
+    configurations =
+        listOf(project.configurations["runtime"], project.configurations["runtimeClasspath"])
+    dependencies {
+        exclude("*.smt2")
+        exclude("Core.smt2.saved")
+        exclude("APIExample.class")
+    }
+    archiveFileName.set(
         "${archiveBaseName.get()}-${archiveClassifier.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
     )
+
 }
 
 publishing {
@@ -152,4 +170,7 @@ publishing {
 
         }
     }
+}
+tasks.assemble {
+    dependsOn("shadowJar", "fatShadowJar")
 }

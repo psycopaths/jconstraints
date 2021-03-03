@@ -38,7 +38,6 @@ import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.TypeContext;
 import java.util.HashSet;
 import java.util.List;
-import org.antlr.runtime.RecognitionException;
 import org.testng.annotations.Test;
 
 /**
@@ -64,8 +63,7 @@ public class ExtendedParserTest {
   }
 
   @Test(groups = {"parser", "base"})
-  public void variableDeclarationOfPrimeVariables()
-      throws RecognitionException, ImpreciseRepresentationException {
+  public void variableDeclarationOfPrimeVariables() throws ImpreciseRepresentationException {
     String varDeclaration = "declare x:sint8, b:bool, c:sint32";
     String primeVarDeclaration = "declare x':sint8, b':bool, c':sint32";
 
@@ -85,7 +83,7 @@ public class ExtendedParserTest {
   }
 
   @Test(groups = {"parser", "base"})
-  public void usingPrimeVariables() throws RecognitionException, ImpreciseRepresentationException {
+  public void usingPrimeVariables() throws ImpreciseRepresentationException {
     String testInput = "declare x:sint32, x':sint32 in x > 5 && x' == 5";
     Expression parsedRes = parser.parseLogical(testInput);
     assertEquals(parsedRes.getClass(), PropositionalCompound.class);
@@ -97,7 +95,7 @@ public class ExtendedParserTest {
   }
 
   @Test(groups = {"parser", "base"})
-  public void variableDeclaration() throws RecognitionException, ImpreciseRepresentationException {
+  public void variableDeclaration() throws ImpreciseRepresentationException {
     String varDeclaration = "declare x:sint8, b:bool, c:sint32";
 
     List<Variable<?>> parsedVar = parser.parseVariableDeclaration(varDeclaration);
@@ -108,7 +106,7 @@ public class ExtendedParserTest {
   }
 
   @Test(groups = {"parser", "base"})
-  public void andBooleanExpression() throws RecognitionException, ImpreciseRepresentationException {
+  public void andBooleanExpression() throws ImpreciseRepresentationException {
     String testString = "declare x:sint8, b:bool, c:sint32 in (c == 5) && (b == false) && (x > c)";
     Expression expr = parser.parseLogical(testString);
 
@@ -121,7 +119,7 @@ public class ExtendedParserTest {
   }
 
   @Test(groups = {"parser", "base"})
-  public void orBooleanExpression() throws RecognitionException, ImpreciseRepresentationException {
+  public void orBooleanExpression() throws ImpreciseRepresentationException {
     // the 5b forces the parser to interpret 5 of type sint8. Otherwise an
     // undesired castexpression is added...
     String testString = "x + 5b > c || b == false";
@@ -177,7 +175,7 @@ public class ExtendedParserTest {
   }
 
   @Test(groups = {"parser", "base"})
-  public void quantifierExpression() throws RecognitionException, ImpreciseRepresentationException {
+  public void quantifierExpression() throws ImpreciseRepresentationException {
     String testString = "forall (x) : (x > 5b && (exists (c) : (c > x)))";
 
     Expression expr = parser.parseLogical(testString, new TypeContext(true), vars);
@@ -201,16 +199,15 @@ public class ExtendedParserTest {
   @Test(
       expectedExceptions = {UndeclaredVariableException.class},
       groups = {"parser", "base"})
-  public void undeclaredVarInQuantifiedExpression()
-      throws RecognitionException, ImpreciseRepresentationException {
+  public void undeclaredVarInQuantifiedExpression() throws ImpreciseRepresentationException {
     String testString = "forall (y:sint32) : (exists (a) : (x > 5b && c > 3))";
     Expression expr = parser.parseLogical(testString, new TypeContext(true), vars);
   }
 
   @Test(
-      expectedExceptions = {RecognitionException.class},
+      expectedExceptions = {AntlrException.class},
       groups = {"parser", "base"})
-  public void wrongEQ() throws RecognitionException, ImpreciseRepresentationException {
+  public void wrongEQ() throws ImpreciseRepresentationException {
     String testString = "declare x:sint32 in x = 5";
     Expression expr = parser.parseLogical(testString);
   }
