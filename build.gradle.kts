@@ -65,7 +65,7 @@ val test by tasks.getting(Test::class) {
 
 
 tasks.shadowJar {
-    //FIXME: Exclude the other jconstraints-deps
+    relocate("com.google", "tools.aqua.jConstraints-z3.com.google")
     exclude("tools.aqua:jconstraints:.*")
     archiveFileName.set(
         "${archiveBaseName.get()}-${archiveClassifier.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
