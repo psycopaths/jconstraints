@@ -125,12 +125,12 @@ tasks.withType<GenerateModuleMetadata> {
 publishing {
     publications {
         create<MavenPublication>("mavenShadow") {
-            artifactId = "jconstraints"
             from(components["java"])
             artifacts.clear()
             artifact(tasks["shadowJar"]) {
                 classifier = null
             }
+            artifactId = "jconstraints"
             pom {
                 name.set("jConstraints")
                 description.set("jConstraints is a library for managing SMT constraints in Java.")
@@ -174,8 +174,8 @@ publishing {
             }
             artifactId = "jconstraints-all"
             pom {
-                name.set("jConstraints")
-                description.set("This is a fat jar containing the dependencies and is actually runable.")
+                name.set("jConstraints Far JAR")
+                description.set("This is a fat jar containing the dependencies and is actually runnable.")
                 url.set("https://github.com/tudo-aqua/jconstraints")
                 licenses {
                     license {
