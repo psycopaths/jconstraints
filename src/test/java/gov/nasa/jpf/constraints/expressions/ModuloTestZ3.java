@@ -39,17 +39,13 @@ import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3Solver;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import java.math.BigInteger;
-import java.util.Properties;
 import org.testng.annotations.Test;
 
 public class ModuloTestZ3 {
 
   @Test
   public void moduloTest() {
-
-    Properties conf = new Properties();
-    conf.setProperty("symbolic.dp", "NativeZ3");
-
+    
     // construct expression
 
     Variable<Integer> var_i1 = Variable.create(BuiltinTypes.SINT32, "i1");
@@ -69,8 +65,8 @@ public class ModuloTestZ3 {
     //    m.setIntMin(0);
     //    m.setVarMax(var_i1, 0.100);
 
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3");
 
     Valuation val = new Valuation();
     ConstraintSolver.Result result = solver.solve(expr, val);

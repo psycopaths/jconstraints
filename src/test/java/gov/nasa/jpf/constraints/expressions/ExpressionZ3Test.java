@@ -34,31 +34,19 @@ import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.exceptions.ImpreciseDoubleException;
-import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import org.testng.annotations.Test;
 
 public class ExpressionZ3Test {
 
   @Test
-  public void expressionTest() throws ImpreciseRepresentationException, ImpreciseDoubleException {
-
-    /*
-    if (args.length < 1) {
-      System.out.println("Usage: ExpressionsExampleZ3 [path to libZ3Java]");
-      return;
-    }*/
-
-    Properties conf = new Properties();
-    conf.setProperty("symbolic.dp", "NativeZ3");
+  public void expressionTest() {
 
     // construct expression
 
@@ -111,8 +99,8 @@ public class ExpressionZ3Test {
     //    m.setIntMin(0);
     //    m.setVarMax(var_i1, 0.100);
 
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3");
 
     Valuation val = new Valuation();
     ConstraintSolver.Result result = solver.solve(expr, val);

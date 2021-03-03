@@ -42,13 +42,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import org.antlr.runtime.RecognitionException;
 import org.testng.annotations.Test;
 
 public class ExpressionZ3BVTest {
 
   @Test
-  public void expressionTest() throws RecognitionException, ImpreciseRepresentationException {
+  public void expressionTest() throws ImpreciseRepresentationException {
 
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "NativeZ3");
@@ -75,8 +74,8 @@ public class ExpressionZ3BVTest {
 
     // solve
 
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3");
 
     Valuation val = new Valuation();
     ConstraintSolver.Result result = solver.solve(expr, val);

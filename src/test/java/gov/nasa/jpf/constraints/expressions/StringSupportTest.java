@@ -53,8 +53,8 @@ public class StringSupportTest {
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "z3");
     conf.setProperty("z3.options", "smt.string_solver=seq");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    solver = (NativeZ3Solver) factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    solver = (NativeZ3Solver) factory.createSolver("z3", conf);
   }
 
   @Test

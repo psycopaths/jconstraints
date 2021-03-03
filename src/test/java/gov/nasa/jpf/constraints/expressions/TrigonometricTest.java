@@ -57,8 +57,8 @@ public class TrigonometricTest {
   private SolverContext createContext(Properties conf) {
     conf.setProperty("symbolic.dp", "z3");
     conf.setProperty("z3.options", "smt.mbqi=true;smt.macro-finder=true");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3", conf);
     SolverContext ctx = solver.createContext();
     return ctx;
   }

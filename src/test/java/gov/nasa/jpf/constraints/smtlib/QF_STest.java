@@ -41,14 +41,13 @@ import gov.nasa.jpf.constraints.smtlibUtility.parser.SMTLIBParserException;
 import gov.nasa.jpf.constraints.solvers.nativez3.NativeZ3Solver;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import org.smtlib.IParser.ParserException;
 import org.testng.annotations.Test;
 
 public class QF_STest {
 
   @Test
   public void joacoExample1Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem = LoadingUtil.loadProblemFromResources("4002_DoSubjectSearch_VxA0.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
     Valuation model = new Valuation();
@@ -61,7 +60,7 @@ public class QF_STest {
 
   @Test
   public void banditfuzzExample1Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem =
         LoadingUtil.loadProblemFromResources("3670_1566478915.37391888518873672772034099_1.smt");
     NativeZ3Solver solver = new NativeZ3Solver();
@@ -73,7 +72,7 @@ public class QF_STest {
 
   @Test
   public void banditfuzzExample2Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem =
         LoadingUtil.loadProblemFromResources("3575_1565554544.3963776322835254933674150_1.smt");
     NativeZ3Solver solver = new NativeZ3Solver();
@@ -85,7 +84,7 @@ public class QF_STest {
 
   @Test
   public void appscanExample1Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem = LoadingUtil.loadProblemFromResources("appscan/4_t07.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
     Valuation model = new Valuation();
@@ -98,7 +97,7 @@ public class QF_STest {
 
   @Test
   public void appscanExample2Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem = LoadingUtil.loadProblemFromResources("appscan/5_t06.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
     Valuation model = new Valuation();
@@ -111,7 +110,7 @@ public class QF_STest {
 
   @Test
   public void appscanExample3Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem = LoadingUtil.loadProblemFromResources("appscan/6_t01.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
     SolverContext sc = solver.createContext();
@@ -133,7 +132,7 @@ public class QF_STest {
 
   @Test
   public void appscanExample4Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem = LoadingUtil.loadProblemFromResources("appscan/7_t03.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
     Valuation model = new Valuation();
@@ -146,7 +145,7 @@ public class QF_STest {
 
   @Test
   public void appscanExample5Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem = LoadingUtil.loadProblemFromResources("appscan/8_t02.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
     Valuation model = new Valuation();
@@ -160,7 +159,7 @@ public class QF_STest {
   // Times out in 4.8.10 - might be better in future versions of Z3
   @Test(enabled = false, timeOut = 20000)
   public void appscanExample6Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem = LoadingUtil.loadProblemFromResources("appscan/9_t05.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
     Valuation model = new Valuation();
@@ -174,7 +173,7 @@ public class QF_STest {
   // Times out in 4.8.10 - might be better in future versions of Z3
   @Test(enabled = false, timeOut = 20000)
   public void appscanExample7Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     // With Z3 4.8.10, this test times out
     SMTProblem problem = LoadingUtil.loadProblemFromResources("appscan/10_t04.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
@@ -189,7 +188,7 @@ public class QF_STest {
 
   @Test(timeOut = 20000)
   public void appscanExample8Test()
-      throws SMTLIBParserException, IOException, ParserException, URISyntaxException {
+      throws SMTLIBParserException, IOException, URISyntaxException {
     SMTProblem problem = LoadingUtil.loadProblemFromResources("appscan/11_t08.smt2");
     NativeZ3Solver solver = new NativeZ3Solver();
     Valuation model = new Valuation();

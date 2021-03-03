@@ -54,8 +54,8 @@ public class IntegerTest {
   public void testIntegerFunction() {
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "z3");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3");
     SolverContext ctx = solver.createContext();
 
     Variable x = new Variable(BuiltinTypes.SINT32, "x");

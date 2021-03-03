@@ -34,7 +34,6 @@ import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
-import java.util.Properties;
 import org.testng.annotations.Test;
 
 /** */
@@ -43,10 +42,8 @@ public class ContextTest {
 
   @Test
   public void testToString() {
-    Properties conf = new Properties();
-    conf.setProperty("symbolic.dp", "NativeZ3");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3");
 
     SolverContext ctx = solver.createContext();
 

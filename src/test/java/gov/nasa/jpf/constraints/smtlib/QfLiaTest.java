@@ -43,13 +43,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.smtlib.IParser;
 import org.testng.annotations.Test;
 
 public class QfLiaTest {
   @Test
   public void Problem2Test()
-      throws IOException, SMTLIBParserException, IParser.ParserException, URISyntaxException {
+      throws IOException, SMTLIBParserException, URISyntaxException {
     URL smtFile = QfLiaTest.class.getClassLoader().getResource("problem_2__008.smt2");
     SMTProblem problem =
         SMTLIBParser.parseSMTProgram(

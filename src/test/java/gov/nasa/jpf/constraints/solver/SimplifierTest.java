@@ -58,8 +58,8 @@ public class SimplifierTest {
   public void eliminationTest() throws IOException {
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "z3");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    NativeZ3Solver solver = (NativeZ3Solver) factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    NativeZ3Solver solver = (NativeZ3Solver) factory.createSolver("Z3", conf);
 
     Variable a = new Variable(BuiltinTypes.INTEGER, "a");
 

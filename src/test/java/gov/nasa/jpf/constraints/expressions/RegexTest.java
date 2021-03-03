@@ -77,7 +77,7 @@ public class RegexTest {
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "z3");
     conf.setProperty("z3.options", "smt.string_solver=z3str3");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
 
     Variable<String> v1 = Variable.create(BuiltinTypes.STRING, "v1");
     Constant<String> c1 = Constant.create(BuiltinTypes.STRING, "Welt");
@@ -88,7 +88,7 @@ public class RegexTest {
             RegexOperatorExpression.createStrToRe("Welt"));
     Expression<Boolean> res = RegExBooleanExpression.create(v1, halloWelt);
 
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolver solver = factory.createSolver("z3", conf);
     Valuation val = new Valuation();
     ConstraintSolver.Result result = solver.solve(ExpressionUtil.and(e1, res), val);
     assertEquals(result, ConstraintSolver.Result.SAT);
@@ -101,9 +101,9 @@ public class RegexTest {
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "z3");
     conf.setProperty("z3.options", "smt.string_solver=z3str3");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
     System.out.println("Simple Tests");
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolver solver = factory.createSolver("z3", conf);
     Variable<String> w = Variable.create(BuiltinTypes.STRING, "w");
     Constant<String> m = Constant.create(BuiltinTypes.STRING, "M");
     Variable i = Variable.create(BuiltinTypes.INTEGER, "i");
@@ -131,10 +131,10 @@ public class RegexTest {
   public void testOverlap() {
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "z3");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
 
     System.out.println(" A string cannot overlap with two different characters. Unsat:");
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolver solver = factory.createSolver("z3", conf);
     Variable<String> v1 = Variable.create(BuiltinTypes.STRING, "v1");
     Constant<String> c1 = Constant.create(BuiltinTypes.STRING, "b");
     Constant<String> c2 = Constant.create(BuiltinTypes.STRING, "a");
@@ -167,8 +167,8 @@ public class RegexTest {
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "z3");
     conf.setProperty("z3.options", "smt.string_solver=seq");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3", conf);
     System.out.println("SimpleExample");
     Constant<Integer> c0 = Constant.create(BuiltinTypes.SINT32, 0);
     Variable<Integer> result = Variable.create(BuiltinTypes.SINT32, "result");
@@ -203,8 +203,8 @@ public class RegexTest {
     System.out.println("property: " + conf.getProperty("symbolic.dp"));
     //	    conf.setProperty("z3.options", "dump_models=false");
 
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3", conf);
     System.out.println("RegexMatches02");
     Constant<String> string = Constant.create(BuiltinTypes.STRING, "WWWWW's Birthday is 12-17-77");
     Constant<String> w = Constant.create(BuiltinTypes.REGEX, "W");

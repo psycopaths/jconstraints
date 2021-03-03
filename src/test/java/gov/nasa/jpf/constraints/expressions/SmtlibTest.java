@@ -38,11 +38,10 @@ import gov.nasa.jpf.constraints.smtlibUtility.parser.SMTLIBParserException;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import java.io.IOException;
 import java.util.Properties;
-import org.smtlib.IParser;
 
 public class SmtlibTest {
   public static void main(String args[])
-      throws IOException, SMTLIBParserException, IParser.ParserException {
+      throws IOException, SMTLIBParserException {
     SMTProblem problem =
         SMTLIBParser.parseSMTProgram(
             "(declare-fun I0_2 () Int)\n"
@@ -70,8 +69,8 @@ public class SmtlibTest {
     Properties conf = new Properties();
     conf.setProperty("symbolic.dp", "z3");
     conf.setProperty("z3.options", "smt.string_solver=seq");
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3");
     Valuation val = new Valuation();
     Result result = solver.solve(problem.getAllAssertionsAsConjunction(), val);
     System.out.println("Result: " + result);

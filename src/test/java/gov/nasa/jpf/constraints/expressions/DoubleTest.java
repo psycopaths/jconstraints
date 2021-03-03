@@ -48,8 +48,6 @@ import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
-import java.util.Properties;
-import org.antlr.runtime.RecognitionException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -57,18 +55,14 @@ import org.testng.annotations.Test;
 public class DoubleTest {
 
   @Test
-  public void expressionTest() throws RecognitionException {
-
-    Properties conf = new Properties();
-    conf.setProperty("symbolic.dp", "NativeZ3");
-
+  public void expressionTest() {
     Variable<Double> s2 = Variable.create(BuiltinTypes.DOUBLE, "s2");
 
     Constant<Double> c0 = Constant.create(BuiltinTypes.DOUBLE, 0.0);
     Constant<Double> c1 = Constant.create(BuiltinTypes.DOUBLE, 1.0);
 
-    ConstraintSolverFactory factory = new ConstraintSolverFactory(conf);
-    ConstraintSolver solver = factory.createSolver();
+    ConstraintSolverFactory factory = new ConstraintSolverFactory();
+    ConstraintSolver solver = factory.createSolver("z3");
 
     Expression<Boolean> expr =
         ExpressionUtil.and(
