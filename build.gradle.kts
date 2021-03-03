@@ -97,7 +97,6 @@ tasks.shadowJar {
         exclude("*.smt2", "*.smt2.*")
         exclude("APIExample.class")
     }
-    archiveClassifier.set("")
 }
 
 val fatShadowJar by tasks.registering(ShadowJar::class) {
