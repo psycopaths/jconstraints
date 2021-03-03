@@ -23,6 +23,7 @@ import java.time.LocalDate.now
 
 plugins {
     `java-library`
+    `maven-publish`
     id("com.github.sherter.google-java-format") version "0.9"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("org.cadixdev.licenser") version "0.5.0"
@@ -33,6 +34,11 @@ repositories {
     mavenLocal()
     mavenCentral()
 }
+
+
+group = "tools.aqua"
+version = "0.9.6-SNAPSHOT"
+description = "JConstraints-cvc4"
 
 dependencies {
 
@@ -66,6 +72,44 @@ license {
     tasks {
         create("buildFiles") {
             files = project.files("build.gradle.kts", "settings.gradle.kts")
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = "jconstraints-cvc4"
+            from(components["java"])
+            pom {
+                name.set("jConstraints-cvc4")
+                description.set("JConstraints-cvc4 is the CVC4 API plug-in for JConstraints.")
+                url.set("https://github.com/tudo-aqua/jconstraints-cvc4")
+                licenses {
+                    license {
+                        name.set("Apache-2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("mmuesly")
+                        name.set("Malte Mues")
+                        email.set("mail.mues@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("https://github.com/tudo-aqua/jconstraints-cvc4")
+                    url.set("https://github.com/tudo-aqua/jconstraints-cvc4")
+                }
+            }
+        }
+        create<MavenPublication>("publishMaven") {
+            artifact(tasks["shadowJar"]) {
+                classifier = null
+            }
+            artifactId = "jconstraints-cvc4-all"
+
         }
     }
 }
