@@ -41,9 +41,6 @@ java {
     }
 }
 
-group = "tools.aqua"
-version = "0.9.6-SNAPSHOT"
-
 repositories {
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
@@ -64,7 +61,6 @@ group = "tools.aqua"
 version = "0.9.6-SNAPSHOT"
 description = "jConstraints"
 
-
 license {
     header = project.file("contrib/license-header.txt")
     ext["year"] = now().year
@@ -80,7 +76,6 @@ license {
         }
     }
 }
-
 
 tasks.test {
     useTestNG {
@@ -185,7 +180,7 @@ publishing {
         }
     }
 }
+
 tasks.assemble {
     dependsOn("shadowJar", "fatShadowJar")
 }
-
