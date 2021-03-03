@@ -104,7 +104,7 @@ tasks.shadowJar {
 val fatShadowJar by tasks.registering(ShadowJar::class) {
     relocate("org.smtlib", "tools.aqua.redistribution.org.smtlib")
     archiveClassifier.set("all")
-    from(sourceSets["main"].output)
+    from(sourceSets.main.map { it.output })
     configurations =
         listOf(project.configurations["runtime"], project.configurations["runtimeClasspath"])
     dependencies {
