@@ -18,6 +18,7 @@
  */
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -123,6 +124,31 @@ tasks.withType<GenerateModuleMetadata> {
     enabled = false
 }
 
+fun MavenPom.commonSetup() {
+    url.set("https://github.com/tudo-aqua/jconstraints")
+    licenses {
+        license {
+            name.set("Apache-2.0")
+            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+        }
+    }
+    developers {
+        developer {
+            id.set("mmuesly")
+            name.set("Malte Mues")
+            email.set("mail.mues@gmail.com")
+        }
+        developer {
+            id.set("fhowar")
+            name.set("Falk Howar")
+        }
+    }
+    scm {
+        connection.set("https://github.com/tudo-aqua/jconstraints.git")
+        url.set("https://github.com/tudo-aqua/jconstraints")
+    }
+}
+
 publishing {
     publications {
         create<MavenPublication>("mavenShadow") {
@@ -135,28 +161,7 @@ publishing {
             pom {
                 name.set("jConstraints")
                 description.set("jConstraints is a library for managing SMT constraints in Java.")
-                url.set("https://github.com/tudo-aqua/jconstraints")
-                licenses {
-                    license {
-                        name.set("Apache-2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("mmuesly")
-                        name.set("Malte Mues")
-                        email.set("mail.mues@gmail.com")
-                    }
-                    developer {
-                        id.set("fhowar")
-                        name.set("Falk Howar")
-                    }
-                }
-                scm {
-                    connection.set("https://github.com/tudo-aqua/jconstraints.git")
-                    url.set("https://github.com/tudo-aqua/jconstraints")
-                }
+                commonSetup()
             }
             pom.withXml {
                 val elem = asElement()
@@ -177,28 +182,7 @@ publishing {
             pom {
                 name.set("jConstraints Far JAR")
                 description.set("This is a fat jar containing the dependencies and is actually runnable.")
-                url.set("https://github.com/tudo-aqua/jconstraints")
-                licenses {
-                    license {
-                        name.set("Apache-2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("mmuesly")
-                        name.set("Malte Mues")
-                        email.set("mail.mues@gmail.com")
-                    }
-                    developer {
-                        id.set("fhowar")
-                        name.set("Falk Howar")
-                    }
-                }
-                scm {
-                    connection.set("https://github.com/tudo-aqua/jconstraints.git")
-                    url.set("https://github.com/tudo-aqua/jconstraints")
-                }
+                commonSetup()
             }
         }
     }
