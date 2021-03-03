@@ -30,33 +30,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.tudoaqua.jconstraints.cvc4.expressions;
+package io.github.tudoaqua.jconstraints.cvc4.serialization;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertTrue;
 
 import gov.nasa.jpf.constraints.api.ConstraintSolver.Result;
+import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.Valuation;
-import gov.nasa.jpf.constraints.api.Variable;
-import gov.nasa.jpf.constraints.expressions.LogicalOperator;
-import gov.nasa.jpf.constraints.expressions.PropositionalCompound;
-import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import gov.nasa.jpf.constraints.exceptions.EvaluationException;
 import io.github.tudoaqua.jconstraints.cvc4.CVC4Solver;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import org.testng.annotations.Test;
 
-public class PropositionalCompoundTest {
+public class CVC4SerializationTest {
 
-  @Test
-  public void propositionalCompoundEquivTest() {
-    Variable a = Variable.create(BuiltinTypes.BOOL, "a");
-    Variable b = Variable.create(BuiltinTypes.BOOL, "b");
-    PropositionalCompound pc = PropositionalCompound.create(a, LogicalOperator.EQUIV, b);
+  @Test(enabled = false,expectedExceptions = EvaluationException.class)
+  public void exprUnsatTest() throws IOException, ClassNotFoundException {
+    InputStream is = new FileInputStream("/tmp/serialized_cvc4200145360267212");
+    ObjectInputStream ois = new ObjectInputStream(is);
+    Expression f = (Expression) ois.readObject();
+
     CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
     Valuation val = new Valuation();
-    Result res = cvc4.solve(pc, val);
-    assertEquals(res, Result.SAT);
-    assertTrue(pc.evaluate(val));
+    Result res = cvc4.solve(f, val);
+    assertEquals(res, Result.UNSAT);
+    f.evaluate(val);
   }
 
+  @Test(enabled = false)
+  public void exprSatTest() throws IOException, ClassNotFoundException {
+    InputStream is = new FileInputStream("/tmp/serialized_cvc4998978124819");
+    ObjectInputStream ois = new ObjectInputStream(is);
+    Expression f = (Expression) ois.readObject();
+
+    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
+    Valuation val = new Valuation();
+    Result res = cvc4.solve(f, val);
+    assertEquals(res, Result.SAT);
+    assertTrue((Boolean) f.evaluate(val));
+
+  }
 }
