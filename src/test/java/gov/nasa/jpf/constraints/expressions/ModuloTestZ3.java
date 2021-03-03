@@ -64,7 +64,7 @@ public class ModuloTestZ3 {
 
   @Test
   public void moduloTest() {
-    
+
     // construct expression
 
     Variable<Integer> var_i1 = Variable.create(BuiltinTypes.SINT32, "i1");

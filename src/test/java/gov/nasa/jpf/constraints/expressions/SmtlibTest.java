@@ -59,8 +59,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class SmtlibTest {
-  public static void main(String args[])
-      throws IOException, SMTLIBParserException {
+  public static void main(String args[]) throws IOException, SMTLIBParserException {
     SMTProblem problem =
         SMTLIBParser.parseSMTProgram(
             "(declare-fun I0_2 () Int)\n"
