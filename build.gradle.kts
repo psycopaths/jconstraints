@@ -105,8 +105,7 @@ val fatShadowJar by tasks.registering(ShadowJar::class) {
     relocate("org.smtlib", "tools.aqua.redistribution.org.smtlib")
     archiveClassifier.set("all")
     from(sourceSets.main.map { it.output })
-    configurations =
-        listOf(project.configurations["runtime"], project.configurations["runtimeClasspath"])
+    configurations = listOf(project.configurations["runtimeClasspath"])
     dependencies {
         exclude("*.smt2")
         exclude("Core.smt2.saved")
