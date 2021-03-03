@@ -67,7 +67,10 @@ license {
     header = project.file("contrib/license-header.txt")
     ext["year"] = now().year
 
+    exclude("**/*.tokens")
+    exclude("**/*.g")
     exclude("**/*.smt2", "**/*.txt")
+    exclude("**/parser/*.java")
 
     tasks {
         create("buildFiles") {
@@ -108,9 +111,6 @@ tasks.shadowJar {
 
     }
     archiveClassifier.set("")
-//    archiveFileName.set(
-//        "${archiveBaseName.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
-//    )
 }
 
 val fatShadowJar by tasks.registering(ShadowJar::class) {
@@ -217,3 +217,4 @@ publishing {
 tasks.assemble {
     dependsOn("shadowJar", "fatShadowJar")
 }
+
