@@ -51,16 +51,24 @@ package gov.nasa.jpf.constraints.smtlib;
 import gov.nasa.jpf.constraints.smtlibUtility.SMTProblem;
 import gov.nasa.jpf.constraints.smtlibUtility.parser.SMTLIBParser;
 import gov.nasa.jpf.constraints.smtlibUtility.parser.SMTLIBParserException;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 
 public class LoadingUtil {
+
+  public static SMTProblem loadProblemFromResources(Path name)
+      throws SMTLIBParserException, IOException, URISyntaxException {
+    return loadProblemFromResources(name.toString());
+  }
 
   public static SMTProblem loadProblemFromResources(String name)
       throws URISyntaxException, IOException, SMTLIBParserException {
     URL smtFile = LoadingUtil.class.getClassLoader().getResource(name);
-    SMTProblem problem = SMTLIBParser.parseSMTProgramFromFile(smtFile.getFile());
+    File fileFromURI = new File(smtFile.toURI());
+    SMTProblem problem = SMTLIBParser.parseSMTProgramFromFile(fileFromURI.getAbsolutePath());
     return problem;
   }
 }
