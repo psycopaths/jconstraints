@@ -26,12 +26,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import org.smtlib.IParser.ParserException;
 
 public class LoadingUtil {
 
   public static SMTProblem loadProblemFromResources(String name)
-      throws URISyntaxException, IOException, SMTLIBParserException, ParserException {
+      throws URISyntaxException, IOException, SMTLIBParserException {
     URL smtFile = QF_LIA_RoundTripTest.class.getClassLoader().getResource(name);
     List<String> input = Files.readAllLines(Paths.get(smtFile.toURI()));
     SMTProblem problem = SMTLIBParser.parseSMTProgram(input

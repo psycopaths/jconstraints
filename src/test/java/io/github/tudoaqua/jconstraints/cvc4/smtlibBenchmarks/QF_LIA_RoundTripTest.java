@@ -45,13 +45,12 @@ import io.github.tudoaqua.jconstraints.cvc4.CVC4Solver;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import org.smtlib.IParser;
 import org.testng.annotations.Test;
 
 public class QF_LIA_RoundTripTest {
 
 	@Test
-	public void Problem2Test() throws IOException, SMTLIBParserException, IParser.ParserException, URISyntaxException {
+	public void Problem2Test() throws IOException, SMTLIBParserException, URISyntaxException {
 		SMTProblem problem = LoadingUtil.loadProblemFromResources("problem_2__008.smt2");
 		CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
 		SolverContext ctx = cvc4.createContext();
