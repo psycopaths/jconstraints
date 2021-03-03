@@ -107,10 +107,10 @@ tasks.shadowJar {
         exclude("javax/annotation/**/*")
 
     }
-
-    archiveFileName.set(
-        "${archiveBaseName.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
-    )
+    archiveClassifier.set("")
+//    archiveFileName.set(
+//        "${archiveBaseName.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
+//    )
 }
 
 val fatShadowJar by tasks.registering(ShadowJar::class) {
@@ -127,7 +127,13 @@ val fatShadowJar by tasks.registering(ShadowJar::class) {
     archiveFileName.set(
         "${archiveBaseName.get()}-${archiveClassifier.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
     )
+    manifest {
+        attributes["Main-Class"] = "gov.nasa.jpf.constraints.smtlibUtility.SMTCommandLine"
+    }
+}
 
+tasks.withType<GenerateModuleMetadata> {
+    enabled = false
 }
 
 publishing {
@@ -135,6 +141,8 @@ publishing {
         create<MavenPublication>("mavenJava") {
             artifactId = "jconstraints"
             from(components["java"])
+            artifacts.clear()
+            artifact(tasks["shadowJar"])
             pom {
                 name.set("jConstraints")
                 description.set("jConstraints is a library for managing SMT constraints in Java.")
@@ -161,13 +169,48 @@ publishing {
                     url.set("https://github.com/tudo-aqua/jconstraints")
                 }
             }
+            pom.withXml {
+                val elem = asElement()
+                var dependencies = elem.getElementsByTagName("artifactId")
+                for (i in 0..(dependencies.length - 1)) {
+                    val dep: org.w3c.dom.Node? = dependencies.item(i)
+                    if (dep != null && dep.textContent.equals("jSMTLIB")) {
+                        dep.parentNode.parentNode.removeChild(dep.parentNode)
+                    }
+                }
+            }
         }
         create<MavenPublication>("publishMaven") {
-            artifact(tasks["shadowJar"]) {
+            artifact(tasks["fatShadowJar"]) {
                 classifier = null
             }
             artifactId = "jconstraints-all"
-
+            pom {
+                name.set("jConstraints")
+                description.set("This is a fat jar containing the dependencies and is actually runable.")
+                url.set("https://github.com/tudo-aqua/jconstraints")
+                licenses {
+                    license {
+                        name.set("Apache-2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("mmuesly")
+                        name.set("Malte Mues")
+                        email.set("mail.mues@gmail.com")
+                    }
+                    developer {
+                        id.set("fhowar")
+                        name.set("Falk Howar")
+                    }
+                }
+                scm {
+                    connection.set("https://github.com/tudo-aqua/jconstraints.git")
+                    url.set("https://github.com/tudo-aqua/jconstraints")
+                }
+            }
         }
     }
 }
