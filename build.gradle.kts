@@ -22,8 +22,9 @@ version = "0.9.6-SNAPSHOT"
 description = "JConstraints-z3"
 
 dependencies {
+    implementation("com.google.guava:guava:30.1-jre")
     implementation("io.github.tudo-aqua:z3-turnkey:4.8.10")
-    implementation("tools.aqua:jconstraints-all:0.9.6-SNAPSHOT")
+    implementation("tools.aqua:jconstraints:0.9.6-SNAPSHOT")
 
     testImplementation("org.testng:testng:7.0.0")
 }
