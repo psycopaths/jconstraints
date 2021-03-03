@@ -124,7 +124,7 @@ tasks.withType<GenerateModuleMetadata> {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("mavenShadow") {
             artifactId = "jconstraints"
             from(components["java"])
             artifacts.clear()
@@ -168,7 +168,7 @@ publishing {
                 }
             }
         }
-        create<MavenPublication>("publishMaven") {
+        create<MavenPublication>("mavenShadowFat") {
             artifact(tasks["fatShadowJar"]) {
                 classifier = null
             }
