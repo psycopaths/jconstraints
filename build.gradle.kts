@@ -22,6 +22,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR
+import org.w3c.dom.Node
 import java.time.LocalDate.now
 
 plugins {
@@ -159,10 +160,10 @@ publishing {
             }
             pom.withXml {
                 val elem = asElement()
-                var dependencies = elem.getElementsByTagName("artifactId")
-                for (i in 0..(dependencies.length - 1)) {
-                    val dep: org.w3c.dom.Node? = dependencies.item(i)
-                    if (dep != null && dep.textContent.equals("jSMTLIB")) {
+                val dependencies = elem.getElementsByTagName("artifactId")
+                repeat(dependencies.length) {
+                    val dep: Node? = dependencies.item(it)
+                    if (dep != null && dep.textContent == "jSMTLIB") {
                         dep.parentNode.parentNode.removeChild(dep.parentNode)
                     }
                 }
