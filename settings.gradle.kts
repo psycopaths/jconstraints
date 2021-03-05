@@ -18,6 +18,6 @@
  */
 
 rootProject.name = "jconstraints"
-include("jconstraints-core")
+include("jconstraints-core", "jconstraints-z3")
 
 

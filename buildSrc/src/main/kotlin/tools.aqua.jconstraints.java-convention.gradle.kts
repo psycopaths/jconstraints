@@ -29,11 +29,23 @@ plugins {
     id("com.github.sherter.google-java-format")
 }
 
+repositories {
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    testImplementation("org.testng:testng:7.3.0")
+}
+
 java.toolchain {
     languageVersion.set(JavaLanguageVersion.of(8))
 }
 
 tasks.test {
+    useTestNG {
+        useDefaultListeners = true
+    }
     testLogging {
         events(FAILED, STANDARD_ERROR, SKIPPED, PASSED)
     }

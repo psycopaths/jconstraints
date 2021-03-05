@@ -1,27 +1,30 @@
-# jConstraints #
-*jConstraints* is a library for modeling expressions
-and for interacting with constraint solvers.
+# jConstraints
+*jConstraints* is a library for modeling expressions and for interacting with constraint solvers.
 
-## Building and Installing ##
+## Building and Installing
 
 * In the *jConstraints* folder, run `./gradlew build`.
 * If the compilation was successful, the *jConstraints* library is located at
   `jconstraints-core/build/libs/jconstraints-core-[VERSION].jar`.
 * A fat JAR containing all dependencies can be found at: `build/libs/jconstraints-core-[VERSION]-all.jar`.
 
-## How To Use ##
+## Solver Bindings
 
-*jConstraints* does not come with constraint solvers.
-In order to use it, you will have to install one
-of the plugins that connect to constraint solvers.
-On the [*tudo-aqua org*][9], you can find *jConstraints*
-plugins for, e.g. Z3.
+*jConstraints* does not come with constraint solvers. In order to use it, you will have to install one of the plugins
+that connect to constraint solvers.
 
-[1]: http://www.antlr3.org/
-[3]: http://www.antlr3.org/license.html
-[7]: https://code.google.com/p/guava-libraries/
-[8]: http://www.apache.org/licenses/LICENSE-2.0
-[9]: https://github.com/tudo-aqua
+### Z3 Solver Plugin
+
+jconstraints-z3 supports setting some of the options in z3
+via constructor parameters or configuration options:
+
+    z3.timeout=[timeout in millis]
+    z3.options=[option1]=[value1];[option2]=[value2];...
+
+Example:
+
+    z3.timeout=2
+    z3.options=smt.mbqi=true;smt.macro-finder=true
 
 ## About this fork ##
 *jConstraints* has been founded by the [psycopaths](https://github.com/psycopaths).

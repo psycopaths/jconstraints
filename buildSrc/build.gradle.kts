@@ -27,6 +27,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.github.jengelman.gradle.plugins", "shadow", "6.1.0")
     implementation("gradle.plugin.com.github.sherter.google-java-format", "google-java-format-gradle-plugin", "0.9")
     implementation("gradle.plugin.org.cadixdev.gradle", "licenser", "0.5.0")
 }

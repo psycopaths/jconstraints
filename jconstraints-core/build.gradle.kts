@@ -25,21 +25,14 @@ version = "0.9.6-SNAPSHOT"
 description = "jConstraints is a library for managing SMT constraints in Java"
 
 plugins {
-    id("tools.aqua.jconstraints.java-convention")
+    id("tools.aqua.jconstraints.java-fatjar-convention")
     antlr
-    `maven-publish`
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-}
-
-repositories {
-    mavenCentral()
-    maven { url = uri("https://jitpack.io") }
+    id("com.github.johnrengelman.shadow")
 }
 
 license {
     exclude("**/*.tokens")
     exclude("**/*.g")
-    exclude("**/*.smt2", "**/*.txt")
     exclude("**/parser/*.java")
 }
 
@@ -51,51 +44,32 @@ dependencies {
     implementation("dk.brics:automaton:1.12-1")
     implementation("org.antlr:antlr-runtime:3.5.2")
     implementation("org.apache.commons:commons-math3:3.6.1")
-    testImplementation("org.testng:testng:6.8")
 }
 
-tasks.test {
-    useTestNG {
-        useDefaultListeners = true
-        includeGroups = setOf("base")
+tasks {
+    shadowJar {
+        archiveClassifier.set("with-smtlib")
+        dependencies {
+            include(dependency("com.github.tudo-aqua:jSMTLIB:5c11ee5"))
+        }
     }
-}
 
-fun ShadowJar.commonSetup() {
-    relocate("org.smtlib", "tools.aqua.redistribution.org.smtlib")
-    dependencies {
-        exclude("*.smt2", "*.smt2.*")
-        exclude("APIExample.class")
+    assemble {
+        dependsOn(shadowJar)
     }
-}
 
-tasks.shadowJar {
-    archiveClassifier.set("with-smtlib")
-    dependencies {
-        include(dependency("com.github.tudo-aqua:jSMTLIB:5c11ee5"))
+    test {
+        useTestNG {
+            includeGroups = setOf("base")
+        }
     }
-    commonSetup()
-}
-
-val fatShadowJar by tasks.registering(ShadowJar::class) {
-    archiveClassifier.set("with-all")
-    from(sourceSets.main.map { it.output })
-    configurations = listOf(project.configurations["runtimeClasspath"])
-    manifest {
-        attributes["Main-Class"] = "gov.nasa.jpf.constraints.smtlibUtility.SMTCommandLine"
-    }
-    commonSetup()
-}
-
-tasks.withType<GenerateModuleMetadata> {
-    enabled = false
 }
 
 publishing {
     publications {
         named<MavenPublication>("mavenJava") {
             artifacts.clear()
-            artifact(tasks["shadowJar"]) { classifier = null }
+            artifact(tasks.shadowJar) { classifier = null }
             pom {
                 withXml {
                     val elem = asElement()
@@ -109,17 +83,5 @@ publishing {
                 }
             }
         }
-        create<MavenPublication>("mavenShadowFat") {
-            artifact(tasks["fatShadowJar"]) { classifier = null }
-            artifactId = "${project.name}-all"
-            pom {
-                name.set("jConstraints Far JAR")
-                description.set("This is a fat jar containing the dependencies and is actually runnable")
-            }
-        }
     }
-}
-
-tasks.assemble {
-    dependsOn("shadowJar", "fatShadowJar")
 }

@@ -17,115 +17,22 @@
  * limitations under the License.
  */
 
-import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
-import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
-import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
-import org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR
-import java.time.LocalDate.now
-
-plugins {
-    `java-library`
-    `maven-publish`
-    id("com.github.sherter.google-java-format") version "0.9"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("org.cadixdev.licenser") version "0.5.0"
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url = uri("https://jitpack.io") }
-}
-
 group = "tools.aqua"
 version = "0.9.6-SNAPSHOT"
-description = "JConstraints-z3"
+description = "jConstraints-Z3 is the Z3 API plug-in for jConstraints"
+
+plugins {
+    id("tools.aqua.jconstraints.java-fatjar-convention")
+}
+
+license {
+    exclude("**/SMT-Problem_origin")
+}
 
 dependencies {
     implementation("com.google.guava:guava:30.1-jre")
     implementation("io.github.tudo-aqua:z3-turnkey:4.8.10")
-    //implementation("tools.aqua:jconstraints:0.9.6-SNAPSHOT")
-    //Use jitpack for build until jconstraints has SNAPSHOT builds on maven central
-    implementation("com.github.tudo-aqua:jconstraints:b057fe7")
+    implementation(project(":jconstraints-core"))
 
     testImplementation("org.testng:testng:7.0.0")
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
-}
-
-val test by tasks.getting(Test::class) {
-    useTestNG {
-        useDefaultListeners = true
-    }
-    testLogging {
-        events(FAILED, STANDARD_ERROR, SKIPPED, PASSED)
-    }
-}
-
-
-tasks.shadowJar {
-    relocate("com.google", "tools.aqua.jConstraints-z3.com.google")
-    exclude("tools.aqua:jconstraints:.*")
-    archiveFileName.set(
-        "${archiveBaseName.get()}-${archiveClassifier.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
-    )
-}
-
-license {
-    header = project.file("contrib/license-header.txt")
-    ext["year"] = now().year
-
-    exclude("**/*.smt2", "**/*.txt")
-
-    tasks {
-        create("buildFiles") {
-            files = project.files("build.gradle.kts", "settings.gradle.kts")
-        }
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = "jconstraints-z3"
-            from(components["java"])
-            pom {
-                name.set("jConstraints-z3")
-                description.set("JConstraints-Z3 is the Z3 API plug-in for JConstraints.")
-                url.set("https://github.com/tudo-aqua/jconstraints-z3")
-                licenses {
-                    license {
-                        name.set("Apache-2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("mmuesly")
-                        name.set("Malte Mues")
-                        email.set("mail.mues@gmail.com")
-                    }
-                    developer {
-                        id.set("fhowar")
-                        name.set("Falk Howar")
-                    }
-                }
-                scm {
-                    connection.set("https://github.com/tudo-aqua/jconstraints-z3")
-                    url.set("https://github.com/tudo-aqua/jconstraints-z3")
-                }
-            }
-        }
-        create<MavenPublication>("publishMaven") {
-            artifact(tasks["shadowJar"]) {
-                classifier = null
-            }
-            artifactId = "jconstraints-z3-all"
-
-        }
-    }
 }

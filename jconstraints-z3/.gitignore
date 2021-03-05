@@ -1,7 +1,0 @@
-/nb-configuration.xml
-/target/
-**/*.DS_Store
-/.project
-/.classpath
-/.settings/
-build/**/*

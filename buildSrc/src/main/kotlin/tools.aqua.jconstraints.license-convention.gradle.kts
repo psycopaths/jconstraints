@@ -27,6 +27,8 @@ license {
     header = rootProject.file("contrib/license-header.txt")
     ext["year"] = now().year
 
+    exclude("**/*.smt", "**/*.smt2")
+
     tasks {
         create("buildFiles") {
             files = project.files("build.gradle.kts", "settings.gradle.kts")
