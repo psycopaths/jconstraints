@@ -17,7 +17,16 @@
  * limitations under the License.
  */
 
-rootProject.name = "jconstraints"
-include("jconstraints-core")
+plugins {
+    `kotlin-dsl`
+}
 
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+}
 
+dependencies {
+    implementation("gradle.plugin.com.github.sherter.google-java-format", "google-java-format-gradle-plugin", "0.9")
+    implementation("gradle.plugin.org.cadixdev.gradle", "licenser", "0.5.0")
+}

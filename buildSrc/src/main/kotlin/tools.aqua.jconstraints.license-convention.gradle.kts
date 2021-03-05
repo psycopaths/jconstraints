@@ -17,7 +17,19 @@
  * limitations under the License.
  */
 
-rootProject.name = "jconstraints"
-include("jconstraints-core")
+import java.time.LocalDateTime.now
 
+plugins {
+    id("org.cadixdev.licenser")
+}
 
+license {
+    header = rootProject.file("contrib/license-header.txt")
+    ext["year"] = now().year
+
+    tasks {
+        create("buildFiles") {
+            files = project.files("build.gradle.kts", "settings.gradle.kts")
+        }
+    }
+}
