@@ -19,7 +19,7 @@
 
 package gov.nasa.jpf.constraints.smtlibUtility.export;
 
-import static gov.nasa.jpf.constraints.util.CharsetIO.toStringUTF8;
+import static gov.nasa.jpf.constraints.util.CharsetIO.toNormalizedStringUTF8;
 import static gov.nasa.jpf.constraints.util.CharsetIO.wrapInUTF8PrintStream;
 import static org.testng.Assert.assertEquals;
 
@@ -63,7 +63,7 @@ public class BitvectorExpressionTest {
 
     BitvectorExpression expr = BitvectorExpression.create(x, BitvectorOperator.AND, c0SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -73,7 +73,7 @@ public class BitvectorExpressionTest {
 
     BitvectorExpression expr = BitvectorExpression.create(x, BitvectorOperator.OR, c0SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -83,7 +83,7 @@ public class BitvectorExpressionTest {
 
     BitvectorExpression expr = BitvectorExpression.create(x, BitvectorOperator.XOR, c0SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -93,7 +93,7 @@ public class BitvectorExpressionTest {
 
     BitvectorExpression expr = BitvectorExpression.create(x, BitvectorOperator.SHIFTL, c0SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -103,7 +103,7 @@ public class BitvectorExpressionTest {
 
     BitvectorExpression expr = BitvectorExpression.create(x, BitvectorOperator.SHIFTR, c0SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -113,7 +113,7 @@ public class BitvectorExpressionTest {
 
     BitvectorExpression expr = BitvectorExpression.create(x, BitvectorOperator.SHIFTUR, c0SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -123,7 +123,7 @@ public class BitvectorExpressionTest {
 
     BitvectorNegation expr = BitvectorNegation.create(x);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -133,7 +133,7 @@ public class BitvectorExpressionTest {
 
     UnaryMinus expr = UnaryMinus.create(x);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 }

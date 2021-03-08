@@ -19,7 +19,7 @@
 
 package gov.nasa.jpf.constraints.smtlibUtility.export;
 
-import static gov.nasa.jpf.constraints.util.CharsetIO.toStringUTF8;
+import static gov.nasa.jpf.constraints.util.CharsetIO.toNormalizedStringUTF8;
 import static gov.nasa.jpf.constraints.util.CharsetIO.wrapInUTF8PrintStream;
 import static org.testng.Assert.assertEquals;
 
@@ -39,7 +39,7 @@ public class Util {
     ps = wrapInUTF8PrintStream(baos);
     se = (new SMTLibExportWrapper(new DontKnowSolver(), ps)).createContext();
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 }

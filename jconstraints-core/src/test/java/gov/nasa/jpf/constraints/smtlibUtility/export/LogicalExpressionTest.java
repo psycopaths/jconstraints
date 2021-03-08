@@ -24,7 +24,7 @@ import static gov.nasa.jpf.constraints.expressions.LogicalOperator.EQUIV;
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.IMPLY;
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.OR;
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.XOR;
-import static gov.nasa.jpf.constraints.util.CharsetIO.toStringUTF8;
+import static gov.nasa.jpf.constraints.util.CharsetIO.toNormalizedStringUTF8;
 import static gov.nasa.jpf.constraints.util.CharsetIO.wrapInUTF8PrintStream;
 import static org.testng.Assert.assertEquals;
 
@@ -63,7 +63,7 @@ public class LogicalExpressionTest {
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (and x y))\n";
     PropositionalCompound expr = PropositionalCompound.create(var1, AND, var2);
     se.add(expr);
-    assertEquals(toStringUTF8(baos), expected);
+    assertEquals(toNormalizedStringUTF8(baos), expected);
   }
 
   @Test(groups = {"base", "smt-export"})
@@ -72,7 +72,7 @@ public class LogicalExpressionTest {
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (or x y))\n";
     PropositionalCompound expr = PropositionalCompound.create(var1, OR, var2);
     se.add(expr);
-    assertEquals(toStringUTF8(baos), expected);
+    assertEquals(toNormalizedStringUTF8(baos), expected);
   }
 
   @Test(groups = {"base", "smt-export"})
@@ -81,7 +81,7 @@ public class LogicalExpressionTest {
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (=> x y))\n";
     PropositionalCompound expr = PropositionalCompound.create(var1, IMPLY, var2);
     se.add(expr);
-    assertEquals(toStringUTF8(baos), expected);
+    assertEquals(toNormalizedStringUTF8(baos), expected);
   }
 
   @Test(groups = {"base", "smt-export"})
@@ -90,7 +90,7 @@ public class LogicalExpressionTest {
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (= x y))\n";
     PropositionalCompound expr = PropositionalCompound.create(var1, EQUIV, var2);
     se.add(expr);
-    assertEquals(toStringUTF8(baos), expected);
+    assertEquals(toNormalizedStringUTF8(baos), expected);
   }
 
   @Test(groups = {"base", "smt-export"})
@@ -99,7 +99,7 @@ public class LogicalExpressionTest {
         "(declare-const x Bool)\n" + "(declare-const y Bool)\n" + "(assert (xor x y))\n";
     PropositionalCompound expr = PropositionalCompound.create(var1, XOR, var2);
     se.add(expr);
-    assertEquals(toStringUTF8(baos), expected);
+    assertEquals(toNormalizedStringUTF8(baos), expected);
   }
 
   @Test(groups = {"base", "smt-export"})
@@ -107,7 +107,7 @@ public class LogicalExpressionTest {
     String expected = "(declare-const x Bool)\n" + "(assert (not x))\n";
     Negation expr = Negation.create(var1);
     se.add(expr);
-    assertEquals(toStringUTF8(baos), expected);
+    assertEquals(toNormalizedStringUTF8(baos), expected);
   }
 
   @Test(groups = {"base", "smt-export"})
@@ -124,6 +124,6 @@ public class LogicalExpressionTest {
     Variable var3 = Variable.create(BuiltinTypes.BOOL, "z");
     IfThenElse expr = IfThenElse.create(var1, var2, var3);
     se.add(expr);
-    assertEquals(toStringUTF8(baos), expected);
+    assertEquals(toNormalizedStringUTF8(baos), expected);
   }
 }

@@ -19,7 +19,7 @@
 
 package gov.nasa.jpf.constraints.smtlibUtility.export;
 
-import static gov.nasa.jpf.constraints.util.CharsetIO.toStringUTF8;
+import static gov.nasa.jpf.constraints.util.CharsetIO.toNormalizedStringUTF8;
 import static gov.nasa.jpf.constraints.util.CharsetIO.wrapInUTF8PrintStream;
 import static org.testng.Assert.assertEquals;
 
@@ -54,7 +54,7 @@ public class CastExpressionTest {
     CastExpression expr =
         CastExpression.create(Variable.create(BuiltinTypes.SINT32, "X"), BuiltinTypes.INTEGER);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -64,7 +64,7 @@ public class CastExpressionTest {
     CastExpression expr =
         CastExpression.create(Variable.create(BuiltinTypes.INTEGER, "X"), BuiltinTypes.SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -74,7 +74,7 @@ public class CastExpressionTest {
     CastExpression expr =
         CastExpression.create(Variable.create(BuiltinTypes.INTEGER, "X"), BuiltinTypes.SINT8);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -84,7 +84,7 @@ public class CastExpressionTest {
     CastExpression expr =
         CastExpression.create(Variable.create(BuiltinTypes.SINT8, "X"), BuiltinTypes.SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -94,7 +94,7 @@ public class CastExpressionTest {
     CastExpression expr =
         CastExpression.create(Variable.create(BuiltinTypes.SINT8, "X"), BuiltinTypes.UINT16);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 
@@ -104,7 +104,7 @@ public class CastExpressionTest {
     CastExpression expr =
         CastExpression.create(Variable.create(BuiltinTypes.UINT16, "X"), BuiltinTypes.SINT32);
     se.add(expr);
-    String output = toStringUTF8(baos);
+    String output = toNormalizedStringUTF8(baos);
     assertEquals(output, expected);
   }
 }

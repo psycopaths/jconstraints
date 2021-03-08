@@ -108,18 +108,19 @@ public final class CharsetIO {
 
   /**
    * Create a {@link String} from a {@link ByteArrayOutputStream}'s contents, interpreted as UTF-8
-   * encoded data.
+   * encoded data and replace all newline characters with unix newlines ({@code \n}).
    *
    * <p>This suppresses the {@link UnsupportedEncodingException} declared by {@link
    * ByteArrayOutputStream#toString(String)} (which cannot occur for UTF-8!), since the safe API
-   * {@link ByteArrayOutputStream#toString(Charset)} is not available for Java 8.
+   * {@link ByteArrayOutputStream#toString(Charset)} is not available for Java 8. It also fixes the
+   * usage of platform-dependent newline characters by {@link PrintStream}.
    *
    * @param stream the stream to transform.
-   * @return the parsed contents.
+   * @return the parsed contents with normalized newlines.
    */
-  public static String toStringUTF8(ByteArrayOutputStream stream) {
+  public static String toNormalizedStringUTF8(ByteArrayOutputStream stream) {
     try {
-      return stream.toString(UTF_8.name());
+      return stream.toString(UTF_8.name()).replaceAll("\\R", "\n");
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("Standard charset unavailable");
     }
