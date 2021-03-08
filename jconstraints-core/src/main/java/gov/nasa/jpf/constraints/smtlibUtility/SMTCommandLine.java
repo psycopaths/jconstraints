@@ -19,12 +19,11 @@
 
 package gov.nasa.jpf.constraints.smtlibUtility;
 
-import static gov.nasa.jpf.constraints.util.CharsetIO.readFile;
-
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.smtlibUtility.parser.SMTLIBParser;
 import gov.nasa.jpf.constraints.smtlibUtility.parser.SMTLIBParserException;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
+import gov.nasa.jpf.constraints.util.CharsetIO;
 import java.io.BufferedReader;
 import java.io.IOException;
 import org.smtlib.IParser;
@@ -37,7 +36,7 @@ public class SMTCommandLine {
       String filename = args[0];
       System.out.println("Trying to parse filename: " + filename);
 
-      try (BufferedReader reader = readFile(filename); ) {
+      try (BufferedReader reader = CharsetIO.readUTF8File(filename); ) {
         String smtProgram = reader.lines().reduce((a, b) -> b.startsWith(";") ? a : a + b).get();
         SMTProblem problem = SMTLIBParser.parseSMTProgram(smtProgram);
 

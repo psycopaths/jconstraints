@@ -22,6 +22,7 @@ package gov.nasa.jpf.constraints.util;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -56,7 +57,7 @@ public final class CharsetIO {
    * @return the wrapped stream.
    * @throws FileNotFoundException if the file does not exist.
    */
-  public static PrintStream openInPrintStream(File file) throws FileNotFoundException {
+  public static PrintStream openInUTF8PrintStream(File file) throws FileNotFoundException {
     try {
       return new PrintStream(file, UTF_8.name());
     } catch (UnsupportedEncodingException e) {
@@ -75,7 +76,7 @@ public final class CharsetIO {
    * @param stream the stream to wrap.
    * @return the wrapped stream.
    */
-  public static PrintStream wrapInPrintStream(OutputStream stream) {
+  public static PrintStream wrapInUTF8PrintStream(OutputStream stream) {
     try {
       return new PrintStream(stream, false, UTF_8.name());
     } catch (UnsupportedEncodingException e) {
@@ -90,7 +91,7 @@ public final class CharsetIO {
    * @return a wrapping reader.
    * @throws FileNotFoundException if the file does not exist.
    */
-  public static BufferedReader readFile(File file) throws FileNotFoundException {
+  public static BufferedReader readUTF8File(File file) throws FileNotFoundException {
     return new BufferedReader(new InputStreamReader(new FileInputStream(file), UTF_8));
   }
 
@@ -101,7 +102,26 @@ public final class CharsetIO {
    * @return a wrapping reader.
    * @throws FileNotFoundException if the file does not exist.
    */
-  public static BufferedReader readFile(String filename) throws FileNotFoundException {
+  public static BufferedReader readUTF8File(String filename) throws FileNotFoundException {
     return new BufferedReader(new InputStreamReader(new FileInputStream(filename), UTF_8));
+  }
+
+  /**
+   * Create a {@link String} from a {@link ByteArrayOutputStream}'s contents, interpreted as UTF-8
+   * encoded data.
+   *
+   * <p>This suppresses the {@link UnsupportedEncodingException} declared by {@link
+   * ByteArrayOutputStream#toString(String)} (which cannot occur for UTF-8!), since the safe API
+   * {@link ByteArrayOutputStream#toString(Charset)} is not available for Java 8.
+   *
+   * @param stream the stream to transform.
+   * @return the parsed contents.
+   */
+  public static String toStringUTF8(ByteArrayOutputStream stream) {
+    try {
+      return stream.toString(UTF_8.name());
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("Standard charset unavailable");
+    }
   }
 }

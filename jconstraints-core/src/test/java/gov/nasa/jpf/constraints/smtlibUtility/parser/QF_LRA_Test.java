@@ -21,7 +21,7 @@ package gov.nasa.jpf.constraints.smtlibUtility.parser;
 
 import static gov.nasa.jpf.constraints.smtlibUtility.parser.utility.ResourceParsingHelper.loadResource;
 import static gov.nasa.jpf.constraints.smtlibUtility.parser.utility.ResourceParsingHelper.parseResourceFile;
-import static gov.nasa.jpf.constraints.util.CharsetIO.readFile;
+import static gov.nasa.jpf.constraints.util.CharsetIO.readUTF8File;
 import static org.testng.Assert.assertEquals;
 
 import gov.nasa.jpf.constraints.api.Expression;
@@ -84,7 +84,7 @@ public class QF_LRA_Test {
   public void readingCountBy2Test() throws IOException, InterruptedException {
     final String targetResource = "test_inputs/_count_by_2.i_3_2_2.bpl_1.smt2";
     final StringBuilder b = new StringBuilder();
-    final BufferedReader reader = readFile(loadResource(targetResource));
+    final BufferedReader reader = readUTF8File(loadResource(targetResource));
     reader.lines().forEach(e -> b.append(e));
 
     final String fileContent = b.toString();
