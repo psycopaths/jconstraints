@@ -19,6 +19,8 @@
 
 package gov.nasa.jpf.constraints.smtlibUtility.solver;
 
+import static gov.nasa.jpf.constraints.util.CharsetIO.wrapInPrintStream;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
@@ -102,7 +104,7 @@ public class SMTLibExportSolverContext extends SolverContext {
         Paths.get(singleQueryFolder, queryPrefix + "_" + Integer.toString(queryCounter) + ".smt2");
     newFileName.toFile().getAbsoluteFile().getParentFile().mkdirs();
     try (FileOutputStream fos = new FileOutputStream(newFileName.toFile())) {
-      PrintStream pw = new PrintStream(fos);
+      PrintStream pw = wrapInPrintStream(fos);
       SMTLibExportGenContext queryCtx = new SMTLibExportGenContext(pw);
       SMTLibExportVisitor queryVisitor = new SMTLibExportVisitor(queryCtx);
       for (List<Expression> level : ctxKopie) {

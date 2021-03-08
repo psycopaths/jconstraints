@@ -19,6 +19,7 @@
 
 package gov.nasa.jpf.constraints.smtlibUtility.export;
 
+import static gov.nasa.jpf.constraints.util.CharsetIO.wrapInPrintStream;
 import static org.testng.Assert.assertEquals;
 
 import gov.nasa.jpf.constraints.api.SolverContext;
@@ -50,7 +51,7 @@ public class BitvectorExpressionTest {
     c0SINT32 = Constant.create(BuiltinTypes.SINT32, 0);
 
     baos = new ByteArrayOutputStream();
-    ps = new PrintStream(baos);
+    ps = wrapInPrintStream(baos);
 
     se = (new SMTLibExportWrapper(new DontKnowSolver(), ps)).createContext();
   }

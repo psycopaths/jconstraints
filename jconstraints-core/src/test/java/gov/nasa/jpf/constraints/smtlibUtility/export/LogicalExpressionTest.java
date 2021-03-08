@@ -24,6 +24,7 @@ import static gov.nasa.jpf.constraints.expressions.LogicalOperator.EQUIV;
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.IMPLY;
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.OR;
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.XOR;
+import static gov.nasa.jpf.constraints.util.CharsetIO.wrapInPrintStream;
 import static org.testng.Assert.assertEquals;
 
 import gov.nasa.jpf.constraints.api.SolverContext;
@@ -51,7 +52,7 @@ public class LogicalExpressionTest {
     var1 = Variable.create(BuiltinTypes.BOOL, "x");
     var2 = Variable.create(BuiltinTypes.BOOL, "y");
     baos = new ByteArrayOutputStream();
-    ps = new PrintStream(baos);
+    ps = wrapInPrintStream(baos);
     se = (new SMTLibExportWrapper(new DontKnowSolver(), ps)).createContext();
   }
 

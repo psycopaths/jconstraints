@@ -19,6 +19,7 @@
 
 package gov.nasa.jpf.constraints.smtlibUtility.export;
 
+import static gov.nasa.jpf.constraints.util.CharsetIO.wrapInPrintStream;
 import static org.testng.Assert.assertEquals;
 
 import gov.nasa.jpf.constraints.api.Expression;
@@ -34,7 +35,7 @@ public class Util {
     ByteArrayOutputStream baos;
     PrintStream ps;
     baos = new ByteArrayOutputStream();
-    ps = new PrintStream(baos);
+    ps = wrapInPrintStream(baos);
     se = (new SMTLibExportWrapper(new DontKnowSolver(), ps)).createContext();
     se.add(expr);
     String output = baos.toString();

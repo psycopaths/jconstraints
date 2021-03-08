@@ -19,6 +19,8 @@
 
 package gov.nasa.jpf.constraints.smtlibUtility.solver;
 
+import static gov.nasa.jpf.constraints.util.CharsetIO.openInPrintStream;
+
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverProvider;
@@ -49,7 +51,7 @@ public class SMTLibExportSolverProvider implements ConstraintSolverProvider {
       outfile.getAbsoluteFile().getParentFile().mkdirs();
       prefix = outfile.getName().split("\\.")[0];
       try {
-        out = new PrintStream(outfile);
+        out = openInPrintStream(outfile);
       } catch (FileNotFoundException e) {
         System.err.println("Cannot write to: " + resultFile);
         out = System.out;
