@@ -1,5 +1,7 @@
 /*
- * Copyright 2017-2021 The jConstraints-cvc4 Authors
+ * Copyright 2015 United States Government, as represented by the Administrator
+ *                of the National Aeronautics and Space Administration. All Rights Reserved.
+ *           2017-2021 The jConstraints Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,19 +17,6 @@
  * limitations under the License.
  */
 
-/**
- * Copyright 2020 TU Dortmund, Nils Schmidt und Malte Mues
- *
- * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
- *
- * <p>http://www.apache.org/licenses/LICENSE-2.0
- *
- * <p>Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.github.tudoaqua.jconstraints.cvc4;
 
 import static gov.nasa.jpf.constraints.expressions.LogicalOperator.AND;
@@ -54,7 +43,6 @@ import edu.stanford.CVC4.Type;
 import edu.stanford.CVC4.vectorExpr;
 import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.Expression;
-import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
 import gov.nasa.jpf.constraints.expressions.BitvectorExpression;
@@ -72,29 +60,29 @@ import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import gov.nasa.jpf.constraints.types.NamedSort;
 import gov.nasa.jpf.constraints.types.TypeContext;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
-import java.util.HashMap;
 import org.apache.commons.math3.fraction.BigFraction;
+import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class CVC4SolverTest {
+public class CVC4SolverTest extends AbstractCVC4Test {
   ExprManager em;
   SmtEngine smt;
 
   @BeforeMethod
-  public void initialize() {
-    em = new ExprManager();
-    smt = new SmtEngine(em);
+  public void initializeEngine() {
+    try {
+      em = new ExprManager();
+      smt = new SmtEngine(em);
+    } catch (UnsatisfiedLinkError e) {
+      throw new SkipException("No native CVC4 support", e);
+    }
     smt.setOption("produce-models", new SExpr(true));
   }
 
   @Test
   public void linearArith() {
-
     smt.setLogic("QF_LIRA"); // Set the logic
-
-    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
-    SolverContext cvc4Context = cvc4.createContext();
 
     // Types
     Type real = em.realType();
@@ -180,8 +168,6 @@ public class CVC4SolverTest {
     Result.Entailment expect, actual;
     smt.setLogic("QF_BV");
 
-    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
-    SolverContext ctx = cvc4.createContext();
     // The following example has been adapted from the book A Hacker's Delight by
     // Henry S. Warren.
     //
@@ -227,7 +213,7 @@ public class CVC4SolverTest {
 
     // Assert the assumption
     smt.assertFormula(assumption);
-    ctx.add(jAssumption);
+    cvc4Context.add(jAssumption);
 
     // Introduce a new variable for the new value of x after assignment.
     Expr new_x = em.mkVar("new_x", bitvector32); // x after executing code (0)
@@ -245,10 +231,10 @@ public class CVC4SolverTest {
 
     // Assert the encoding of code (0)
     smt.assertFormula(assignment0);
-    ctx.add(jAssignement0);
+    cvc4Context.add(jAssignement0);
 
     smt.push();
-    ctx.push();
+    cvc4Context.push();
 
     // Encoding code (1)
     // new_x_ = a xor b xor x
@@ -262,18 +248,18 @@ public class CVC4SolverTest {
 
     // Assert encoding to CVC4 in current context;
     smt.assertFormula(assignment1);
-    ctx.add(jAssignment1);
+    cvc4Context.add(jAssignment1);
 
     Expr new_x_eq_new_x_ = em.mkExpr(Kind.EQUAL, new_x, new_x_);
     NumericBooleanExpression jNewXEqNewX_ = NumericBooleanExpression.create(jNewX, EQ, jNewX_);
 
     Result res = smt.checkSat();
-    ConstraintSolver.Result jRes = ctx.isSatisfiable();
+    ConstraintSolver.Result jRes = cvc4Context.isSatisfiable();
 
     assertEquals(jRes, CVC4Solver.convertCVC4Res(res));
 
     smt.pop();
-    ctx.pop();
+    cvc4Context.pop();
     // Encoding code (2)
     // new_x_ = a + b - x
     Expr a_plus_b = em.mkExpr(Kind.BITVECTOR_PLUS, a, b);
@@ -288,10 +274,10 @@ public class CVC4SolverTest {
 
     // Assert encoding to CVC4 in current context;
     smt.assertFormula(assignment2);
-    ctx.add(jAssignment2);
+    cvc4Context.add(jAssignment2);
 
     Result res2 = smt.checkSat();
-    ConstraintSolver.Result jRes2 = ctx.isSatisfiable();
+    ConstraintSolver.Result jRes2 = cvc4Context.isSatisfiable();
 
     assertEquals(jRes2, CVC4Solver.convertCVC4Res(res2));
   }
@@ -430,18 +416,15 @@ public class CVC4SolverTest {
     assumption = PropositionalCompound.create(assumption, AND, notP0);
     assumption = PropositionalCompound.create(assumption, AND, jPfy);
 
-    CVC4Solver cvc4 = new CVC4Solver(new HashMap<>());
-    SolverContext ctx = cvc4.createContext();
+    cvc4Context.add(assumption);
 
-    ctx.add(assumption);
-
-    ctx.push();
+    cvc4Context.push();
 
     NumericBooleanExpression distinct = NumericBooleanExpression.create(jX, NE, jY);
-    ctx.add(distinct);
-    assertEquals(ConstraintSolver.Result.SAT, ctx.isSatisfiable());
+    cvc4Context.add(distinct);
+    assertEquals(ConstraintSolver.Result.SAT, cvc4Context.isSatisfiable());
 
-    ctx.pop();
-    assertEquals(ConstraintSolver.Result.SAT, ctx.isSatisfiable());
+    cvc4Context.pop();
+    assertEquals(ConstraintSolver.Result.SAT, cvc4Context.isSatisfiable());
   }
 }

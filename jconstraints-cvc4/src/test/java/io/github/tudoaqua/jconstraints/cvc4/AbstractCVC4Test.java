@@ -17,26 +17,25 @@
  * limitations under the License.
  */
 
-package gov.nasa.jpf.constraints.solvers.nativez3;
+package io.github.tudoaqua.jconstraints.cvc4;
 
-import gov.nasa.jpf.constraints.api.ConstraintSolver;
-import java.util.Properties;
-import java.util.logging.Logger;
+import gov.nasa.jpf.constraints.api.SolverContext;
+import java.util.HashMap;
+import org.testng.SkipException;
+import org.testng.annotations.BeforeMethod;
 
-@Deprecated
-public class NativeZ3SolverProviderLegacy extends NativeZ3SolverProvider {
+public abstract class AbstractCVC4Test {
 
-  private static final Logger logger = Logger.getLogger("constraints");
+  protected CVC4Solver cvc4;
+  protected SolverContext cvc4Context;
 
-  @Override
-  public String[] getNames() {
-    return new String[] {"NativeZ3"};
-  }
-
-  @Override
-  public ConstraintSolver createSolver(Properties config) {
-    // TODO: Why should this fail and what is the new name?
-    // logger.warning("Using deprecated solver name 'NativeZ3' might fail in future releases");
-    return super.createSolver(config);
+  @BeforeMethod
+  public void initialize() {
+    try {
+      cvc4 = new CVC4Solver(new HashMap<>());
+      cvc4Context = cvc4.createContext();
+    } catch (UnsatisfiedLinkError e) {
+      throw new SkipException("No native CVC4 support", e);
+    }
   }
 }

@@ -38,7 +38,7 @@ license {
 
 dependencies {
     antlr("org.antlr:antlr:3.5.2")
-    implementation("com.google.guava:guava:30.1-jre")
+    api("com.google.guava:guava:30.1-jre")
     implementation("com.github.tudo-aqua:jSMTLIB:5c11ee5")
     implementation("commons-cli:commons-cli:1.4")
     implementation("dk.brics:automaton:1.12-1")

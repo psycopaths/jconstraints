@@ -33,6 +33,4 @@ dependencies {
     implementation("com.google.guava:guava:30.1-jre")
     implementation("io.github.tudo-aqua:z3-turnkey:4.8.10")
     implementation(project(":jconstraints-core"))
-
-    testImplementation("org.testng:testng:7.0.0")
 }

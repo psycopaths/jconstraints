@@ -1,5 +1,7 @@
 /*
- * Copyright 2017-2021 The jConstraints-cvc4 Authors
+ * Copyright 2015 United States Government, as represented by the Administrator
+ *                of the National Aeronautics and Space Administration. All Rights Reserved.
+ *           2017-2021 The jConstraints Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

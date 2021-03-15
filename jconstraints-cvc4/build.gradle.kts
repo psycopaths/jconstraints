@@ -1,5 +1,7 @@
 /*
- * Copyright 2017-2021 The jConstraints-cvc4 Authors
+ * Copyright 2015 United States Government, as represented by the Administrator
+ *                of the National Aeronautics and Space Administration. All Rights Reserved.
+ *           2017-2021 The jConstraints Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +17,11 @@
  * limitations under the License.
  */
 
-import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
-import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
-import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
-import org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR
-import java.time.LocalDate.now
-
 plugins {
-    `java-library`
-    `maven-publish`
-    id("com.github.sherter.google-java-format") version "0.9"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("org.cadixdev.licenser") version "0.5.0"
+    id("tools.aqua.jconstraints.java-fatjar-convention")
 }
 
 repositories {
-    maven { url = uri("https://jitpack.io") }
     mavenLocal()
     mavenCentral()
 }
@@ -38,78 +29,10 @@ repositories {
 
 group = "tools.aqua"
 version = "0.9.6-SNAPSHOT"
-description = "JConstraints-cvc4"
+description = "jConstraints-CVC4 is the CVC4 API plug-in for jConstraints"
 
 dependencies {
-
-    //Use jitpack.io until a better solution is in place for jConstraints
-    implementation("com.github.tudo-aqua:jconstraints:b057fe7")
     implementation("io.github.tudo-aqua:cvc4-turnkey-permissive:1.8")
     implementation("org.apache.commons:commons-math3:3.6.1")
-
-    testImplementation("org.testng:testng:7.0.0")
-}
-
-val test by tasks.getting(Test::class) {
-    // Use TestNG for unit tests
-    useTestNG()
-    testLogging {
-        events(FAILED, STANDARD_ERROR, SKIPPED, PASSED)
-    }
-}
-
-tasks.shadowJar {
-    exclude("tools.aqua:jconstraints:.*")
-
-}
-
-license {
-    header = project.file("contrib/license-header.txt")
-    ext["year"] = now().year
-
-    exclude("**/*.smt2", "**/*.txt")
-
-    tasks {
-        create("buildFiles") {
-            files = project.files("build.gradle.kts", "settings.gradle.kts")
-        }
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = "jconstraints-cvc4"
-            from(components["java"])
-            pom {
-                name.set("jConstraints-cvc4")
-                description.set("JConstraints-cvc4 is the CVC4 API plug-in for JConstraints.")
-                url.set("https://github.com/tudo-aqua/jconstraints-cvc4")
-                licenses {
-                    license {
-                        name.set("Apache-2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("mmuesly")
-                        name.set("Malte Mues")
-                        email.set("mail.mues@gmail.com")
-                    }
-                }
-                scm {
-                    connection.set("https://github.com/tudo-aqua/jconstraints-cvc4")
-                    url.set("https://github.com/tudo-aqua/jconstraints-cvc4")
-                }
-            }
-        }
-        create<MavenPublication>("publishMaven") {
-            artifact(tasks["shadowJar"]) {
-                classifier = null
-            }
-            artifactId = "jconstraints-cvc4-all"
-
-        }
-    }
+    implementation(project(":jconstraints-core"))
 }

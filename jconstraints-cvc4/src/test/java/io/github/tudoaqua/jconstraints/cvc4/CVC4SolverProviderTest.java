@@ -1,5 +1,7 @@
 /*
- * Copyright 2017-2021 The jConstraints-cvc4 Authors
+ * Copyright 2015 United States Government, as represented by the Administrator
+ *                of the National Aeronautics and Space Administration. All Rights Reserved.
+ *           2017-2021 The jConstraints Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,14 +31,19 @@ import gov.nasa.jpf.constraints.expressions.Constant;
 import gov.nasa.jpf.constraints.expressions.NumericBooleanExpression;
 import gov.nasa.jpf.constraints.solvers.ConstraintSolverFactory;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 public class CVC4SolverProviderTest {
 
   @Test
   public void cvc4ServiceLoaderTest() {
-    ConstraintSolverFactory factory = new ConstraintSolverFactory();
-    ConstraintSolver solver = factory.createSolver("cvc4");
+    ConstraintSolver solver;
+    try {
+      solver = ConstraintSolverFactory.createSolver("cvc4");
+    } catch (UnsatisfiedLinkError e) {
+      throw new SkipException("No native CVC4 support", e);
+    }
     Valuation val = new Valuation();
     Variable x = Variable.create(BuiltinTypes.SINT32, "X");
     Constant c5 = Constant.create(BuiltinTypes.SINT32, 5);
