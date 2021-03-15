@@ -1,0 +1,3 @@
+We added a couple of SMT-Problems for unit-testing purpose to this repository.
+They are all taken from the existing body of literature on string solving and have been previously collected in the following git:
+https://git.zs.informatik.uni-kiel.de/dbp/wordbenchmarks/-/tree/d9072e19461a50a570792f41a7d438da3610b9f5/models

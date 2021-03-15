@@ -1,42 +1,30 @@
-# jConstraints #
-*jConstraints* is a library for modeling expressions
-and for interacting with constraint solvers.
+# jConstraints
+*jConstraints* is a library for modeling expressions and for interacting with constraint solvers.
 
-## Dependencies ##
+## Building and Installing
 
-* [ANTLR v3][1]
-* [Guava 14.0.1][7]
+* In the *jConstraints* folder, run `./gradlew build`.
+* If the compilation was successful, the *jConstraints* library is located at
+  `jconstraints-core/build/libs/jconstraints-core-[VERSION].jar`.
+* A fat JAR containing all dependencies can be found at: `build/libs/jconstraints-core-[VERSION]-all.jar`.
 
-ANTLR is distributed under the terms of the
-[BSD license][3]. Guava is distributed under
-the terms of the [Apache License 2.0][8].
+## Solver Bindings
 
+*jConstraints* does not come with constraint solvers. In order to use it, you will have to install one of the plugins
+that connect to constraint solvers.
 
-## Building and Installing ##
+### Z3 Solver Plugin
 
-* In the *jConstraints* folder, run `./gradlew jar`
-* If the compilation was successful, the *jConstraints*
-  library can be found in the JAR file
-  `build/libs/jconstraints-[VERSION].jar`
+jconstraints-z3 supports setting some of the options in z3
+via constructor parameters or configuration options:
 
-* You might run `./gradlew shadowJar` to get a fat JAR containing
-  all dependencies. It should be found as: `build/libs/jconstraints-[VERSION]-all.jar`
+    z3.timeout=[timeout in millis]
+    z3.options=[option1]=[value1];[option2]=[value2];...
 
+Example:
 
-## How To Use ##
-
-*jConstraints* does not come with constraint solvers.
-In order to use it, you will have to install one
-of the plugins that connect to constraint solvers.
-On the [*tudo-aqua org*][9], you can find *jConstraints*
-plugins for, e.g. Z3.
-
-[1]: http://www.antlr3.org/
-[3]: http://www.antlr3.org/license.html
-[7]: https://code.google.com/p/guava-libraries/
-[8]: http://www.apache.org/licenses/LICENSE-2.0
-[9]: https://github.com/tudo-aqua
-
+    z3.timeout=2
+    z3.options=smt.mbqi=true;smt.macro-finder=true
 
 ## About this fork ##
 *jConstraints* has been founded by the [psycopaths](https://github.com/psycopaths).
