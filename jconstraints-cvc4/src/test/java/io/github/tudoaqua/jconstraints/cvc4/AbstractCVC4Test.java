@@ -28,13 +28,18 @@ public abstract class AbstractCVC4Test {
 
   protected CVC4Solver cvc4;
   protected SolverContext cvc4Context;
+  protected boolean loadingFailed = false;
 
   @BeforeMethod
   public void initialize() {
+    if (loadingFailed) {
+      throw new SkipException("No native CVC4 support");
+    }
     try {
       cvc4 = new CVC4Solver(new HashMap<>());
       cvc4Context = cvc4.createContext();
     } catch (UnsatisfiedLinkError e) {
+      loadingFailed = true;
       throw new SkipException("No native CVC4 support", e);
     }
   }

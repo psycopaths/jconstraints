@@ -61,7 +61,6 @@ import gov.nasa.jpf.constraints.types.NamedSort;
 import gov.nasa.jpf.constraints.types.TypeContext;
 import gov.nasa.jpf.constraints.util.ExpressionUtil;
 import org.apache.commons.math3.fraction.BigFraction;
-import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -71,12 +70,8 @@ public class CVC4SolverTest extends AbstractCVC4Test {
 
   @BeforeMethod
   public void initializeEngine() {
-    try {
-      em = new ExprManager();
-      smt = new SmtEngine(em);
-    } catch (UnsatisfiedLinkError e) {
-      throw new SkipException("No native CVC4 support", e);
-    }
+    em = new ExprManager();
+    smt = new SmtEngine(em);
     smt.setOption("produce-models", new SExpr(true));
   }
 
