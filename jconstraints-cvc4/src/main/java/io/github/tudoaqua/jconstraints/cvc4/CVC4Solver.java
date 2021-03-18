@@ -29,6 +29,7 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.api.SolverContext;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
+import gov.nasa.jpf.constraints.exceptions.ImpreciseRepresentationException;
 import gov.nasa.jpf.constraints.types.BuiltinTypes;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -110,7 +111,16 @@ public class CVC4Solver extends ConstraintSolver {
           } else if (Kind.CONST_STRING.equals(k)) {
             valueString = resolveUnicode(value.toString());
             val.setValue(entry.getKey(), valueString.substring(1, valueString.length() - 1));
-
+          } else if (Kind.UNINTERPRETED_CONSTANT.equals(k)) {
+            valueString = valueString.split("_")[2];
+            try {
+              val.setParsedValue(entry.getKey(), valueString);
+            } catch (ImpreciseRepresentationException e) {
+              throw new IllegalArgumentException(
+                  "Cannot handle the uninterpreted_constant value: "
+                      + valueString
+                      + " during model creation.");
+            }
           } else {
             throw new IllegalArgumentException("Cannot parse the variable of the model");
           }
