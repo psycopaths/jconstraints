@@ -24,8 +24,9 @@ import gov.nasa.jpf.constraints.api.Expression;
 import gov.nasa.jpf.constraints.types.Type;
 import gov.nasa.jpf.constraints.util.AbstractPrintable;
 import java.io.IOException;
+import java.io.Serializable;
 
-public class Function<T> extends AbstractPrintable {
+public class Function<T> extends AbstractPrintable implements Serializable {
 
   private final String name;
   private final Type<T> returnType;
