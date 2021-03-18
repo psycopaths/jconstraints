@@ -286,8 +286,15 @@ public class StringSupportTest extends AbstractCVC4Test {
     SmtEngine smt = new SmtEngine(em);
     Expr c1 = em.mkConst(new CVC4String("av"));
     Expr allchar = em.mkConst(Kind.REGEXP_SIGMA);
-    String res = smt.checkSat(em.mkExpr(Kind.STRING_IN_REGEXP, c1, allchar)).toString();
+    Expr expr = em.mkExpr(Kind.STRING_IN_REGEXP, c1, allchar);
+    String res = smt.checkSat(expr).toString();
     assertTrue(res.equals("unsat"));
+
+    c1.delete();
+    allchar.delete();
+    expr.delete();
+    smt.delete();
+    em.delete();
   }
 
   // FIXME: This seems to be a problem in the JAVA API??? (assert (str.in_re "av" re.allchar)) works
