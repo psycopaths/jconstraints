@@ -53,7 +53,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
   private ObjectInputStream outObject;
 
   public ProcessWrapperSolver(String solver) {
-    this.solverName = solver;
+    this.solverName = solver + "process";
     inObject = null;
     bes = null;
     bos = null;
