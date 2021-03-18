@@ -28,7 +28,6 @@ import gov.nasa.jpf.constraints.solvers.encapsulation.messages.StartSolvingMessa
 import gov.nasa.jpf.constraints.solvers.encapsulation.messages.StopSolvingMessage;
 import gov.nasa.jpf.constraints.solvers.encapsulation.messages.TimeOutSolvingMessage;
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,12 +37,11 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.util.List;
-import java.util.Objects;
 
 public class ProcessWrapperSolver extends ConstraintSolver {
 
   private final String solverName;
-  String jconstraintsJar;
+  String javaClassPath;
   private String jConstraintsExtensionsPath;
   private static int TIMEOUT = 60;
   private String javaBinary;
@@ -56,7 +54,6 @@ public class ProcessWrapperSolver extends ConstraintSolver {
 
   public ProcessWrapperSolver(String solver) {
     this.solverName = solver;
-    solver = null;
     inObject = null;
     bes = null;
     bos = null;
@@ -65,17 +62,12 @@ public class ProcessWrapperSolver extends ConstraintSolver {
     List<String> env = ManagementFactory.getRuntimeMXBean().getInputArguments();
     jConstraintsExtensionsPath = "";
     for (String s : env) {
-      if (s.startsWith("-Djconstraints.extension.path")) {
-        jConstraintsExtensionsPath = s;
-      }
       if (s.startsWith("-Djconstraints.wrapper.timeout")) {
         TIMEOUT = Integer.parseInt(s.split("=")[1]);
       }
     }
 
-    jconstraintsJar =
-        Objects.requireNonNull(
-            new File(".").list((dir, name) -> name.matches("jconstraints(?:.*)jar")))[0];
+    javaClassPath = System.getProperty("java.class.path");
     javaBinary = "java";
   }
 
@@ -115,8 +107,7 @@ public class ProcessWrapperSolver extends ConstraintSolver {
           javaBinary,
           "-ea",
           "-cp",
-          jconstraintsJar,
-          jConstraintsExtensionsPath,
+          javaClassPath,
           "gov.nasa.jpf.constraints.solvers.encapsulation.SolverRunner",
           "-s",
           solverName,
@@ -154,11 +145,15 @@ public class ProcessWrapperSolver extends ConstraintSolver {
 
           if (o instanceof SolvingResult) {
             SolvingResult res = (SolvingResult) o;
-            if (res.getResult().equals(Result.SAT)) {
+            if (res.getResult().equals(Result.SAT) && result != null) {
               for (ValuationEntry e : res.getVal()) {
                 result.addEntry(e);
               }
-              assert (Boolean) f.evaluate(result);
+              try {
+                assert (Boolean) f.evaluate(result);
+              } catch (UnsupportedOperationException e) {
+                // This might happen if something in the expression does not support the valuation.
+              }
             }
             return res.getResult();
           }
@@ -171,18 +166,22 @@ public class ProcessWrapperSolver extends ConstraintSolver {
     return Result.DONT_KNOW;
   }
 
+  public void shutdown() throws IOException {
+    if (solver != null && solver.isAlive()) {
+      StopSolvingMessage ssm = new StopSolvingMessage();
+      ObjectOutputStream os = new ObjectOutputStream(solver.getOutputStream());
+      os.writeObject(ssm);
+      os.flush();
+    }
+  }
+
   private void registerShutdown(Process solver) {
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
                 () -> {
                   try {
-                    if (solver.isAlive()) {
-                      StopSolvingMessage ssm = new StopSolvingMessage();
-                      ObjectOutputStream os = new ObjectOutputStream(solver.getOutputStream());
-                      os.writeObject(ssm);
-                      os.flush();
-                    }
+                    shutdown();
                   } catch (IOException e) {
                     e.printStackTrace();
                     solver.destroyForcibly();

@@ -23,7 +23,6 @@ import static gov.nasa.jpf.constraints.expressions.NumericComparator.EQ;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import gov.nasa.jpf.constraints.api.ConstraintSolver;
 import gov.nasa.jpf.constraints.api.ConstraintSolver.Result;
 import gov.nasa.jpf.constraints.api.Valuation;
 import gov.nasa.jpf.constraints.api.Variable;
@@ -36,11 +35,16 @@ import org.testng.annotations.Test;
 
 public class CVC4SolverProviderTest {
 
-  @Test
+  /* We disabled this as the memory clean up during Garbage collection in CVC4 is error prune.
+    In applications and other enabled tests, we rap CVC4 in its own process. Once there is a new
+    Java API JNI-Library, stabilizing these tests by making the JNI-Library robust against garbage collection.
+    https://github.com/CVC4/CVC4/issues/5018
+  */
+  @Test(enabled = false)
   public void cvc4ServiceLoaderTest() {
-    ConstraintSolver solver;
+    CVC4Solver solver;
     try {
-      solver = ConstraintSolverFactory.createSolver("cvc4");
+      solver = (CVC4Solver) ConstraintSolverFactory.createSolver("cvc4");
     } catch (UnsatisfiedLinkError e) {
       throw new SkipException("No native CVC4 support", e);
     }

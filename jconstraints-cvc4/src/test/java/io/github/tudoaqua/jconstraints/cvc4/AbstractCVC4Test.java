@@ -20,27 +20,39 @@
 package io.github.tudoaqua.jconstraints.cvc4;
 
 import gov.nasa.jpf.constraints.api.SolverContext;
-import java.util.HashMap;
+import gov.nasa.jpf.constraints.solvers.encapsulation.ProcessWrapperSolver;
+import java.io.IOException;
 import org.testng.SkipException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 public abstract class AbstractCVC4Test {
 
-  protected CVC4Solver cvc4;
+  protected ProcessWrapperSolver cvc4;
   protected SolverContext cvc4Context;
   protected boolean loadingFailed = false;
 
   @BeforeMethod
   public void initialize() {
-    if (loadingFailed) {
+    if (loadingFailed || System.getProperty("os.name").contains("windows")) {
       throw new SkipException("No native CVC4 support");
     }
     try {
-      cvc4 = new CVC4Solver(new HashMap<>());
+
+      cvc4 = new ProcessWrapperSolver("cvc4");
       cvc4Context = cvc4.createContext();
     } catch (UnsatisfiedLinkError e) {
       loadingFailed = true;
       throw new SkipException("No native CVC4 support", e);
+    }
+  }
+
+  @AfterMethod
+  public void shutDownCVC4() {
+    try {
+      cvc4.shutdown();
+    } catch (IOException e) {
+      // The solver might already be crashed
     }
   }
 }

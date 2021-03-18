@@ -25,4 +25,4 @@ jobs:
     - name: Check formating
       run: ./gradlew verifyGoogleJavaFormat
     - name: Build with Gradle
-      run: ./gradlew assemble test -x :jconstraints-cvc4:test
+      run: ./gradlew assemble test
