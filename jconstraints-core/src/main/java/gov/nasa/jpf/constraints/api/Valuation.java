@@ -108,8 +108,16 @@ public class Valuation extends AbstractPrintable
       return false;
     }
     final Valuation other = (Valuation) obj;
-
-    return this.entries.equals(other.entries);
+    int count = 0;
+    for (Variable v : this.getVariables()) {
+      if (other.containsValueFor(v)) {
+        if (!other.getValue(v).equals(this.getValue(v))) {
+          return false;
+        }
+        ++count;
+      }
+    }
+    return count == other.entries.size();
   }
 
   @Override
